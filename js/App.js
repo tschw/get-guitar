@@ -68,7 +68,7 @@ class App {
 		window.requestAnimationFrame( () => this.paint() );
 	}
 
-	mouseMove( event ) {
+	_findNote( event ) {
 
 		let note = this.fretboard.noteAtCoordinates( event.offsetX, event.offsetY );
 		if ( note == null && this.pianoTransform != null ) {
@@ -76,17 +76,17 @@ class App {
 			const p = transformedPoint( this.pianoTransform, event );
 			note = this.piano.noteAtCoordinates( p.x, p.y );
 		}
-		this.highlightedNote = note;
+		return note;
+	}
+
+	mouseMove( event ) {
+
+		this.highlightedNote = this._findNote( event );
 	}
 
 	mouseDown( event ) {
 
-		let note = this.fretboard.noteAtCoordinates( event.offsetX, event.offsetY );
-		if ( note == null && this.pianoTransform != null ) {
-
-			const p = transformedPoint( this.pianoTransform, event );
-			note = this.piano.noteAtCoordinates( p.x, p.y );
-		}
+		let note = this._findNote( event );
 		if ( note != null )
 			this.highlighting.toggleSelection( note );
 	}

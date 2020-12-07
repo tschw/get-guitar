@@ -42,14 +42,18 @@ class App {
 		this.fretboard = new Fretboard( width, height * 0.75, tuning, numberOfFrets, highlighting );
 		this.piano = new PianoKeyboard( width, height * 0.25 - pianoUpperBorder, pianoFirstOctave, numberOfPianoOctaves, highlighting );
 		this.pianoTransform = null;
+		this.animationFrame = null;
 
-		window.requestAnimationFrame( () => this.paint() );
 		this.element.addEventListener( 'mousemove', (e) => this.mouseMove(e) );
 		this.element.addEventListener( 'mousedown', (e) => this.mouseDown(e) );
 		this.element.addEventListener( 'mouseout', (e) => this.mouseOut(e) );
+
+		this._requestRefresh();
 	}
 
 	paint() {
+
+		this.animationFrame = null;
 
 		const c2d = this.c2d;
 		this.fretboard.paint( c2d );
@@ -60,8 +64,14 @@ class App {
 		this.piano.paint( c2d );
 		c2d.restore();
 
-		this.highlighting.attenuate();
-		window.requestAnimationFrame( () => this.paint() );
+		if ( ! this.highlighting.attenuate() ) this._requestRefresh();
+	}
+
+	_requestRefresh() {
+
+		if ( this.animationFrame == null )
+			this.animationFrame =
+				window.requestAnimationFrame( () => this.paint() );
 	}
 
 	_findNote( event ) {
@@ -78,17 +88,22 @@ class App {
 	mouseMove( event ) {
 
 		this.highlighting.highlightedNote = this._findNote( event );
+		this._requestRefresh();
 	}
 
 	mouseOut( event ) {
 
 		this.highlighting.highlightedNote = null;
+		this._requestRefresh();
 	}
 
 	mouseDown( event ) {
 
 		let note = this._findNote( event );
-		if ( note != null ) this.highlighting.toggleSelection( note );
+		if ( note != null ) {
+			this.highlighting.toggleSelection( note );
+			this._requestRefresh();
+		}
 	}
 }
 

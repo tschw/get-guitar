@@ -68,6 +68,8 @@ export class PianoKeyboard {
 			const xMax = xCenter + xExtent;
 
 			c2d.fillStyle = '#101010';
+			c2d.strokeStyle = '#000000';
+
 			c2d.beginPath();
 			c2d.moveTo( xMin, 0 );
 			c2d.lineTo( xMin, hB );

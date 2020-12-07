@@ -16,20 +16,29 @@ export class Highlighting {
 	attenuate() {
 
 		const fillSmoothing = 0.1;
-		const strokeSmoothing = 0.1;
+		const strokeSmoothing = 0.2;
 
-		const highlightInOctave = this.highlightedNote % 12;
+		const highlight = this.highlightedNote;
+		const highlightInOctave = highlight != null ? highlight % 12 : -1;
 
+		let idle = true;
+		function checkIdle( value ) {
+
+			if ( Math.abs(value) > 1/1024 ) idle = false;
+			return value;
+		}
 
 		for ( let i = 0; i < 12; ++ i ) {
 
 			let s = this._state[ i ];
 
-			s.fill += ( s.fillTarget - s.fill ) * fillSmoothing;
+			s.fill += checkIdle( s.fillTarget - s.fill ) * fillSmoothing;
 
 			s.stroke = ( i == highlightInOctave ) ? 1 :
-				s.stroke - s.stroke * strokeSmoothing;
+				s.stroke - checkIdle( s.stroke ) * strokeSmoothing;
 		}
+
+		return idle;
 	}
 
 	toggleSelection( note ) {

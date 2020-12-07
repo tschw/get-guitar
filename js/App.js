@@ -43,8 +43,6 @@ class App {
 		this.piano = new PianoKeyboard( width, height * 0.25 - pianoUpperBorder, pianoFirstOctave, numberOfPianoOctaves, highlighting );
 		this.pianoTransform = null;
 
-		this.highlightedNote = null;
-
 		window.requestAnimationFrame( () => this.paint() );
 		this.element.addEventListener( 'mousemove', (e) => this.mouseMove(e) );
 		this.element.addEventListener( 'mousedown', (e) => this.mouseDown(e) );
@@ -52,10 +50,6 @@ class App {
 	}
 
 	paint() {
-
-		const note = this.highlightedNote;
-		if ( note != null )
-			this.highlighting.showSelectionHint( note );
 
 		const c2d = this.c2d;
 		this.fretboard.paint( c2d );
@@ -83,19 +77,18 @@ class App {
 
 	mouseMove( event ) {
 
-		this.highlightedNote = this._findNote( event );
+		this.highlighting.highlightedNote = this._findNote( event );
+	}
+
+	mouseOut( event ) {
+
+		this.highlighting.highlightedNote = null;
 	}
 
 	mouseDown( event ) {
 
 		let note = this._findNote( event );
-		if ( note != null )
-			this.highlighting.toggleSelection( note );
-	}
-
-	mouseOut( event ) {
-
-		this.highlightedNote = null;
+		if ( note != null ) this.highlighting.toggleSelection( note );
 	}
 }
 

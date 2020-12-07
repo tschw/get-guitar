@@ -9,6 +9,8 @@ export class Highlighting {
 			this._state[ i ] = {
 				actualNote: -1, stroke: 0, fill: 0, fillTarget: 0
 			};
+
+		this.highlightedNote = null;
 	}
 
 	attenuate() {
@@ -16,20 +18,18 @@ export class Highlighting {
 		const fillSmoothing = 0.1;
 		const strokeSmoothing = 0.1;
 
+		const highlightInOctave = this.highlightedNote % 12;
+
+
 		for ( let i = 0; i < 12; ++ i ) {
 
 			let s = this._state[ i ];
 
-			s.stroke -= s.stroke * strokeSmoothing;
 			s.fill += ( s.fillTarget - s.fill ) * fillSmoothing;
+
+			s.stroke = ( i == highlightInOctave ) ? 1 :
+				s.stroke - s.stroke * strokeSmoothing;
 		}
-	}
-
-	showSelectionHint( note ) {
-
-		const noteInOctave = note % 12;
-		const state = this._state[ noteInOctave ];
-		state.stroke = 1;
 	}
 
 	toggleSelection( note ) {

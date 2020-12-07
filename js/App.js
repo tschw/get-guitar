@@ -24,6 +24,8 @@ const numberOfFrets = 16;
 const numberOfPianoOctaves = 4;
 const pianoFirstOctave = 2;
 
+const pianoUpperBorder = 16;
+
 class App {
 
 	constructor() {
@@ -37,8 +39,8 @@ class App {
 
 		const highlighting = new Highlighting();
 		this.highlighting = highlighting;
-		this.fretboard = new Fretboard( width, width / 3, tuning, numberOfFrets, highlighting );
-		this.piano = new PianoKeyboard( width, width / 9, pianoFirstOctave, numberOfPianoOctaves, highlighting );
+		this.fretboard = new Fretboard( width, height * 0.75, tuning, numberOfFrets, highlighting );
+		this.piano = new PianoKeyboard( width, height * 0.25 - pianoUpperBorder, pianoFirstOctave, numberOfPianoOctaves, highlighting );
 		this.pianoTransform = null;
 
 		this.highlightedNote = null;
@@ -59,7 +61,7 @@ class App {
 		this.fretboard.paint( c2d );
 
 		c2d.save();
-		c2d.translate( 0, this.element.width / 3 + 20 );
+		c2d.translate( 0, this.element.height * 0.75 + pianoUpperBorder );
 		this.pianoTransform = c2d.getTransform().invertSelf();
 		this.piano.paint( c2d );
 		c2d.restore();

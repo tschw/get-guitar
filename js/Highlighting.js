@@ -1,4 +1,7 @@
 
+const fillSmoothing = 0.1;
+const strokeSmoothing = 0.15;
+
 export class Highlighting {
 
 	constructor() {
@@ -14,9 +17,6 @@ export class Highlighting {
 	}
 
 	attenuate() {
-
-		const fillSmoothing = 0.1;
-		const strokeSmoothing = 0.2;
 
 		const highlight = this.highlightedNote;
 		const highlightInOctave = highlight != null ? highlight % 12 : -1;

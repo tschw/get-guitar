@@ -1,24 +1,8 @@
 import { Fretboard } from './Fretboard.js'
 import { Highlighting } from './Highlighting.js'
 import { PianoKeyboard } from './PianoKeyboard.js'
-import { noteNameToNumber } from './Music.js'
 
-const tuning = [
-
-	{ caption: 'Guitar - standard tuning' },
-	{ caption: 'E', tuning: noteNameToNumber('E4') },
-	{ caption: 'B', tuning: noteNameToNumber('B3') },
-	{ caption: 'G', tuning: noteNameToNumber('G3') },
-	{ caption: 'D', tuning: noteNameToNumber('D3') },
-	{ caption: 'A', tuning: noteNameToNumber('A2') },
-	{ caption: 'E', tuning: noteNameToNumber('E2') },
-
-	{ caption: 'Ukulele - GCEA' },
-	{ caption: 'A', tuning: noteNameToNumber('A4') },
-	{ caption: 'E', tuning: noteNameToNumber('E4') },
-	{ caption: 'C', tuning: noteNameToNumber('C4') },
-	{ caption: 'G', tuning: noteNameToNumber('G4') },
-];
+const defaultTuning = 'Guitar - standard tuning: E2 A2 D3 G3 B3 E4 Ukulele - GCEA: G4 C4 E4 A4';
 
 const numberOfFrets = 16;
 const numberOfPianoOctaves = 4;
@@ -39,7 +23,8 @@ class App {
 
 		const highlighting = new Highlighting();
 		this.highlighting = highlighting;
-		this.fretboard = new Fretboard( width, height * 0.75, tuning, numberOfFrets, highlighting );
+		this.tuning = defaultTuning
+		this.fretboard = new Fretboard( width, height * 0.75, this.tuning, numberOfFrets, highlighting );
 		this.piano = new PianoKeyboard( width, height * 0.25 - pianoUpperBorder, pianoFirstOctave, numberOfPianoOctaves, highlighting );
 		this.pianoTransform = null;
 		this.animationFrame = null;
@@ -49,6 +34,23 @@ class App {
 		this.element.addEventListener( 'mouseout', (e) => this.mouseOut(e) );
 
 		this._requestRefresh();
+	}
+
+	configure() {
+
+		let tuning = prompt("Edit tuning:", this.tuning);
+		if (tuning == null) return false; // cancel
+		if (tuning == "") tuning = defaultTuning;
+
+		const stringSlots = Fretboard.parseStringSlots( tuning );
+		if (! stringSlots) {
+			alert("Something in your tuning did not quite add up. ");
+			return false;
+		}
+
+		this.tuning = tuning;
+		this.fretboard.stringSlots = stringSlots
+		return true;
 	}
 
 	paint() {
@@ -103,6 +105,8 @@ class App {
 		if ( note != null ) {
 			this.highlighting.toggleSelection( note );
 			this._requestRefresh();
+		} else {
+			this.configure();
 		}
 	}
 }

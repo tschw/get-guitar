@@ -1,4 +1,5 @@
 import { Highlighting } from './Highlighting.js'
+import { noteNameToNumber } from './Music.js'
 
 // The frequency is inverse proportional to the length of that
 // part of the string that can oscillate. Semitones affect the
@@ -13,23 +14,41 @@ const fretStringPosition = (i) => 1 - 2**(-i/12);
 
 export class Fretboard {
 
-	constructor( width, height, stringSlots, numberOfFrets, highlighting ) {
+	constructor( width, height, tuning, numberOfFrets, highlighting ) {
 
 		this.width = width;
 		this.height = height;
 
 		this.highlighting = highlighting;
 
-		this.stringSlots = stringSlots;
+		this.stringSlots = Fretboard.parseStringSlots( tuning );
 		this.numberOfFrets = numberOfFrets;
+	}
 
+	static parseStringSlots( tuning ) {
 
-		const numberOfFretsWithOpenString = numberOfFrets + 1;
-		this._fretPosition = new Array( numberOfFretsWithOpenString );
-		for ( let i = 0; i < numberOfFretsWithOpenString; ++ i )
-			this._fretPosition[ i ] =
-				(fretStringPosition(i) + openStringOffset) /
-				(visibleStringLength + openStringOffset);
+		const result = [];
+
+		const splitParts = /([^:]*):\s*((?:[A-G]\d\s*)+)/g;
+		const eachString = /(([A-G])\d)\s*/g;
+
+		const fail = tuning.replaceAll(
+				splitParts, function(_, caption, strings) {
+
+			result.push( { caption } );
+
+			const parsed = [];
+			strings.replaceAll(eachString,
+					function(_, noteWithOctave, note) {
+
+				parsed.push( { caption: note, tuning:
+					noteNameToNumber( noteWithOctave ) } );
+			});
+			Array.prototype.push.apply( result, parsed.reverse() );
+
+			return "";
+		});
+		return !fail ? result : null;
 	}
 
 	paint( c2d ) {

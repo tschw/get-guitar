@@ -21,12 +21,8 @@ export class Fretboard {
 		this.highlighting = highlighting;
 
 		this.stringSlots = stringSlots;
-		this._numberOfFrets = numberOfFrets;
+		this.numberOfFrets = numberOfFrets;
 
-		const lastFret = fretStringPosition( numberOfFrets );
-		const lastFretBefore = fretStringPosition( numberOfFrets - 1 );
-		const openStringOffset = lastFret - lastFretBefore;
-		const visibleStringLength = lastFret;
 
 		const numberOfFretsWithOpenString = numberOfFrets + 1;
 		this._fretPosition = new Array( numberOfFretsWithOpenString );
@@ -43,9 +39,9 @@ export class Fretboard {
 
 		// Paint frets:
 
-		for ( let i = 0; i < this._numberOfFrets; ++ i ) {
+		for ( let i = 0; i < this.numberOfFrets; ++ i ) {
 
-			const x = this._fretPosition[ i ] * this.width;
+			const x = this._fretPosition( i ) * this.width;
 
 			c2d.lineWidth = (i % 12 == 0) ? 3 : 1;
 			c2d.setLineDash( [] );
@@ -119,13 +115,24 @@ export class Fretboard {
 				(x >= xMin && y >= yMin && x < xMax && y < yMax) ? note : null );
 	}
 
+
+	_fretPosition( i ) {
+		const lastFret = fretStringPosition( this.numberOfFrets );
+		const lastFretBefore = fretStringPosition( this.numberOfFrets - 1 );
+		const openStringOffset = lastFret - lastFretBefore;
+		const visibleStringLength = lastFret;
+
+		return (fretStringPosition(i) + openStringOffset) /
+				(visibleStringLength + openStringOffset);
+	}
+
 	_forEachBoundingBox( f ) {
 
 		let xMin = 0, xMax = 0;
-		for ( let i = 0; i < this._numberOfFrets + 1; ++ i ) {
+		for ( let i = 0; i < this.numberOfFrets + 1; ++ i ) {
 
 			xMin = xMax;
-			xMax = this._fretPosition[ i ] * this.width;
+			xMax = this._fretPosition( i ) * this.width;
 
 			let yMin = 0, yMax = 0;
 			const nSlots = this.stringSlots.length;

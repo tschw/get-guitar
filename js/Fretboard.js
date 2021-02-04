@@ -54,7 +54,6 @@ export class Fretboard {
 	paint( c2d ) {
 
 		c2d.clearRect( 0, 0, this.width, this.height );
-		c2d.strokeStyle = '#aaaaaa';
 
 		// Paint frets:
 
@@ -62,7 +61,27 @@ export class Fretboard {
 
 			const x = this._fretPosition( i ) * this.width;
 
-			c2d.lineWidth = (i % 12 == 0) ? 3 : 1;
+			switch (i % 12) {
+
+				case 0:
+					c2d.lineWidth = 3;
+					c2d.strokeStyle = '#ffffff';
+					break;
+				case 5:
+					c2d.lineWidth = 3;
+					c2d.strokeStyle = '#cccccc';
+					break;
+				case 3:
+				case 7:
+				case 9:
+					c2d.lineWidth = 2;
+					c2d.strokestyle = '#888888';
+					break;
+				default:
+					c2d.lineWidth = 1;
+					c2d.strokeStyle = '#aaaaaa';
+			}
+
 			c2d.setLineDash( [] );
 			c2d.beginPath();
 			c2d.moveTo(x, 0);

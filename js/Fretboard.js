@@ -54,26 +54,32 @@ export class Fretboard {
 	paint( c2d ) {
 
 		c2d.clearRect( 0, 0, this.width, this.height );
+		c2d.setLineDash( [] );
 
 		// Paint frets:
 
 		for ( let i = 0; i < this.numberOfFrets; ++ i ) {
 
 			const x = this._fretPosition( i ) * this.width;
+			let marker = null;
 
 			switch (i % 12) {
 
 				case 0:
+					marker = 'double';
 					c2d.lineWidth = 3;
 					c2d.strokeStyle = '#ffffff';
 					break;
+				case 7:
+					marker = 'double';
 				case 5:
+					marker ||= 'single';
 					c2d.lineWidth = 3;
 					c2d.strokeStyle = '#cccccc';
 					break;
-				case 3:
-				case 7:
 				case 9:
+					marker = 'single';
+				case 3:
 					c2d.lineWidth = 2;
 					c2d.strokestyle = '#888888';
 					break;
@@ -82,11 +88,47 @@ export class Fretboard {
 					c2d.strokeStyle = '#aaaaaa';
 			}
 
-			c2d.setLineDash( [] );
 			c2d.beginPath();
 			c2d.moveTo(x, 0);
 			c2d.lineTo(x, this.height);
 			c2d.stroke();
+
+			if ( i < 1 || ! marker ) continue;
+
+			const xPrev = this._fretPosition( i - 1 ) * this.width;
+			const xMiddle = ( x + xPrev ) / 2;
+			const fretWidth = x - xPrev;
+			const xLeft = xMiddle - fretWidth * 0.245;
+			const xRight = xMiddle + fretWidth * 0.24;
+
+			const nSlots = this.stringSlots.length;
+			const stringSlotHeight = this.height / nSlots;
+			const markerRadius = stringSlotHeight * 0.125;
+			const markerElevation = stringSlotHeight *0.125;
+
+			c2d.fillStyle = '#dddddd';
+
+			for ( let j = 0; j < nSlots; ++ j ) {
+
+				const stringSlot = this.stringSlots[ j ];
+				if (!! stringSlot.tuning) continue;
+
+				const y = this.height * (j + 1) / nSlots - markerElevation;
+
+				c2d.beginPath();
+				if (marker == 'single')
+
+						c2d.arc( xMiddle, y, markerRadius, 0, Math.PI * 2 );
+
+				else if (marker == 'double') {
+
+						c2d.arc( xLeft, y, markerRadius, 0, Math.PI * 2 );
+						//c2d.fill();
+						//c2d.beginPath();
+						c2d.arc( xRight, y, markerRadius, 0, Math.PI * 2 );
+				}
+				c2d.fill();
+			}
 		}
 
 		let yMin = 0, yMax = 0;

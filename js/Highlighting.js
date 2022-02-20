@@ -1,6 +1,7 @@
 
 const fillSmoothing = 0.1;
 const strokeSmoothing = 0.15;
+const maxInactive = 1 / 1024;
 
 export class Highlighting {
 
@@ -24,7 +25,7 @@ export class Highlighting {
 		let idle = true;
 		function checkIdle( value ) {
 
-			if ( Math.abs(value) > 1/1024 ) idle = false;
+			if ( Math.abs(value) > maxInactive ) idle = false;
 			return value;
 		}
 
@@ -48,7 +49,7 @@ export class Highlighting {
 		const noteInOctave = note % 12;
 		const state = this._state[ noteInOctave ];
 
-		const isSelected = state.fillTarget > 0.01;
+		const isSelected = state.fillTarget > maxInactive;
 		if ( isSelected ) {
 			state.fillTarget = 0;
 			state.actualNote = -1;

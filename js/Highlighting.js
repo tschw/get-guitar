@@ -31,7 +31,7 @@ export class Highlighting {
 
 		for ( let i = 0; i < 12; ++ i ) {
 
-			let s = this._state[ i ];
+			const s = this._state[ i ];
 
 			s.fill += checkIdle( s.fillTarget - s.fill ) * fillSmoothing;
 

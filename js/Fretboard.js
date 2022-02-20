@@ -118,14 +118,12 @@ export class Fretboard {
 				c2d.beginPath();
 				if (marker == 'single')
 
-						c2d.arc( xMiddle, y, markerRadius, 0, Math.PI * 2 );
+					c2d.arc( xMiddle, y, markerRadius, 0, Math.PI * 2 );
 
 				else if (marker == 'double') {
 
-						c2d.arc( xLeft, y, markerRadius, 0, Math.PI * 2 );
-						//c2d.fill();
-						//c2d.beginPath();
-						c2d.arc( xRight, y, markerRadius, 0, Math.PI * 2 );
+					c2d.arc( xLeft, y, markerRadius, 0, Math.PI * 2 );
+					c2d.arc( xRight, y, markerRadius, 0, Math.PI * 2 );
 				}
 				c2d.fill();
 			}
@@ -154,12 +152,12 @@ export class Fretboard {
 
 			const textMeasure = c2d.measureText( stringSlot.caption );
 			c2d.clearRect(
-				textMeasure.actualBoundingBoxLeft,
-				y - textMeasure.actualBoundingBoxAscent,
-				textMeasure.actualBoundingBoxRight -
 					textMeasure.actualBoundingBoxLeft,
-				textMeasure.actualBoundingBoxDescent +
-					textMeasure.actualBoundingBoxAscent );
+					y - textMeasure.actualBoundingBoxAscent,
+					textMeasure.actualBoundingBoxRight -
+						textMeasure.actualBoundingBoxLeft,
+					textMeasure.actualBoundingBoxDescent +
+						textMeasure.actualBoundingBoxAscent );
 
 			c2d.fillText( stringSlot.caption, 0, y );
 

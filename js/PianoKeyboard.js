@@ -29,7 +29,7 @@ export class PianoKeyboard {
 		const hB = h * blackKeyFractionalHeight;
 
 		c2d.clearRect( 0, 0, w, h );
-
+		c2d.lineWidth = 1;
 
 		let whiteKeyIndex = 0
 		for ( let i = 0; i < this.numberOfKeys; ++ i ) {

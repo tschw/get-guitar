@@ -59,6 +59,20 @@ export class Highlighting {
 		}
 	}
 
+	transpose( delta ) {
+
+		const newState = new Array( 12 );
+
+		for ( let i = 0; i < 12; ++ i ) {
+
+			const s = this._state[ ( i + 12 - delta ) % 12 ];
+			if ( s.actualNote != -1 ) s.actualNote += delta;
+			newState[ i ] = s;
+		}
+
+		this._state = newState;
+	}
+
 	paint( c2d, note, xMin, yMin, xMax, yMax ) {
 
 		const w = xMax - xMin;

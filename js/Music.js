@@ -19,4 +19,12 @@ function noteNameToNumber(s) {
 	return note + octave * 12
 }
 
-export { numberToNoteName, noteNameToNumber };
+function transpose(tonality, semitones) {
+
+	const nSemiDown = ( 12 - semitones % 12 ) % 12;
+	const lowMask = ( 1 << nSemiDown ) - 1;
+
+	return (tonality & lowMask) << (12 - nSemiDown) | tonality >>> nSemiDown;
+}
+
+export { numberToNoteName, noteNameToNumber, transpose };

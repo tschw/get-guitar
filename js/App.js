@@ -2,6 +2,7 @@ import { Fretboard } from './Fretboard.js'
 import { Highlighting } from './Highlighting.js'
 import { PianoKeyboard } from './PianoKeyboard.js'
 import { Button } from './Button.js'
+import { transpose } from './Music.js'
 
 const defaultTuning = 'Guitar - standard tuning: E2 A2 D3 G3 B3 E4 Ukulele - GCEA: G4 C4 E4 A4';
 
@@ -137,19 +138,21 @@ class App {
 		const x = event.offsetX;
 		const y = event.offsetY;
 
+		const highlighting = this.highlighting;
+
 		if ( this.buttonConf.isContained( x, y ) )
 			this.configure();
 
 		else if ( this.buttonUp.isContained( x, y ) )
-			this.highlighting.transpose( 1 );
+			highlighting.selection = transpose( highlighting.selection, 1 );
 
 		else if ( this.buttonDown.isContained( x, y ) )
-			this.highlighting.transpose( -1 );
+			highlighting.selection = transpose( highlighting.selection, -1 );
 
 		const note = this._findNote( x, y );
 
 		if ( note != null )
-			this.highlighting.toggleSelection( note );
+			highlighting.selection ^= 1 << note % 12;
 
 		this._requestRefresh();
 	}

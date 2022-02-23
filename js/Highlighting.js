@@ -1,76 +1,48 @@
 
 const fillSmoothing = 0.1;
 const strokeSmoothing = 0.15;
-const maxInactive = 1 / 1024;
 
 export class Highlighting {
 
 	constructor() {
 
-		this._state = new Array( 12 );
-		for ( let i = 0; i < 12; ++ i )
-
-			this._state[ i ] = {
-				actualNote: -1, stroke: 0, fill: 0, fillTarget: 0
-			};
-
+		this.selection = 0;
 		this.highlightedNote = null;
+
+		this._animationState = new Array( 12 );
+		for ( let i = 0; i < 12; ++ i )
+			this._animationState[ i ] = { stroke: 0, fill: 0 };
 	}
 
 	attenuate() {
 
-		const highlight = this.highlightedNote;
-		const highlightInOctave = highlight != null ? highlight % 12 : -1;
-
 		let idle = true;
 		function checkIdle( value ) {
 
-			if ( Math.abs(value) > maxInactive ) idle = false;
+			const closeEnough = 1 / 1024;
+
+			if ( Math.abs(value) > closeEnough ) idle = false;
 			return value;
 		}
 
+		const highlight = this.highlightedNote;
+		const highlightInOctave = highlight != null ? highlight % 12 : -1;
+
 		for ( let i = 0; i < 12; ++ i ) {
 
-			const s = this._state[ i ];
+			const s = this._animationState[ i ];
 
-			s.fill += checkIdle( s.fillTarget - s.fill ) * fillSmoothing;
+			const isSelected = ( this.selection & (1 << i) ) != 0;
+			const isHighlit = i == highlightInOctave;
 
-			s.stroke = ( i == highlightInOctave ) ? 1 :
-				s.stroke - checkIdle( s.stroke ) * strokeSmoothing;
+			const targetOpacity = isSelected ? 0.7 : 0.0;
+			const targetHighlight = isHighlit ? 1.0 : 0.0;
+
+			s.fill += checkIdle( targetOpacity - s.fill ) * fillSmoothing;
+			s.stroke += checkIdle( targetHighlight - s.stroke ) * strokeSmoothing;
 		}
 
 		return idle;
-	}
-
-	toggleSelection( note ) {
-
-		const maximumOpacity = 0.7;
-
-		const noteInOctave = note % 12;
-		const state = this._state[ noteInOctave ];
-
-		const isSelected = state.fillTarget > maxInactive;
-		if ( isSelected ) {
-			state.fillTarget = 0;
-			state.actualNote = -1;
-		} else {
-			state.fillTarget = maximumOpacity;
-			state.actualNote = note;
-		}
-	}
-
-	transpose( delta ) {
-
-		const newState = new Array( 12 );
-
-		for ( let i = 0; i < 12; ++ i ) {
-
-			const s = this._state[ ( i + 12 - delta ) % 12 ];
-			if ( s.actualNote != -1 ) s.actualNote += delta;
-			newState[ i ] = s;
-		}
-
-		this._state = newState;
 	}
 
 	paint( c2d, note, xMin, yMin, xMax, yMax ) {
@@ -82,28 +54,29 @@ export class Highlighting {
 		const r = Math.min( w, h ) / 4;
 		const noteInOctave = note % 12;
 
-		const state = this._state[ noteInOctave ]
-		const octaveDistance = Math.abs( state.actualNote - note ) / 12;
+		const state = this._animationState[ noteInOctave ]
 
 		c2d.strokeStyle = `rgba(255, 255, 255, ${ state.stroke })`;
 		const colorString = hsl2rgb(
-			5 + noteInOctave * 30, 1, 0.5 + octaveDistance * 0.1, state.fill );
+				5 + noteInOctave * 30, 1, 0.5, state.fill );
 		c2d.fillStyle = colorString;
 
 		c2d.beginPath();
 
-		if ( state.actualNote == -1 || note == state.actualNote ) {
+		if ( this.highlightedNote == null ||
+				this.highlightedNote == note ||
+				this.highlightedNote % 12 != noteInOctave ) {
 
 			c2d.arc( x, y, r, 0, Math.PI * 2 );
 
-		} else if ( note > state.actualNote ) {
+		} else if ( note > this.highlightedNote ) {
 
 			c2d.moveTo( x, y - r );
 			c2d.lineTo( x + r, y + r );
 			c2d.lineTo( x - r, y + r );
 			c2d.closePath();
 
-		} else /* ( note < state.actualnote ) */ {
+		} else /* ( note < this.highlightedNote ) */ {
 
 			c2d.moveTo( x, y + r );
 			c2d.lineTo( x + r, y - r );

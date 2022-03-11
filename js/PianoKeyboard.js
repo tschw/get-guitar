@@ -34,11 +34,11 @@ export class PianoKeyboard {
 		let whiteKeyIndex = 0
 		for ( let i = 0; i < this.numberOfKeys; ++ i ) {
 
-			if ( isBlackKey(i) ) continue;
+			if ( isBlackKey( i ) ) continue;
 
 			const iW = whiteKeyIndex ++;
 			const xMin = w * iW / nW;
-			const xMax = w * (iW + 1) / nW;
+			const xMax = w * ( iW + 1 ) / nW;
 
 			c2d.fillStyle = '#777777';
 			c2d.strokeStyle = '#ffffff';
@@ -59,11 +59,11 @@ export class PianoKeyboard {
 
 		for ( let i = 0; i < this.numberOfKeys; ++ i ) {
 
-			if ( ! isBlackKey(i) ) continue;
+			if ( ! isBlackKey( i ) ) continue;
 
 			const n = this.numberOfKeys;
-			const xCenter = w * (i + 0.5) / n;
-			const xExtent = (w * 0.5 / n) * blackKeyWidthUpscale;
+			const xCenter = w * ( i + 0.5 ) / n;
+			const xExtent = ( w * 0.5 / n ) * blackKeyWidthUpscale;
 			const xMin = xCenter - xExtent;
 			const xMax = xCenter + xExtent;
 
@@ -98,8 +98,8 @@ export class PianoKeyboard {
 			if ( ! isBlackKey(i) ) continue;
 
 			const n = this.numberOfKeys;
-			const xCenter = w * (i + 0.5) / n;
-			const xExtent = (w * 0.5 / n) * blackKeyWidthUpscale;
+			const xCenter = w * ( i + 0.5 ) / n;
+			const xExtent = ( w * 0.5 / n ) * blackKeyWidthUpscale;
 			const xMin = xCenter - xExtent;
 			const xMax = xCenter + xExtent;
 
@@ -115,7 +115,7 @@ export class PianoKeyboard {
 
 			const iW = whiteKeyIndex ++;
 			const xMin = w * iW / nW;
-			const xMax = w * (iW + 1) / nW;
+			const xMax = w * ( iW + 1 ) / nW;
 
 			if ( x < xMin || x >= xMax || y < 0 || y >= h ) continue;
 

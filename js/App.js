@@ -59,11 +59,11 @@ class App {
 	configure() {
 
 		let tuning = prompt("Edit tuning:", this.tuning);
-		if (tuning == null) return false; // cancel
-		if (tuning == "") tuning = defaultTuning;
+		if ( tuning == null ) return false; // cancel
+		if ( tuning == "" ) tuning = defaultTuning;
 
 		const stringSlots = Fretboard.parseStringSlots( tuning );
-		if (! stringSlots) {
+		if ( ! stringSlots ) {
 			alert("Something in your tuning did not quite add up. ");
 			return false;
 		}

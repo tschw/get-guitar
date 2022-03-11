@@ -4,14 +4,16 @@ const strokeSmoothing = 0.15;
 
 export class Highlighting {
 
+	#animationState;
+
 	constructor() {
 
 		this.selection = 0;
 		this.highlightedNote = null;
 
-		this._animationState = new Array( 12 );
+		this.#animationState = new Array( 12 );
 		for ( let i = 0; i < 12; ++ i )
-			this._animationState[ i ] = { stroke: 0, fill: 0 };
+			this.#animationState[ i ] = { stroke: 0, fill: 0 };
 	}
 
 	attenuate() {
@@ -30,7 +32,7 @@ export class Highlighting {
 
 		for ( let i = 0; i < 12; ++ i ) {
 
-			const s = this._animationState[ i ];
+			const s = this.#animationState[ i ];
 
 			const isSelected = ( this.selection & (1 << i) ) != 0;
 			const isHighlit = i == highlightInOctave;
@@ -54,7 +56,7 @@ export class Highlighting {
 		const r = Math.min( w, h ) / 4;
 		const noteInOctave = note % 12;
 
-		const state = this._animationState[ noteInOctave ]
+		const state = this.#animationState[ noteInOctave ]
 
 		c2d.strokeStyle = `rgba(255, 255, 255, ${ state.stroke })`;
 		const colorString = hsl2rgb(

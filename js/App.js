@@ -53,7 +53,7 @@ class App {
 		this.element.addEventListener( 'mousedown', (e) => this.mouseDown(e) );
 		this.element.addEventListener( 'mouseout', (e) => this.mouseOut(e) );
 
-		this._requestRefresh();
+		this.#requestRefresh();
 	}
 
 	configure() {
@@ -90,17 +90,17 @@ class App {
 		this.piano.paint( c2d );
 		c2d.restore();
 
-		if ( ! this.highlighting.attenuate() ) this._requestRefresh();
+		if ( ! this.highlighting.attenuate() ) this.#requestRefresh();
 	}
 
-	_requestRefresh() {
+	#requestRefresh() {
 
 		if ( this.animationFrame == null )
 			this.animationFrame =
 				window.requestAnimationFrame( () => this.paint() );
 	}
 
-	_findNote( x, y ) {
+	#findNote( x, y ) {
 
 		let note = this.fretboard.noteAtCoordinates( x, y );
 		if ( note == null && this.pianoTransform != null ) {
@@ -119,8 +119,8 @@ class App {
 		this.buttonDown.highlightIfContained( x, y );
 		this.buttonConf.highlightIfContained( x, y );
 
-		this.highlighting.highlightedNote = this._findNote( x, y );
-		this._requestRefresh();
+		this.highlighting.highlightedNote = this.#findNote( x, y );
+		this.#requestRefresh();
 	}
 
 	mouseOut( event ) {
@@ -130,7 +130,7 @@ class App {
 		this.buttonConf.highlighted = false;
 
 		this.highlighting.highlightedNote = null;
-		this._requestRefresh();
+		this.#requestRefresh();
 	}
 
 	mouseDown( event ) {
@@ -149,12 +149,12 @@ class App {
 		else if ( this.buttonDown.isContained( x, y ) )
 			highlighting.selection = transpose( highlighting.selection, -1 );
 
-		const note = this._findNote( x, y );
+		const note = this.#findNote( x, y );
 
 		if ( note != null )
 			highlighting.selection ^= 1 << note % 12;
 
-		this._requestRefresh();
+		this.#requestRefresh();
 	}
 }
 

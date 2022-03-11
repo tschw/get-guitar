@@ -60,7 +60,7 @@ export class Fretboard {
 
 		for ( let i = 0; i < this.numberOfFrets; ++ i ) {
 
-			const x = this._fretPosition( i ) * this.width;
+			const x = this.#fretPosition( i ) * this.width;
 			let marker = null;
 
 			switch (i % 12) {
@@ -95,7 +95,7 @@ export class Fretboard {
 
 			if ( i < 1 || ! marker ) continue;
 
-			const xPrev = this._fretPosition( i - 1 ) * this.width;
+			const xPrev = this.#fretPosition( i - 1 ) * this.width;
 			const xMiddle = ( x + xPrev ) / 2;
 			const fretWidth = x - xPrev;
 			const xLeft = xMiddle - fretWidth * 0.245;
@@ -183,18 +183,18 @@ export class Fretboard {
 
 		// Paint highlighting:
 
-		return this._forEachBoundingBox( (note, xMin, yMin, xMax, yMax) =>
+		return this.#forEachBoundingBox( (note, xMin, yMin, xMax, yMax) =>
 			this.highlighting.paint( c2d, note, xMin, yMin, xMax, yMax ) );
 	}
 
 	noteAtCoordinates( x, y ) {
 
-		return this._forEachBoundingBox( (note, xMin, yMin, xMax, yMax) =>
+		return this.#forEachBoundingBox( (note, xMin, yMin, xMax, yMax) =>
 				(x >= xMin && y >= yMin && x < xMax && y < yMax) ? note : null );
 	}
 
 
-	_fretPosition( i ) {
+	#fretPosition( i ) {
 		const lastFret = fretStringPosition( this.numberOfFrets );
 		const lastFretBefore = fretStringPosition( this.numberOfFrets - 1 );
 		const openStringOffset = lastFret - lastFretBefore;
@@ -204,13 +204,13 @@ export class Fretboard {
 				(visibleStringLength + openStringOffset);
 	}
 
-	_forEachBoundingBox( f ) {
+	#forEachBoundingBox( f ) {
 
 		let xMin = 0, xMax = 0;
 		for ( let i = 0; i < this.numberOfFrets + 1; ++ i ) {
 
 			xMin = xMax;
-			xMax = this._fretPosition( i ) * this.width;
+			xMax = this.#fretPosition( i ) * this.width;
 
 			let yMin = 0, yMax = 0;
 			const nSlots = this.stringSlots.length;

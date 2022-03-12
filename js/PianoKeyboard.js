@@ -1,6 +1,6 @@
 import { naturalScale } from './Music.js'
 
-const isBlackKey = (index) => ( naturalScale & (1 << (index % 12)) ) == 0;
+const isBlackKey = (index) => ( naturalScale & ( 1 << ( index % 12 ) ) ) == 0;
 
 const blackKeyFractionalHeight = 0.65;
 const blackKeyWidthUpscale = 1.1;

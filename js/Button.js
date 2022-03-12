@@ -17,10 +17,10 @@ export class Button {
 
 	#animationState;
 
-	constructor( x, y, width, height, caption, enabled, highlit ) {
+	constructor( xLeft, yTop, width, height, caption, enabled, highlit ) {
 
-		this.x = x;
-		this.y = y;
+		this.xLeft = xLeft;
+		this.yTop = yTop;
 		this.width = width;
 		this.height = height;
 		this.caption = caption;
@@ -70,7 +70,7 @@ export class Button {
 				fillHue, fillSaturation, state.lightness, state.opacity );
 
 		c2d.beginPath();
-		c2d.rect( this.x, this.y, this.width, this.height );
+		c2d.rect( this.xLeft, this.yTop, this.width, this.height );
 
 		c2d.fill();
 		c2d.stroke();
@@ -89,14 +89,14 @@ export class Button {
 				textMeasure.actualBoundingBoxDescent;
 
 		c2d.fillText( this.caption,
-				this.x + ( this.width - textWidth ) / 2,
-				this.y + this.height / 2 );
+				this.xLeft + ( this.width - textWidth ) / 2,
+				this.yTop + this.height / 2 );
 	}
 
 	isContained( x, y ) {
 
-		return x >= this.x && x <= this.x + this.width &&
-				y >= this.y && y <= this.y + this.height;
+		return x >= this.xLeft && x <= this.xLeft + this.width &&
+				y >= this.yTop && y <= this.yTop + this.height;
 	}
 
 	highlightIfContained( x, y ) {

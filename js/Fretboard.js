@@ -35,7 +35,7 @@ export class Fretboard {
 		const fail = tuning.replaceAll(
 				splitParts, function(_, caption, strings) {
 
-			result.push( { caption } );
+			result.push( { caption, tuning: null } );
 
 			const parsed = [];
 			strings.replaceAll(eachString,
@@ -111,7 +111,7 @@ export class Fretboard {
 			for ( let j = 0; j < nSlots; ++ j ) {
 
 				const stringSlot = this.stringSlots[ j ];
-				if ( !! stringSlot.tuning ) continue;
+				if ( stringSlot.tuning != null ) continue;
 
 				const y = this.height * ( j + 1 ) / nSlots - markerElevation;
 
@@ -134,7 +134,7 @@ export class Fretboard {
 		for ( let i = 0; i < nSlots; ++ i ) {
 
 			const stringSlot = this.stringSlots[ i ];
-			const haveString = stringSlot.tuning !== undefined
+			const haveString = stringSlot.tuning != null;
 
 			yMin = yMax;
 			yMax = this.height * ( i + 1 ) / nSlots;
@@ -163,7 +163,7 @@ export class Fretboard {
 
 			// Paint string and slot separator:
 
-			if ( ! haveString ) continue
+			if ( ! haveString ) continue;
 
 			const xAfterText = c2d.measureText(
 					stringSlot.caption + ' ' ).width;
@@ -221,9 +221,7 @@ export class Fretboard {
 				yMax = this.height * ( j + 1 ) / nSlots;
 				const stringSlot = this.stringSlots[ j ];
 
-				if ( stringSlot.tuning === undefined )
-
-					continue;
+				if ( stringSlot.tuning == null ) continue;
 
 				const actualNote = stringSlot.tuning + i;
 				const result = f( actualNote, xMin, yMin, xMax, yMax );

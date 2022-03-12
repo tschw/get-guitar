@@ -48,7 +48,7 @@ export class Fretboard {
 
 			return "";
 		});
-		return !fail ? result : null;
+		return ! fail ? result : null;
 	}
 
 	paint( c2d ) {
@@ -89,8 +89,8 @@ export class Fretboard {
 			}
 
 			c2d.beginPath();
-			c2d.moveTo(x, 0);
-			c2d.lineTo(x, this.height);
+			c2d.moveTo( x, 0 );
+			c2d.lineTo( x, this.height );
 			c2d.stroke();
 
 			if ( i < 1 || ! marker ) continue;
@@ -104,23 +104,23 @@ export class Fretboard {
 			const nSlots = this.stringSlots.length;
 			const stringSlotHeight = this.height / nSlots;
 			const markerRadius = stringSlotHeight * 0.125;
-			const markerElevation = stringSlotHeight *0.125;
+			const markerElevation = stringSlotHeight * 0.125;
 
 			c2d.fillStyle = '#dddddd';
 
 			for ( let j = 0; j < nSlots; ++ j ) {
 
 				const stringSlot = this.stringSlots[ j ];
-				if (!! stringSlot.tuning) continue;
+				if ( !! stringSlot.tuning ) continue;
 
-				const y = this.height * (j + 1) / nSlots - markerElevation;
+				const y = this.height * ( j + 1 ) / nSlots - markerElevation;
 
 				c2d.beginPath();
-				if (marker == 'single')
+				if ( marker == 'single' )
 
 					c2d.arc( xMiddle, y, markerRadius, 0, Math.PI * 2 );
 
-				else if (marker == 'double') {
+				else if ( marker == 'double' ) {
 
 					c2d.arc( xLeft, y, markerRadius, 0, Math.PI * 2 );
 					c2d.arc( xRight, y, markerRadius, 0, Math.PI * 2 );
@@ -137,7 +137,7 @@ export class Fretboard {
 			const haveString = stringSlot.tuning !== undefined
 
 			yMin = yMax;
-			yMax = this.height * (i + 1) / nSlots;
+			yMax = this.height * ( i + 1 ) / nSlots;
 
 			const y = ( yMax + yMin ) / 2;
 
@@ -172,7 +172,7 @@ export class Fretboard {
 			c2d.lineTo( this.width, y );
 			c2d.stroke();
 
-			if ( i == nSlots - 1 ) continue
+			if ( i == nSlots - 1 ) continue;
 
 			c2d.setLineDash( [ 1, 15 ] );
 			c2d.beginPath();
@@ -195,6 +195,7 @@ export class Fretboard {
 
 
 	#fretPosition( i ) {
+
 		const lastFret = fretStringPosition( this.numberOfFrets );
 		const lastFretBefore = fretStringPosition( this.numberOfFrets - 1 );
 		const openStringOffset = lastFret - lastFretBefore;
@@ -217,7 +218,7 @@ export class Fretboard {
 			for ( let j = 0; j < nSlots; ++ j ) {
 
 				yMin = yMax;
-				yMax = this.height * (j + 1) / nSlots;
+				yMax = this.height * ( j + 1 ) / nSlots;
 				const stringSlot = this.stringSlots[ j ];
 
 				if ( stringSlot.tuning === undefined )

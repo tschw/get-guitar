@@ -1,11 +1,12 @@
 
-
-const name = [ 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B' ];
 const basePitch = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
+
+const noteNameInOctave = [
+		'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B' ];
 
 export function numberToNoteName( i ) {
 
-	return "${ name[ i % 12 ] }${ i / 12 }"
+	return "${ noteNameInOctave[ i % 12 ] }${ i / 12 }"
 }
 
 export function noteNameToNumber( s ) {

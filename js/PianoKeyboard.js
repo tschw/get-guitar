@@ -121,5 +121,7 @@ export class PianoKeyboard {
 
 			return i + this.firstOctave * 12;
 		}
+
+		return null;
 	}
 }

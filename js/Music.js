@@ -3,12 +3,12 @@
 const name = [ 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B' ];
 const basePitch = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
 
-function numberToNoteName( i ) {
+export function numberToNoteName( i ) {
 
 	return "${ name[ i % 12 ] }${ i / 12 }"
 }
 
-function noteNameToNumber( s ) {
+export function noteNameToNumber( s ) {
 
 	let note = basePitch[ s[ 0 ].toUpperCase() ];
 	let octave = s[ s.length - 1 ];
@@ -19,7 +19,7 @@ function noteNameToNumber( s ) {
 	return note + octave * 12
 }
 
-function transpose( tonality, semitones ) {
+export function transpose( tonality, semitones ) {
 
 	const nSemiDown = ( 12 - semitones % 12 ) % 12;
 	const lowMask = ( 1 << nSemiDown ) - 1;
@@ -27,4 +27,3 @@ function transpose( tonality, semitones ) {
 	return (tonality & lowMask) << (12 - nSemiDown) | tonality >>> nSemiDown;
 }
 
-export { numberToNoteName, noteNameToNumber, transpose };

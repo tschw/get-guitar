@@ -4,27 +4,37 @@ const blackKeys = 0b010101001010;
 const isBlackKey = (index) => ( blackKeys & (1 << (index % 12)) ) != 0;
 
 const blackKeyFractionalHeight = 0.65;
-const blackKeyWidthUpscale = 1.2;
+const blackKeyWidthUpscale = 1.1;
 
 export class PianoKeyboard {
 
-	constructor( width, height, firstOctave, numberOfOctaves, highlighting ) {
+	constructor( width, height, lowestNote, numberOfWhiteKeys, highlighting ) {
 
 		this.width = width;
 		this.height = height;
 
 		this.highlighting = highlighting;
 
-		this.firstOctave = firstOctave
-		this.numberOfKeys = numberOfOctaves * 12;
-		this.numberOfWhiteKeys = numberOfOctaves * 7;
+		this.lowestNote = lowestNote;
+		this.numberOfWhiteKeys = numberOfWhiteKeys;
+	}
+
+	#numberOfKeys() {
+
+		let n = 0;
+
+		for ( let nW = 0; nW < this.numberOfWhiteKeys; ++ n )
+
+			if ( ! isBlackKey( n + this.lowestNote ) ) ++ nW;
+
+		return n;
 	}
 
 	paint( c2d ) {
 
 		const w = this.width;
 		const h = this.height;
-		const n = this.numberOfKeys;
+		const n = this.#numberOfKeys();
 		const nW = this.numberOfWhiteKeys;
 		const hB = h * blackKeyFractionalHeight;
 
@@ -32,9 +42,10 @@ export class PianoKeyboard {
 		c2d.lineWidth = 1;
 
 		let iW = 0;
-		for ( let i = 0; i < this.numberOfKeys; ++ i ) {
+		for ( let i = 0; i < n; ++ i ) {
 
-			if ( isBlackKey( i ) ) continue;
+			const note = this.lowestNote + i;
+			if ( isBlackKey( note ) ) continue;
 
 			const xMin = w * iW / nW;
 			const xMax = w * ( iW + 1 ) / nW;
@@ -53,17 +64,23 @@ export class PianoKeyboard {
 			c2d.fill();
 			c2d.stroke();
 
-			const note = i + this.firstOctave * 12;
 			this.highlighting.paint( c2d, note, xMin, hB, xMax, h );
 		}
 
-		for ( let i = 0; i < this.numberOfKeys; ++ i ) {
+		iW = 0;
+		const xExtent = ( w * 0.5 / n ) * blackKeyWidthUpscale;
 
-			if ( ! isBlackKey( i ) ) continue;
+		for ( let i = -1; i <= n; ++ i ) {
 
-			const n = this.numberOfKeys;
-			const xCenter = w * ( i + 0.5 ) / n;
-			const xExtent = ( w * 0.5 / n ) * blackKeyWidthUpscale;
+			const note = this.lowestNote + i;
+
+			if ( ! isBlackKey( note + 12 ) ) {
+
+				if ( i >= 0 ) ++ iW;
+				continue;
+			}
+
+			const xCenter = w * iW / nW;
 			const xMin = xCenter - xExtent;
 			const xMax = xCenter + xExtent;
 
@@ -80,7 +97,6 @@ export class PianoKeyboard {
 			c2d.fill();
 			c2d.stroke();
 
-			const note = i + this.firstOctave * 12;
 			this.highlighting.paint( c2d, note, xMin, hB / 2, xMax, hB );
 		}
 	}
@@ -89,29 +105,32 @@ export class PianoKeyboard {
 
 		const w = this.width;
 		const h = this.height;
-		const n = this.numberOfKeys;
+		const n = this.#numberOfKeys();
 		const nW = this.numberOfWhiteKeys;
 		const hB = h * blackKeyFractionalHeight;
 
-		for ( let i = 0; i < this.numberOfKeys; ++ i ) {
+		const xExtent = ( w * 0.5 / n ) * blackKeyWidthUpscale;
 
-			if ( ! isBlackKey(i) ) continue;
+		let iW = 0;
+		for ( let i = 0; i < n; ++ i ) {
 
-			const n = this.numberOfKeys;
-			const xCenter = w * ( i + 0.5 ) / n;
-			const xExtent = ( w * 0.5 / n ) * blackKeyWidthUpscale;
+			const note = this.lowestNote + i;
+			if ( ! isBlackKey( note ) ) { ++ iW; continue; }
+
+			const xCenter = w * iW / nW;
 			const xMin = xCenter - xExtent;
 			const xMax = xCenter + xExtent;
 
 			if ( x < xMin || x >= xMax || y < 0 || y >= hB ) continue;
 
-			return i + this.firstOctave * 12;
+			return note;
 		}
 
-		let iW = 0;
-		for ( let i = 0; i < this.numberOfKeys; ++ i ) {
+		iW = 0;
+		for ( let i = 0; i < n; ++ i ) {
 
-			if ( isBlackKey(i) ) continue;
+			const note = this.lowestNote + i;
+			if ( isBlackKey( note ) ) continue;
 
 			const xMin = w * iW / nW;
 			const xMax = w * ( iW + 1 ) / nW;
@@ -119,7 +138,7 @@ export class PianoKeyboard {
 
 			if ( x < xMin || x >= xMax || y < 0 || y >= h ) continue;
 
-			return i + this.firstOctave * 12;
+			return note;
 		}
 
 		return null;

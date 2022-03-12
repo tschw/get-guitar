@@ -146,19 +146,29 @@ export class Fretboard {
 			// Paint caption:
 
 			c2d.fillStyle = '#cccccc';
-			c2d.font = haveString ? '12px arial' : '24px arial';
-			c2d.textBaseline = 'middle';
 
-			const textMeasure = c2d.measureText( stringSlot.caption );
-			c2d.clearRect(
-					textMeasure.actualBoundingBoxLeft,
-					y - textMeasure.actualBoundingBoxAscent,
-					textMeasure.actualBoundingBoxRight -
+			if ( ! haveString ) {
+
+				c2d.font = '24px arial';
+				c2d.textBaseline = 'alphabetic';
+
+				const textMeasure = c2d.measureText( stringSlot.caption );
+
+				c2d.clearRect(
 						textMeasure.actualBoundingBoxLeft,
-					textMeasure.actualBoundingBoxDescent +
-						textMeasure.actualBoundingBoxAscent );
+						yMax - textMeasure.actualBoundingBoxAscent,
+						textMeasure.actualBoundingBoxRight -
+							textMeasure.actualBoundingBoxLeft,
+						textMeasure.actualBoundingBoxDescent +
+							textMeasure.actualBoundingBoxAscent );
 
-			c2d.fillText( stringSlot.caption, 0, y );
+				c2d.fillText( stringSlot.caption, 0, yMax );
+			} else {
+
+				c2d.font = '12px arial';
+				c2d.textBaseline = 'middle';
+				c2d.fillText( stringSlot.caption, 0, y );
+			}
 
 			// Paint string and slot separator:
 

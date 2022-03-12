@@ -31,14 +31,14 @@ export class PianoKeyboard {
 		c2d.clearRect( 0, 0, w, h );
 		c2d.lineWidth = 1;
 
-		let whiteKeyIndex = 0
+		let iW = 0;
 		for ( let i = 0; i < this.numberOfKeys; ++ i ) {
 
 			if ( isBlackKey( i ) ) continue;
 
-			const iW = whiteKeyIndex ++;
 			const xMin = w * iW / nW;
 			const xMax = w * ( iW + 1 ) / nW;
+			++ iW;
 
 			c2d.fillStyle = '#777777';
 			c2d.strokeStyle = '#ffffff';
@@ -108,14 +108,14 @@ export class PianoKeyboard {
 			return i + this.firstOctave * 12;
 		}
 
-		let whiteKeyIndex = 0
+		let iW = 0;
 		for ( let i = 0; i < this.numberOfKeys; ++ i ) {
 
 			if ( isBlackKey(i) ) continue;
 
-			const iW = whiteKeyIndex ++;
 			const xMin = w * iW / nW;
 			const xMax = w * ( iW + 1 ) / nW;
+			++ iW;
 
 			if ( x < xMin || x >= xMax || y < 0 || y >= h ) continue;
 

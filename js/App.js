@@ -31,10 +31,16 @@ class App {
 
 		const highlighting = new Highlighting();
 		this.highlighting = highlighting;
+
 		this.tuning = defaultTuning
-		this.fretboard = new Fretboard( width, height * 0.7, this.tuning, numberOfFrets, highlighting );
-		this.piano = new PianoKeyboard( width, height * 0.3 - pianoUpperSpace, pianoFirstOctave * 12, numberOfPianoOctaves * 7, highlighting );
+		this.fretboard = new Fretboard(
+				width, height * 0.7, this.tuning, numberOfFrets, highlighting );
+
+		this.piano = new PianoKeyboard(
+				width, height * 0.3 - pianoUpperSpace,
+				pianoFirstOctave * 12, numberOfPianoOctaves * 7, highlighting );
 		this.pianoTransform = null;
+
 		this.animationFrame = null;
 
 		const yButtons = buttonsUpperSpace;

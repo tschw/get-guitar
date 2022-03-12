@@ -90,7 +90,12 @@ class App {
 		this.piano.paint( c2d );
 		c2d.restore();
 
-		if ( ! this.highlighting.attenuate() ) this.#requestRefresh();
+		if ( ! ( this.highlighting.attenuate()
+				& this.buttonUp.attenuate()
+				& this.buttonDown.attenuate()
+				& this.buttonConf.attenuate() ) )
+
+			this.#requestRefresh();
 	}
 
 	#requestRefresh() {

@@ -1,6 +1,23 @@
+import { hsl2rgb } from './Color.js'
+
+const fillHue = 120;
+const fillSaturation = 0.5;
+
+const strokeColor = '200, 200, 200';
+
+const lightnessNormal = 0.15;
+const lightnessHighlit = 0.38;
+
+const opacityEnabled = 1.0;
+const opacityDisabled = 0.2;
+
+const smoothing = 0.25;
+
 export class Button {
 
-	constructor( x, y, width, height, caption ) {
+	#animationState;
+
+	constructor( x, y, width, height, caption, enabled, highlit ) {
 
 		this.x = x;
 		this.y = y;
@@ -8,15 +25,49 @@ export class Button {
 		this.height = height;
 		this.caption = caption;
 
-		this.highlit = false;
+		this.enabled = enabled != null ? enabled : true;
+		this.highlit = highlit != null ? highlit : false;
+
+		this.#animationState = {
+
+			opacity: this.enabled ? opacityEnabled : opacityDisabled,
+			lightness: this.highlit ? lightnessHighlit : lightnessNormal
+		};
+	}
+
+	attenuate() {
+
+		let idle = true;
+		function checkIdle( value ) {
+
+			const closeEnough = 1 / 1024;
+
+			if ( Math.abs(value) > closeEnough ) idle = false;
+			return value;
+		}
+
+		const state = this.#animationState;
+
+		const targetOpacity = this.enabled ? opacityEnabled : opacityDisabled;
+		state.opacity += checkIdle( targetOpacity - state.opacity ) * smoothing;
+
+		const targetLightness =
+				this.highlit ? lightnessHighlit : lightnessNormal;
+		state.lightness += checkIdle(
+				targetLightness - state.lightness ) * smoothing;
+
+		return idle;
 	}
 
 	paint( c2d ) {
 
+		const state = this.#animationState;
+
 		c2d.lineWidth = 2;
 		c2d.setLineDash( [] );
-		c2d.strokeStyle = '#cccccc';
-		c2d.fillStyle = this.highlit ? '#30a030' : '#103010';
+		c2d.strokeStyle = `rgba(${ strokeColor }, ${ state.opacity }`;
+		c2d.fillStyle = hsl2rgb(
+				fillHue, fillSaturation, state.lightness, state.opacity );
 
 		c2d.beginPath();
 		c2d.rect( this.x, this.y, this.width, this.height );

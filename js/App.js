@@ -7,7 +7,7 @@ import { transpose, noteNameToNumber } from './Music.js'
 const defaultTuning = 'Guitar - standard tuning: E2 A2 D3 G3 B3 E4 Ukulele - GCEA: G4 C4 E4 A4';
 
 const numberOfFrets = 16;
-const numberOfPianoWhiteKeys = 4 * 7;
+const numberOfPianoWhiteKeys = 3 * 7;
 const lowestPianoKey = noteNameToNumber( 'C2' );
 
 const pianoUpperSpace = 12;

@@ -20,6 +20,8 @@ export function noteNameToNumber( s ) {
 	return note + octave * 12
 }
 
+export const naturalScale = 0b101010110101;
+
 export function transpose( tonality, semitones ) {
 
 	const nSemiDown = ( 12 - semitones % 12 ) % 12;

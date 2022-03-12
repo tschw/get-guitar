@@ -9,7 +9,7 @@ export class Highlighting {
 	constructor() {
 
 		this.selection = 0;
-		this.highlightedNote = null;
+		this.highlitNote = null;
 
 		this.#animationState = new Array( 12 );
 		for ( let i = 0; i < 12; ++ i )
@@ -27,7 +27,7 @@ export class Highlighting {
 			return value;
 		}
 
-		const highlight = this.highlightedNote;
+		const highlight = this.highlitNote;
 		const highlightInOctave = highlight != null ? highlight % 12 : -1;
 
 		for ( let i = 0; i < 12; ++ i ) {
@@ -65,20 +65,20 @@ export class Highlighting {
 
 		c2d.beginPath();
 
-		if ( this.highlightedNote == null ||
-				this.highlightedNote == note ||
-				this.highlightedNote % 12 != noteInOctave ) {
+		if ( this.highlitNote == null ||
+				this.highlitNote == note ||
+				this.highlitNote % 12 != noteInOctave ) {
 
 			c2d.arc( x, y, r, 0, Math.PI * 2 );
 
-		} else if ( note > this.highlightedNote ) {
+		} else if ( note > this.highlitNote ) {
 
 			c2d.moveTo( x, y - r );
 			c2d.lineTo( x + r, y + r );
 			c2d.lineTo( x - r, y + r );
 			c2d.closePath();
 
-		} else /* ( note < this.highlightedNote ) */ {
+		} else /* ( note < this.highlitNote ) */ {
 
 			c2d.moveTo( x, y + r );
 			c2d.lineTo( x + r, y - r );

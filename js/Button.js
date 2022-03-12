@@ -8,7 +8,7 @@ export class Button {
 		this.height = height;
 		this.caption = caption;
 
-		this.highlighted = false;
+		this.highlit = false;
 	}
 
 	paint( c2d ) {
@@ -16,7 +16,7 @@ export class Button {
 		c2d.lineWidth = 2;
 		c2d.setLineDash( [] );
 		c2d.strokeStyle = '#cccccc';
-		c2d.fillStyle = this.highlighted ? '#30a030' : '#103010';
+		c2d.fillStyle = this.highlit ? '#30a030' : '#103010';
 
 		c2d.beginPath();
 		c2d.rect( this.x, this.y, this.width, this.height );
@@ -50,6 +50,6 @@ export class Button {
 
 	highlightIfContained( x, y ) {
 
-		this.highlighted = this.isContained( x, y );
+		this.highlit = this.isContained( x, y );
 	}
 }

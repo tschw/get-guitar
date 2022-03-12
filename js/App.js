@@ -119,17 +119,17 @@ class App {
 		this.buttonDown.highlightIfContained( x, y );
 		this.buttonConf.highlightIfContained( x, y );
 
-		this.highlighting.highlightedNote = this.#findNote( x, y );
+		this.highlighting.highlitNote = this.#findNote( x, y );
 		this.#requestRefresh();
 	}
 
 	mouseOut( event ) {
 
-		this.buttonUp.highlighted = false;
-		this.buttonDown.highlighted = false;
-		this.buttonConf.highlighted = false;
+		this.buttonUp.highlit = false;
+		this.buttonDown.highlit = false;
+		this.buttonConf.highlit = false;
 
-		this.highlighting.highlightedNote = null;
+		this.highlighting.highlitNote = null;
 		this.#requestRefresh();
 	}
 

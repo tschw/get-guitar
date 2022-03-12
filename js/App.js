@@ -2,13 +2,13 @@ import { Fretboard } from './Fretboard.js'
 import { Highlighting } from './Highlighting.js'
 import { PianoKeyboard } from './PianoKeyboard.js'
 import { Button } from './Button.js'
-import { transpose } from './Music.js'
+import { transpose, noteNameToNumber } from './Music.js'
 
 const defaultTuning = 'Guitar - standard tuning: E2 A2 D3 G3 B3 E4 Ukulele - GCEA: G4 C4 E4 A4';
 
 const numberOfFrets = 16;
-const numberOfPianoOctaves = 4;
-const pianoFirstOctave = 2;
+const numberOfPianoWhiteKeys = 4 * 7;
+const lowestPianoKey = noteNameToNumber( 'C2' );
 
 const pianoUpperSpace = 12;
 
@@ -38,7 +38,7 @@ class App {
 
 		this.piano = new PianoKeyboard(
 				width, height * 0.3 - pianoUpperSpace,
-				pianoFirstOctave * 12, numberOfPianoOctaves * 7, highlighting );
+				lowestPianoKey, numberOfPianoWhiteKeys, highlighting );
 		this.pianoTransform = null;
 
 		this.animationFrame = null;

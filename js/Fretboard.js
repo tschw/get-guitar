@@ -58,6 +58,11 @@ export class Fretboard {
 
 		// Paint frets:
 
+		const nSlots = this.stringSlots.length;
+		const stringSlotHeight = this.height / nSlots;
+		const markerRadius = stringSlotHeight * 0.125;
+		const markerElevation = stringSlotHeight * 0.125;
+
 		for ( let i = 0; i < this.numberOfFrets; ++ i ) {
 
 			const x = this.#fretPosition( i ) * this.width;
@@ -101,11 +106,6 @@ export class Fretboard {
 			const xLeft = xMiddle - fretWidth * 0.245;
 			const xRight = xMiddle + fretWidth * 0.24;
 
-			const nSlots = this.stringSlots.length;
-			const stringSlotHeight = this.height / nSlots;
-			const markerRadius = stringSlotHeight * 0.125;
-			const markerElevation = stringSlotHeight * 0.125;
-
 			c2d.fillStyle = '#dddddd';
 
 			for ( let j = 0; j < nSlots; ++ j ) {
@@ -130,7 +130,6 @@ export class Fretboard {
 		}
 
 		let yMin = 0, yMax = 0;
-		const nSlots = this.stringSlots.length;
 		for ( let i = 0; i < nSlots; ++ i ) {
 
 			const stringSlot = this.stringSlots[ i ];

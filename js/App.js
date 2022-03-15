@@ -49,10 +49,10 @@ class App {
 		this.buttonConf = new Button(
 				xLastButton, yButtons, buttonWidth, buttonHeight, "\u2261" );
 
-		this.buttonDown = new Button( xLastButton - buttonSpacing,
+		this.buttonDown = new Button( xLastButton - buttonSpacing * 2,
 				yButtons, buttonWidth, buttonHeight, "\u2228" );
 
-		this.buttonUp = new Button( xLastButton - buttonSpacing * 2,
+		this.buttonUp = new Button( xLastButton - buttonSpacing,
 				yButtons, buttonWidth, buttonHeight, "\u2227" );
 
 		this.element.addEventListener( 'mousemove', (e) => this.mouseMove(e) );

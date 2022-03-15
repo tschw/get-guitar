@@ -72,20 +72,28 @@ export class Highlighting {
 
 			c2d.arc( x, y, r, 0, Math.PI * 2 );
 
-		} else if ( note > this.highlitNote ) {
+		} else {
 
-			c2d.moveTo( x, y - r );
-			c2d.lineTo( x + r, y + r );
-			c2d.lineTo( x - r, y + r );
-			c2d.closePath();
+			const a = r * 1.19;
+			const h = a * 1.732; // 1.732... = sqrt( 3 )
+			const e = h / 3;
 
-		} else /* ( note < this.highlitNote ) */ {
+			if ( note > this.highlitNote ) {
 
-			c2d.moveTo( x, y + r );
-			c2d.lineTo( x + r, y - r );
-			c2d.lineTo( x - r, y - r );
-			c2d.closePath();
+				c2d.moveTo( x, y - h + e );
+				c2d.lineTo( x + a, y + e );
+				c2d.lineTo( x - a, y + e );
+				c2d.closePath();
+
+			} else /* ( note < this.highlitNote ) */ {
+
+				c2d.moveTo( x, y + h - e );
+				c2d.lineTo( x + a, y - e );
+				c2d.lineTo( x - a, y - e );
+				c2d.closePath();
+			}
 		}
+
 		c2d.fill();
 		c2d.stroke();
 	}

@@ -1,4 +1,4 @@
-import { naturalScale } from './Music.js'
+import { naturalScale, numberToNoteName } from './Music.js'
 
 const isBlackKey = (index) => ( naturalScale & ( 1 << ( index % 12 ) ) ) == 0;
 
@@ -39,6 +39,8 @@ export class PianoKeyboard {
 
 		c2d.clearRect( 0, 0, w, h );
 		c2d.lineWidth = 1;
+		c2d.font = '10px arial';
+		c2d.textBaseline = 'middle';
 
 		let iW = 0;
 		for ( let i = 0; i < n; ++ i ) {
@@ -64,6 +66,16 @@ export class PianoKeyboard {
 			c2d.stroke();
 
 			this.highlighting.paint( c2d, note, xMin, hB, xMax, h );
+
+			if ( i == 0 || i == n - 1 ) {
+
+				const label = numberToNoteName( note );
+				const wC = c2d.measureText( label ).width;
+
+				c2d.fillStyle = '#ffffff';
+				c2d.fillText( label,
+						( xMin + xMax - wC ) / 2, ( h + hB ) / 2 );
+			}
 		}
 
 		iW = 0;

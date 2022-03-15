@@ -15,7 +15,7 @@ const pianoUpperSpace = 12;
 const buttonWidth = 32;
 const buttonHeight = 24;
 const buttonSpacing = buttonWidth + 16;
-const buttonsRightSpace = 12;
+const buttonsHorizontalSpace = 12;
 const buttonsUpperSpace = 6;
 
 class App {
@@ -44,7 +44,7 @@ class App {
 		this.animationFrame = null;
 
 		const yButtons = buttonsUpperSpace;
-		const xLastButton = width - buttonsRightSpace - buttonWidth;
+		const xLastButton = width - buttonsHorizontalSpace - buttonWidth;
 
 		this.buttonConf = new Button(
 				xLastButton, yButtons, buttonWidth, buttonHeight, "\u2261" );
@@ -54,6 +54,15 @@ class App {
 
 		this.buttonUp = new Button( xLastButton - buttonSpacing,
 				yButtons, buttonWidth, buttonHeight, "\u2227" );
+
+		const yTopKeysButtons =
+				this.element.height * 0.7 + pianoUpperSpace + buttonsUpperSpace;
+
+		this.buttonKeysRight = new Button( xLastButton,
+				yTopKeysButtons, buttonWidth, buttonHeight, "\u25bb" );
+
+		this.buttonKeysLeft = new Button( buttonsHorizontalSpace,
+				yTopKeysButtons, buttonWidth, buttonHeight, "\u25c5" );
 
 		this.element.addEventListener( 'mousemove', (e) => this.mouseMove(e) );
 		this.element.addEventListener( 'mousedown', (e) => this.mouseDown(e) );
@@ -96,10 +105,15 @@ class App {
 		this.piano.paint( c2d );
 		c2d.restore();
 
+		this.buttonKeysLeft.paint( c2d );
+		this.buttonKeysRight.paint( c2d );
+
 		if ( ! ( this.highlighting.attenuate()
 				& this.buttonUp.attenuate()
 				& this.buttonDown.attenuate()
-				& this.buttonConf.attenuate() ) )
+				& this.buttonConf.attenuate()
+				& this.buttonKeysLeft.attenuate()
+				& this.buttonKeysRight.attenuate() ) )
 
 			this.#requestRefresh();
 	}
@@ -129,8 +143,13 @@ class App {
 		this.buttonUp.highlightIfContained( x, y );
 		this.buttonDown.highlightIfContained( x, y );
 		this.buttonConf.highlightIfContained( x, y );
+		if ( this.buttonKeysLeft.highlightIfContained( x, y ) ||
+				this.buttonKeysRight.highlightIfContained( x, y ) )
 
-		this.highlighting.highlitNote = this.#findNote( x, y );
+			this.highlighting.highlitNote = null;
+		else
+			this.highlighting.highlitNote = this.#findNote( x, y );
+
 		this.#requestRefresh();
 	}
 
@@ -139,6 +158,8 @@ class App {
 		this.buttonUp.highlit = false;
 		this.buttonDown.highlit = false;
 		this.buttonConf.highlit = false;
+		this.buttonKeysLeft.highlit = false;
+		this.buttonKeysRight.highlit = false;
 
 		this.highlighting.highlitNote = null;
 		this.#requestRefresh();
@@ -151,28 +172,47 @@ class App {
 
 		const highlighting = this.highlighting;
 
-		if ( this.buttonConf.isContained( x, y ) )
-			this.configure();
+		if ( this.buttonConf.isContained( x, y ) ) this.configure();
 
 		else if ( this.buttonUp.isContained( x, y ) )
+
 			highlighting.selection = transpose( highlighting.selection, 1 );
 
 		else if ( this.buttonDown.isContained( x, y ) )
+
 			highlighting.selection = transpose( highlighting.selection, -1 );
 
-		const note = this.#findNote( x, y );
+		else if ( this.buttonKeysLeft.isContained( x, y ) ) {
 
-		if ( note != null )
-			highlighting.selection ^= 1 << note % 12;
+			if ( this.buttonKeysLeft.enabled ) this.#scrollKeysViewport( -1 );
+		}
+
+		else if ( this.buttonKeysRight.isContained( x, y ) ) {
+
+			if ( this.buttonKeysRight.enabled ) this.#scrollKeysViewport( 1 );
+
+		} else {
+
+			const note = this.#findNote( x, y );
+
+			if ( note != null )
+				highlighting.selection ^= 1 << note % 12;
+		}
 
 		this.#requestRefresh();
+	}
+
+	#scrollKeysViewport( direction ) {
+
+		this.piano.scrollViewport( direction );
+		this.buttonKeysLeft.enabled = this.piano.canScrollViewport( -1 );
+		this.buttonKeysRight.enabled = this.piano.canScrollViewport( 1 );
 	}
 }
 
 function transformedPoint( t, x, y ) {
 	return t.transformPoint( new DOMPoint( x, y ) );
 }
-
 
 const app = new App();
 export { app }

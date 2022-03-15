@@ -101,6 +101,8 @@ export class Button {
 
 	highlightIfContained( x, y ) {
 
-		this.highlit = this.isContained( x, y );
+		const contained = this.isContained( x, y );
+		if ( this.enabled ) this.highlit = contained;
+		return contained;
 	}
 }

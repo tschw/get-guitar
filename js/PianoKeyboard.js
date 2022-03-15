@@ -5,6 +5,9 @@ const isBlackKey = (index) => ( naturalScale & ( 1 << ( index % 12 ) ) ) == 0;
 const blackKeyFractionalHeight = 0.65;
 const blackKeyWidthUpscale = 1.1;
 
+const highestNote = 9 * 12 - 1;
+
+
 export class PianoKeyboard {
 
 	constructor( width, height, lowestNote, numberOfWhiteKeys, highlighting ) {
@@ -16,6 +19,22 @@ export class PianoKeyboard {
 
 		this.lowestNote = lowestNote;
 		this.numberOfWhiteKeys = numberOfWhiteKeys;
+	}
+
+	canScrollViewport( direction ) {
+
+		const lowest = this.lowestNote + direction;
+		const highest = lowest + this.#numberOfKeys();
+		return lowest >= 0 && highest <= highestNote;
+	}
+
+	scrollViewport( direction ) {
+
+		do {
+
+			this.lowestNote += direction;
+
+		} while ( isBlackKey( this.lowestNote ) );
 	}
 
 	#numberOfKeys() {
@@ -49,8 +68,7 @@ export class PianoKeyboard {
 			if ( isBlackKey( note ) ) continue;
 
 			const xMin = w * iW / nW;
-			const xMax = w * ( iW + 1 ) / nW;
-			++ iW;
+			const xMax = w * ++ iW / nW;
 
 			c2d.fillStyle = '#777777';
 			c2d.strokeStyle = '#ffffff';

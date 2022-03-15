@@ -6,7 +6,7 @@ const noteNameInOctave = [
 
 export function numberToNoteName( i ) {
 
-	return "${ noteNameInOctave[ i % 12 ] }${ i / 12 }"
+	return `${ noteNameInOctave[ i % 12 ] }${ i / 12 | 0 }`
 }
 
 export function noteNameToNumber( s ) {

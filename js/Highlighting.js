@@ -1,16 +1,21 @@
-import { hsl2rgb } from './Color.js'
+import { VariableColor } from './VariableColor.js'
 
 const fillSmoothing = 0.1;
 const strokeSmoothing = 0.15;
 
 export class Highlighting {
 
+	#colors;
 	#animationState;
 
 	constructor() {
 
 		this.selection = 0;
 		this.highlitNote = null;
+
+		this.#colors = new Array( 12 );
+		for ( let i = 0; i != 12; ++ i )
+			this.#colors[ i ] = new VariableColor( 5 + 30 * i, 1, 0.5, { } );
 
 		this.#animationState = new Array( 12 );
 		for ( let i = 0; i < 12; ++ i )
@@ -60,9 +65,7 @@ export class Highlighting {
 		const state = this.#animationState[ noteInOctave ]
 
 		c2d.strokeStyle = `rgba(255, 255, 255, ${ state.stroke })`;
-		const colorString = hsl2rgb(
-				5 + noteInOctave * 30, 1, 0.5, state.fill );
-		c2d.fillStyle = colorString;
+		c2d.fillStyle = this.#colors[ noteInOctave ].toString( state.fill );
 
 		c2d.beginPath();
 

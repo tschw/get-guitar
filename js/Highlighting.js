@@ -1,7 +1,8 @@
 import { VariableColor } from './VariableColor.js'
+import { animation } from './Animation.js'
 
-const fillSmoothing = 0.1;
-const strokeSmoothing = 0.15;
+const fillSmoothing = 0.9;
+const strokeSmoothing = 0.85;
 
 export class Highlighting {
 
@@ -24,15 +25,6 @@ export class Highlighting {
 
 	attenuate() {
 
-		let idle = true;
-		function checkIdle( value ) {
-
-			const closeEnough = 1 / 1024;
-
-			if ( Math.abs(value) > closeEnough ) idle = false;
-			return value;
-		}
-
 		const highlight = this.highlitNote;
 		const highlightInOctave = highlight != null ? highlight % 12 : -1;
 
@@ -46,11 +38,10 @@ export class Highlighting {
 			const targetOpacity = isSelected ? 0.7 : 0.0;
 			const targetHighlight = isHighlit ? 1.0 : 0.0;
 
-			s.fill += checkIdle( targetOpacity - s.fill ) * fillSmoothing;
-			s.stroke += checkIdle( targetHighlight - s.stroke ) * strokeSmoothing;
+			s.fill += animation.delta( s.fill, targetOpacity, fillSmoothing);
+			s.stroke += animation.delta(
+					s.stroke, targetHighlight, strokeSmoothing );
 		}
-
-		return idle;
 	}
 
 	paint( c2d, note, xMin, yMin, xMax, yMax ) {

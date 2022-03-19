@@ -3,6 +3,7 @@ import { Highlighting } from './Highlighting.js'
 import { PianoKeyboard } from './PianoKeyboard.js'
 import { Button } from './Button.js'
 import { transpose, noteNameToNumber } from './Music.js'
+import { animation } from './Animation.js'
 
 const defaultTuning = 'Guitar - standard tuning: E2 A2 D3 G3 B3 E4 Ukulele - GCEA: G4 C4 E4 A4';
 
@@ -41,8 +42,6 @@ class App {
 				width, height * 0.3 - pianoUpperSpace,
 				lowestPianoKey, numberOfPianoWhiteKeys, highlighting );
 
-		this.animationFrame = null;
-
 		const yButtons = buttonsUpperSpace;
 		const xLastButton = width - buttonsHorizontalSpace - buttonWidth;
 
@@ -66,9 +65,12 @@ class App {
 
 		this.element.addEventListener( 'mousemove', (e) => this.mouseMove(e) );
 		this.element.addEventListener( 'mousedown', (e) => this.mouseDown(e) );
-		this.element.addEventListener( 'mouseout', (e) => this.mouseOut(e) );
+		this.element.addEventListener( 'mouseout', (e) => this.unhighlight() );
 
-		this.#requestRefresh();
+		animation.render = () => this.paint();
+		animation.unhighlight = () => this.unhighlight();
+
+		animation.requestRefresh();
 	}
 
 	configure() {
@@ -90,8 +92,6 @@ class App {
 
 	paint() {
 
-		this.animationFrame = null;
-
 		const c2d = this.c2d;
 
 		this.fretboard.paint( c2d );
@@ -104,21 +104,7 @@ class App {
 		this.buttonKeysLeft.paint( c2d );
 		this.buttonKeysRight.paint( c2d );
 
-		if ( ! ( this.highlighting.attenuate()
-				& this.buttonUp.attenuate()
-				& this.buttonDown.attenuate()
-				& this.buttonConf.attenuate()
-				& this.buttonKeysLeft.attenuate()
-				& this.buttonKeysRight.attenuate() ) )
-
-			this.#requestRefresh();
-	}
-
-	#requestRefresh() {
-
-		if ( this.animationFrame == null )
-			this.animationFrame =
-				window.requestAnimationFrame( () => this.paint() );
+		this.highlighting.attenuate();
 	}
 
 	#findNote( x, y ) {
@@ -141,21 +127,8 @@ class App {
 
 			this.highlighting.highlitNote = null;
 		else
-			this.highlighting.highlitNote = this.#findNote( x, y );
-
-		this.#requestRefresh();
-	}
-
-	mouseOut( event ) {
-
-		this.buttonUp.highlit = false;
-		this.buttonDown.highlit = false;
-		this.buttonConf.highlit = false;
-		this.buttonKeysLeft.highlit = false;
-		this.buttonKeysRight.highlit = false;
-
-		this.highlighting.highlitNote = null;
-		this.#requestRefresh();
+			this.highlighting.highlitNote = animation.ifStateChange(
+					this.highlighting.highlitNote, this.#findNote( x, y ) );
 	}
 
 	mouseDown( event ) {
@@ -177,22 +150,36 @@ class App {
 
 		else if ( this.buttonKeysLeft.isContained( x, y ) ) {
 
-			if ( this.buttonKeysLeft.enabled ) this.#scrollKeysViewport( -1 );
+			if ( ! this.buttonKeysLeft.enabled ) return;
+			this.#scrollKeysViewport( -1 );
 		}
 
 		else if ( this.buttonKeysRight.isContained( x, y ) ) {
 
-			if ( this.buttonKeysRight.enabled ) this.#scrollKeysViewport( 1 );
+			if ( ! this.buttonKeysRight.enabled ) return;
+			this.#scrollKeysViewport( 1 );
 
 		} else {
 
 			const note = this.#findNote( x, y );
+			if ( note == null ) return;
 
-			if ( note != null )
-				highlighting.selection ^= 1 << note % 12;
+			highlighting.selection ^= 1 << note % 12;
 		}
 
-		this.#requestRefresh();
+		animation.requestRefresh();
+	}
+
+	unhighlight() {
+
+		this.buttonUp.highlit = false;
+		this.buttonDown.highlit = false;
+		this.buttonConf.highlit = false;
+		this.buttonKeysLeft.highlit = false;
+		this.buttonKeysRight.highlit = false;
+		this.highlighting.highlitNote = null;
+
+		animation.requestRefresh();
 	}
 
 	#scrollKeysViewport( direction ) {

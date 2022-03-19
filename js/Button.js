@@ -1,10 +1,11 @@
 import { VariableColor } from './VariableColor.js'
+import { animation } from './Animation.js'
 
 const opacity = { a: 0.2, b: 1.0 };
 const fillColor = new VariableColor( 120, 0.5, { a: 0.15, b: 0.38 }, opacity );
 const strokeColor = new VariableColor( 0, 0, 0.7, opacity );
 
-const smoothing = 0.25;
+const smoothing = 0.75;
 
 export class Button {
 
@@ -26,29 +27,6 @@ export class Button {
 			opacity: this.enabled ? 1 : 0,
 			lightness: this.highlit ? 1 : 0
 		};
-	}
-
-	attenuate() {
-
-		let idle = true;
-		function checkIdle( value ) {
-
-			const closeEnough = 1 / 1024;
-
-			if ( Math.abs(value) > closeEnough ) idle = false;
-			return value;
-		}
-
-		const state = this.#animationState;
-
-		const targetOpacity = this.enabled ? 1 : 0;
-		state.opacity += checkIdle( targetOpacity - state.opacity ) * smoothing;
-
-		const targetLightness = this.highlit ? 1 : 0;
-		state.lightness += checkIdle(
-				targetLightness - state.lightness ) * smoothing;
-
-		return idle;
 	}
 
 	paint( c2d ) {
@@ -82,6 +60,12 @@ export class Button {
 		c2d.fillText( this.caption,
 				this.xLeft + ( this.width - textWidth ) / 2,
 				this.yTop + this.height / 2 );
+
+		state.opacity += animation.delta(
+				state.opacity, this.enabled ? 1 : 0, smoothing );
+
+		state.lightness += animation.delta(
+				state.lightness, this.highlit ? 1 : 0, smoothing );
 	}
 
 	isContained( x, y ) {
@@ -93,7 +77,8 @@ export class Button {
 	highlightIfContained( x, y ) {
 
 		const contained = this.isContained( x, y );
-		if ( this.enabled ) this.highlit = contained;
+		if ( this.enabled )
+			this.highlit = animation.ifStateChange( this.highlit, contained );
 		return contained;
 	}
 }

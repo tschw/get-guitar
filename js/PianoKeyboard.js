@@ -83,12 +83,7 @@ export class PianoKeyboard {
 			c2d.strokeStyle = '#ffffff';
 
 			c2d.beginPath();
-			c2d.moveTo( xMin, yMin );
-			c2d.lineTo( xMin, yMaxW );
-			c2d.lineTo( xMax, yMaxW );
-			c2d.lineTo( xMax, yMin );
-			c2d.closePath();
-
+			c2d.rect( xMin, yMin, xMax - xMin, h );
 			c2d.fill();
 			c2d.stroke();
 
@@ -127,12 +122,7 @@ export class PianoKeyboard {
 			c2d.strokeStyle = '#000000';
 
 			c2d.beginPath();
-			c2d.moveTo( xMin, yMin );
-			c2d.lineTo( xMin, yMaxB );
-			c2d.lineTo( xMax, yMaxB );
-			c2d.lineTo( xMax, yMin );
-			c2d.closePath();
-
+			c2d.rect( xMin, yMin, xMax - xMin, hB );
 			c2d.fill();
 			c2d.stroke();
 

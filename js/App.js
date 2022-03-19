@@ -23,7 +23,6 @@ class App {
 
 	constructor() {
 
-
 		this.element = document.getElementById( 'canvas' );
 		this.c2d = this.element.getContext( '2d' );
 
@@ -34,34 +33,61 @@ class App {
 		this.highlighting = highlighting;
 
 		this.tuning = defaultTuning
-		this.fretboard = new Fretboard(
+		this.frets = new Fretboard(
 				width, height * 0.7, this.tuning, numberOfFrets, highlighting );
 
-		this.piano = new PianoKeyboard(
+		this.keys = new PianoKeyboard(
 				height * 0.7 + pianoUpperSpace,
 				width, height * 0.3 - pianoUpperSpace,
 				lowestPianoKey, numberOfPianoWhiteKeys, highlighting );
 
-		const yButtons = buttonsUpperSpace;
+		const yFretsButtons = buttonsUpperSpace;
+		const yKeysButtons =
+				this.element.height * 0.7 +
+					pianoUpperSpace + buttonsUpperSpace;
+
+		const xFirstButton = buttonsHorizontalSpace;
 		const xLastButton = width - buttonsHorizontalSpace - buttonWidth;
 
-		this.buttonConf = new Button(
-				xLastButton, yButtons, buttonWidth, buttonHeight, "\u2261" );
+		this.buttons = [
 
-		this.buttonDown = new Button( xLastButton - buttonSpacing * 2,
-				yButtons, buttonWidth, buttonHeight, "\u2228" );
+			{
+				widget: 
+					new Button( xLastButton,
+							yFretsButtons, buttonWidth, buttonHeight, "\u2261" ),
 
-		this.buttonUp = new Button( xLastButton - buttonSpacing,
-				yButtons, buttonWidth, buttonHeight, "\u2227" );
+				action: () => this.configure()
 
-		const yTopKeysButtons =
-				this.element.height * 0.7 + pianoUpperSpace + buttonsUpperSpace;
+			}, {
+				widget:
+					new Button( xLastButton - buttonSpacing,
+							yFretsButtons, buttonWidth, buttonHeight, "\u2227" ),
 
-		this.buttonKeysRight = new Button( xLastButton,
-				yTopKeysButtons, buttonWidth, buttonHeight, "\u25bb" );
+				action: () => this.transpose(1)
 
-		this.buttonKeysLeft = new Button( buttonsHorizontalSpace,
-				yTopKeysButtons, buttonWidth, buttonHeight, "\u25c5" );
+			}, {
+				widget:
+					new Button( xLastButton - buttonSpacing * 2,
+							yFretsButtons, buttonWidth, buttonHeight, "\u2228" ),
+
+				action: () => this.transpose(-1)
+
+			}, {
+				widget:
+					this.buttonKeysLeft = new Button( xFirstButton,
+							yKeysButtons, buttonWidth, buttonHeight, "\u25c5" ),
+
+				action: () => this.scrollKeysViewport(-1)
+
+			}, {
+				widget:
+					this.buttonKeysRight = new Button( xLastButton,
+							yKeysButtons, buttonWidth, buttonHeight, "\u25bb" ),
+
+				action: () => this.scrollKeysViewport(1)
+			}
+		];
+
 
 		this.element.addEventListener( 'mousemove', (e) => this.mouseMove(e) );
 		this.element.addEventListener( 'mousedown', (e) => this.mouseDown(e) );
@@ -73,62 +99,36 @@ class App {
 		animation.requestRefresh();
 	}
 
-	configure() {
-
-		let tuning = prompt("Edit tuning:", this.tuning);
-		if ( tuning == null ) return false; // cancel
-		if ( tuning == "" ) tuning = defaultTuning;
-
-		const stringSlots = Fretboard.parseStringSlots( tuning );
-		if ( ! stringSlots ) {
-			alert("Something in your tuning did not quite add up. ");
-			return false;
-		}
-
-		this.tuning = tuning;
-		this.fretboard.stringSlots = stringSlots
-		return true;
-	}
-
 	paint() {
 
 		const c2d = this.c2d;
 
-		this.fretboard.paint( c2d );
-		this.piano.paint( c2d );
+		this.frets.paint( c2d );
+		this.keys.paint( c2d );
 
-		this.buttonUp.paint( c2d );
-		this.buttonDown.paint( c2d );
-		this.buttonConf.paint( c2d );
-
-		this.buttonKeysLeft.paint( c2d );
-		this.buttonKeysRight.paint( c2d );
+		for ( let button of this.buttons ) button.widget.paint( c2d );
 
 		this.highlighting.attenuate();
-	}
-
-	#findNote( x, y ) {
-
-		let note = this.fretboard.noteAtCoordinates( x, y );
-		if ( note != null ) return note;
-		note = this.piano.noteAtCoordinates( x, y );
-		return note;
 	}
 
 	mouseMove( event ) {
 
 		const x = event.offsetX;
 		const y = event.offsetY;
-		this.buttonUp.highlightIfContained( x, y );
-		this.buttonDown.highlightIfContained( x, y );
-		this.buttonConf.highlightIfContained( x, y );
-		if ( this.buttonKeysLeft.highlightIfContained( x, y ) ||
-				this.buttonKeysRight.highlightIfContained( x, y ) )
 
-			this.highlighting.highlitNote = null;
-		else
-			this.highlighting.highlitNote = animation.ifStateChange(
-					this.highlighting.highlitNote, this.#findNote( x, y ) );
+		const highlighting = this.highlighting;
+
+		for ( let button of this.buttons )
+			if ( button.widget.highlightIfContained( x, y ) ) {
+
+				highlighting.highlitNote =
+						animation.ifStateChange(
+							highlighting.highlitNote, null );
+				return;
+			}
+
+		highlighting.highlitNote = animation.ifStateChange(
+					highlighting.highlitNote, this.#findNote( x, y ) );
 	}
 
 	mouseDown( event ) {
@@ -138,57 +138,74 @@ class App {
 
 		const highlighting = this.highlighting;
 
-		if ( this.buttonConf.isContained( x, y ) ) this.configure();
+		for ( let button of this.buttons )
+			if ( button.widget.isContained( x, y ) ) {
 
-		else if ( this.buttonUp.isContained( x, y ) )
+				if ( button.widget.enabled ) {
 
-			highlighting.selection = transpose( highlighting.selection, 1 );
+					button.action();
+					animation.requestRefresh();
+				}
+				return;
+			}
 
-		else if ( this.buttonDown.isContained( x, y ) )
+		const note = this.#findNote( x, y );
 
-			highlighting.selection = transpose( highlighting.selection, -1 );
-
-		else if ( this.buttonKeysLeft.isContained( x, y ) ) {
-
-			if ( ! this.buttonKeysLeft.enabled ) return;
-			this.#scrollKeysViewport( -1 );
-		}
-
-		else if ( this.buttonKeysRight.isContained( x, y ) ) {
-
-			if ( ! this.buttonKeysRight.enabled ) return;
-			this.#scrollKeysViewport( 1 );
-
-		} else {
-
-			const note = this.#findNote( x, y );
-			if ( note == null ) return;
+		if ( note != null ) {
 
 			highlighting.selection ^= 1 << note % 12;
+			animation.requestRefresh();
 		}
-
-		animation.requestRefresh();
 	}
 
 	unhighlight() {
 
-		this.buttonUp.highlit = false;
-		this.buttonDown.highlit = false;
-		this.buttonConf.highlit = false;
-		this.buttonKeysLeft.highlit = false;
-		this.buttonKeysRight.highlit = false;
-		this.highlighting.highlitNote = null;
+		for ( let button of this.buttons ) {
 
-		animation.requestRefresh();
+			const widget = button.widget;
+			widget.highlit = animation.ifStateChange( widget.highlit, false );
+		}
+
+		this.highlighting.highlitNote =
+				animation.ifStateChange( this.highlighting.highlitNote, null );
 	}
 
-	#scrollKeysViewport( direction ) {
+	#findNote( x, y ) {
 
-		this.piano.scrollViewport( direction );
-		this.buttonKeysLeft.enabled = this.piano.canScrollViewport( -1 );
-		this.buttonKeysRight.enabled = this.piano.canScrollViewport( 1 );
+		let note = this.frets.noteAtCoordinates( x, y );
+		if ( note != null ) return note;
+		note = this.keys.noteAtCoordinates( x, y );
+		return note;
+	}
+
+	configure() {
+
+		let tuning = prompt("Edit tuning:", this.tuning);
+		if ( tuning == null ) return; // cancel
+		if ( tuning == "" ) tuning = defaultTuning;
+
+		const stringSlots = Fretboard.parseStringSlots( tuning );
+		if ( ! stringSlots ) {
+			alert("Something in your tuning did not quite add up. ");
+			return;
+		}
+
+		this.tuning = tuning;
+		this.frets.stringSlots = stringSlots;
+	}
+
+	transpose( semitones ) {
+
+		this.highlighting.selection =
+				transpose( this.highlighting.selection, semitones );
+	}
+
+	scrollKeysViewport( direction ) {
+
+		this.keys.scrollViewport( direction );
+		this.buttonKeysLeft.enabled = this.keys.canScrollViewport( -1 );
+		this.buttonKeysRight.enabled = this.keys.canScrollViewport( 1 );
 	}
 }
 
 const app = new App();
-export { app }

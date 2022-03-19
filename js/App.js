@@ -25,6 +25,7 @@ class App {
 
 		this.element = document.getElementById( 'canvas' );
 		this.c2d = this.element.getContext( '2d' );
+		this.pointerPosition = { x: 0, y: 0 };
 
 		const width = this.element.width;
 		const height = this.element.height;
@@ -111,15 +112,24 @@ class App {
 		this.highlighting.attenuate();
 	}
 
+	#getPointerCoordinates( event ) {
+
+		const p = this.pointerPosition, e = this.element,
+				b = this.element.getBoundingClientRect();
+
+		p.x = event.offsetX * e.width / b.width;
+		p.y = event.offsetY * e.height / b.height;
+
+		return p;
+	}
+
 	mouseMove( event ) {
 
-		const x = event.offsetX;
-		const y = event.offsetY;
-
-		const highlighting = this.highlighting;
+		const highlighting = this.highlighting,
+				p = this.#getPointerCoordinates( event );
 
 		for ( let button of this.buttons )
-			if ( button.widget.highlightIfContained( x, y ) ) {
+			if ( button.widget.highlightIfContained( p.x, p.y ) ) {
 
 				highlighting.highlitNote =
 						animation.ifStateChange(
@@ -128,18 +138,16 @@ class App {
 			}
 
 		highlighting.highlitNote = animation.ifStateChange(
-					highlighting.highlitNote, this.#findNote( x, y ) );
+					highlighting.highlitNote, this.#findNote( p.x, p.y ) );
 	}
 
 	mouseDown( event ) {
 
-		const x = event.offsetX;
-		const y = event.offsetY;
-
-		const highlighting = this.highlighting;
+		const highlighting = this.highlighting,
+				p = this.#getPointerCoordinates( event );
 
 		for ( let button of this.buttons )
-			if ( button.widget.isContained( x, y ) ) {
+			if ( button.widget.isContained( p.x, p.y ) ) {
 
 				if ( button.widget.enabled ) {
 
@@ -149,7 +157,7 @@ class App {
 				return;
 			}
 
-		const note = this.#findNote( x, y );
+		const note = this.#findNote( p.x, p.y );
 
 		if ( note != null ) {
 

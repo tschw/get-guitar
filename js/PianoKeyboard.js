@@ -10,8 +10,9 @@ const highestNote = 9 * 12 - 1;
 
 export class PianoKeyboard {
 
-	constructor( width, height, lowestNote, numberOfWhiteKeys, highlighting ) {
+	constructor( yTop, width, height, lowestNote, numberOfWhiteKeys, highlighting ) {
 
+		this.yTop = yTop;
 		this.width = width;
 		this.height = height;
 
@@ -56,10 +57,18 @@ export class PianoKeyboard {
 		const nW = this.numberOfWhiteKeys;
 		const hB = h * blackKeyFractionalHeight;
 
-		c2d.clearRect( 0, 0, w, h );
+		const yMin = this.yTop;
+		const yMaxW = yMin + h;
+		const yMaxB = yMin + hB;
+
+		c2d.clearRect( 0, yMin, w, h );
 		c2d.lineWidth = 1;
 		c2d.font = '10px arial';
 		c2d.textBaseline = 'middle';
+
+		c2d.save();
+		c2d.rect( 0, yMin, w, h );
+		c2d.clip();
 
 		let iW = 0;
 		for ( let i = 0; i < n; ++ i ) {
@@ -74,16 +83,16 @@ export class PianoKeyboard {
 			c2d.strokeStyle = '#ffffff';
 
 			c2d.beginPath();
-			c2d.moveTo( xMin, 0 );
-			c2d.lineTo( xMin, h );
-			c2d.lineTo( xMax, h );
-			c2d.lineTo( xMax, 0 );
+			c2d.moveTo( xMin, yMin );
+			c2d.lineTo( xMin, yMaxW );
+			c2d.lineTo( xMax, yMaxW );
+			c2d.lineTo( xMax, yMin );
 			c2d.closePath();
 
 			c2d.fill();
 			c2d.stroke();
 
-			this.highlighting.paint( c2d, note, xMin, hB, xMax, h );
+			this.highlighting.paint( c2d, note, xMin, yMaxB, xMax, yMaxW );
 
 			if ( i == 0 || i == n - 1 ) {
 
@@ -92,12 +101,13 @@ export class PianoKeyboard {
 
 				c2d.fillStyle = '#ffffff';
 				c2d.fillText( label,
-						( xMin + xMax - wC ) / 2, ( h + hB ) / 2 );
+						( xMin + xMax - wC ) / 2, ( yMaxB + yMaxW ) / 2 );
 			}
 		}
 
 		iW = 0;
 		const xExtent = ( w * 0.5 / n ) * blackKeyWidthUpscale;
+		const yMinH = yMin + hB / 2;
 
 		for ( let i = -1; i <= n; ++ i ) {
 
@@ -117,17 +127,19 @@ export class PianoKeyboard {
 			c2d.strokeStyle = '#000000';
 
 			c2d.beginPath();
-			c2d.moveTo( xMin, 0 );
-			c2d.lineTo( xMin, hB );
-			c2d.lineTo( xMax, hB );
-			c2d.lineTo( xMax, 0 );
+			c2d.moveTo( xMin, yMin );
+			c2d.lineTo( xMin, yMaxB );
+			c2d.lineTo( xMax, yMaxB );
+			c2d.lineTo( xMax, yMin );
 			c2d.closePath();
 
 			c2d.fill();
 			c2d.stroke();
 
-			this.highlighting.paint( c2d, note, xMin, hB / 2, xMax, hB );
+			this.highlighting.paint( c2d, note, xMin, yMinH, xMax, yMaxB );
 		}
+
+		c2d.restore();
 	}
 
 	noteAtCoordinates( x, y ) {
@@ -137,6 +149,9 @@ export class PianoKeyboard {
 		const n = this.#numberOfKeys();
 		const nW = this.numberOfWhiteKeys;
 		const hB = h * blackKeyFractionalHeight;
+
+		const yMin = this.yTop;
+		const yMaxB = yMin + hB;
 
 		const xExtent = ( w * 0.5 / n ) * blackKeyWidthUpscale;
 
@@ -150,10 +165,12 @@ export class PianoKeyboard {
 			const xMin = xCenter - xExtent;
 			const xMax = xCenter + xExtent;
 
-			if ( x < xMin || x >= xMax || y < 0 || y >= hB ) continue;
+			if ( x < xMin || x >= xMax || y < yMin || y >= yMaxB ) continue;
 
 			return note;
 		}
+
+		const yMaxW = yMin + h;
 
 		iW = 0;
 		for ( let i = 0; i < n; ++ i ) {
@@ -165,7 +182,7 @@ export class PianoKeyboard {
 			const xMax = w * ( iW + 1 ) / nW;
 			++ iW;
 
-			if ( x < xMin || x >= xMax || y < 0 || y >= h ) continue;
+			if ( x < xMin || x >= xMax || y < yMin || y >= yMaxW ) continue;
 
 			return note;
 		}

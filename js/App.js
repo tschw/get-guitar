@@ -37,9 +37,9 @@ class App {
 				width, height * 0.7, this.tuning, numberOfFrets, highlighting );
 
 		this.piano = new PianoKeyboard(
+				height * 0.7 + pianoUpperSpace,
 				width, height * 0.3 - pianoUpperSpace,
 				lowestPianoKey, numberOfPianoWhiteKeys, highlighting );
-		this.pianoTransform = null;
 
 		this.animationFrame = null;
 
@@ -93,17 +93,13 @@ class App {
 		this.animationFrame = null;
 
 		const c2d = this.c2d;
+
 		this.fretboard.paint( c2d );
+		this.piano.paint( c2d );
 
 		this.buttonUp.paint( c2d );
 		this.buttonDown.paint( c2d );
 		this.buttonConf.paint( c2d );
-
-		c2d.save();
-		c2d.translate( 0, this.element.height * 0.7 + pianoUpperSpace );
-		this.pianoTransform = c2d.getTransform().invertSelf();
-		this.piano.paint( c2d );
-		c2d.restore();
 
 		this.buttonKeysLeft.paint( c2d );
 		this.buttonKeysRight.paint( c2d );
@@ -128,11 +124,8 @@ class App {
 	#findNote( x, y ) {
 
 		let note = this.fretboard.noteAtCoordinates( x, y );
-		if ( note == null && this.pianoTransform != null ) {
-
-			const p = transformedPoint( this.pianoTransform, x, y );
-			note = this.piano.noteAtCoordinates( p.x, p.y );
-		}
+		if ( note != null ) return note;
+		note = this.piano.noteAtCoordinates( x, y );
 		return note;
 	}
 
@@ -208,10 +201,6 @@ class App {
 		this.buttonKeysLeft.enabled = this.piano.canScrollViewport( -1 );
 		this.buttonKeysRight.enabled = this.piano.canScrollViewport( 1 );
 	}
-}
-
-function transformedPoint( t, x, y ) {
-	return t.transformPoint( new DOMPoint( x, y ) );
 }
 
 const app = new App();

@@ -61,15 +61,15 @@ class App {
 
 			}, {
 				widget:
-					new Button( xLastButton - buttonSpacing,
-							yFretsButtons, buttonWidth, buttonHeight, "\u2227" ),
+					new Button( xLastButton - buttonSpacing, yFretsButtons,
+							buttonWidth, buttonHeight, "\ud834\udd30" ),
 
 				action: () => this.transpose(1)
 
 			}, {
 				widget:
-					new Button( xLastButton - buttonSpacing * 2,
-							yFretsButtons, buttonWidth, buttonHeight, "\u2228" ),
+					new Button( xLastButton - buttonSpacing * 2, yFretsButtons,
+							buttonWidth, buttonHeight, "\ud834\udd2c" ),
 
 				action: () => this.transpose(-1)
 

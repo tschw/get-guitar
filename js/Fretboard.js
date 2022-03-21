@@ -29,8 +29,9 @@ export class Fretboard {
 
 		const result = [];
 
-		const splitParts = /([^:]*):\s*((?:[A-G]\d\s*)+)/g;
-		const eachString = /(([A-G])\d)\s*/g;
+		const splitParts =
+				/([^:]*):\s*((?:[A-G][#b\u{1d130}\u{1d12c}]?\d\s*)+)/gu;
+		const eachString = /(([A-G][#b\u{1d130}\u{1d12c}]?)\d)\s*/gu;
 
 		const fail = tuning.replaceAll(
 				splitParts, function(_, caption, strings) {

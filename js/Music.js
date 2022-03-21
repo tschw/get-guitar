@@ -1,8 +1,9 @@
 
 const basePitch = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
 
-const noteNameInOctave = [
-		'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B' ];
+const sharp = '\u{1d130}';
+export const noteNameInOctave = [ 'C', 'C' + sharp, 'D', 'D' + sharp,
+		'E', 'F', 'F' + sharp, 'G', 'G' + sharp, 'A', 'A' + sharp, 'B' ];
 
 export function numberToNoteName( i ) {
 
@@ -12,12 +13,20 @@ export function numberToNoteName( i ) {
 export function noteNameToNumber( s ) {
 
 	let note = basePitch[ s[ 0 ].toUpperCase() ];
-	let octave = s[ s.length - 1 ];
+	let octavePos = 1;
 	switch ( s[ 1 ] ) {
-		case '#': note += 1; break;
-		case 'b': note -= 1; break;
+		case '#': ++ note; ++ octavePos; break;
+		case 'b': -- note; ++ octavePos; break;
+
+		case '\ud834':
+			switch ( s[ 2 ] ) {
+				case '\udd30': ++ note; octavePos += 2; break;
+				case '\udd2c': -- note; octavePos += 2; break;
+			}
 	}
-	return note + octave * 12
+	const octave = octavePos < s.length ?
+			Number.parseInt( s.substring( octavePos ) ) : 0;
+	return note + octave * 12;
 }
 
 export const naturalScale = 0b101010110101;

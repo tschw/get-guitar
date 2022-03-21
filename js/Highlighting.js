@@ -13,10 +13,20 @@ export class Highlighting {
 
 		this.selection = 0;
 		this.highlitNote = null;
-
-		this.#colors = new Array( 12 );
-		for ( let i = 0; i != 12; ++ i )
-			this.#colors[ i ] = new VariableColor( 5 + 30 * i, 1, 0.5, { } );
+		this.#colors = [
+			new VariableColor(   0, 0.9, 0.4, {} ), // C
+			new VariableColor(   0, 0.5, 0.8, {} ), // C#
+			new VariableColor(  65, 0.9, 0.4, {} ), // D
+			new VariableColor(  65, 0.5, 0.8, {} ), // D#
+			new VariableColor(  30, 0.9, 0.4, {} ), // E
+			new VariableColor( 180, 0.9, 0.4, {} ), // F
+			new VariableColor( 180, 0.5, 0.8, {} ), // F#
+			new VariableColor( 110, 0.9, 0.4, {} ), // G
+			new VariableColor( 110, 0.5, 0.8, {} ), // G#
+			new VariableColor( 240, 0.9, 0.4, {} ), // A
+			new VariableColor( 240, 0.5, 0.8, {} ), // A#
+			new VariableColor( 270, 0.9, 0.4, {} )  // B
+		];
 
 		this.#animationState = new Array( 12 );
 		for ( let i = 0; i < 12; ++ i )

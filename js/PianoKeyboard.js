@@ -61,7 +61,6 @@ export class PianoKeyboard {
 		const yMaxW = yMin + h;
 		const yMaxB = yMin + hB;
 
-		c2d.clearRect( 0, yMin, w, h );
 		c2d.lineWidth = 1;
 		c2d.font = '10px arial';
 		c2d.textBaseline = 'middle';

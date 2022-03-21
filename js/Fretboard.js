@@ -53,7 +53,6 @@ export class Fretboard {
 
 	paint( c2d ) {
 
-		c2d.clearRect( 0, 0, this.width, this.height );
 		c2d.setLineDash( [] );
 
 		// Paint frets:

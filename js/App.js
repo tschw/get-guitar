@@ -102,8 +102,9 @@ class App {
 
 	paint() {
 
-		const c2d = this.c2d;
+		const c2d = this.c2d, element = this.element;
 
+		c2d.clearRect( 0, 0, element.width, element.height );
 		this.frets.paint( c2d );
 		this.keys.paint( c2d );
 

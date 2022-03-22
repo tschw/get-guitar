@@ -1,9 +1,10 @@
 import { VariableColor } from './VariableColor.js'
 import { animation } from './Animation.js'
 
-const opacity = { a: 0.2, b: 1.0 };
+const opacity = { a: 0.2, b: 0.9 };
 const fillColor = new VariableColor( 120, 0.5, { a: 0.15, b: 0.38 }, opacity );
 const strokeColor = new VariableColor( 0, 0, 0.7, opacity );
+const textColor = new VariableColor( 0, 0, 0.7, opacity );
 
 const smoothing = 0.75;
 
@@ -44,7 +45,7 @@ export class Button {
 		c2d.fill();
 		c2d.stroke();
 
-		c2d.fillStyle = '#cccccc';
+		c2d.fillStyle = textColor.toString( state.opacity );
 		c2d.font = '18px arial';
 		c2d.textBaseline = 'middle';
 

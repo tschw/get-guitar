@@ -12,7 +12,7 @@ export class Button {
 
 	#animationState;
 
-	constructor( xLeft, yTop, width, height, label, enabled, highlit ) {
+	constructor( xLeft, yTop, width, height, label ) {
 
 		this.xLeft = xLeft;
 		this.yTop = yTop;
@@ -20,8 +20,8 @@ export class Button {
 		this.height = height;
 		this.label = label;
 
-		this.enabled = enabled != null ? enabled : true;
-		this.highlit = highlit != null ? highlit : false;
+		this.enabled = true;
+		this.highlit = false;
 
 		this.#animationState = {
 

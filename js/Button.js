@@ -2,9 +2,11 @@ import { VariableColor } from './VariableColor.js'
 import { animation } from './Animation.js'
 
 const opacity = { a: 0.2, b: 0.9 };
-const fillColor = new VariableColor( 120, 0.5, { a: 0.15, b: 0.38 }, opacity );
-const strokeColor = new VariableColor( 0, 0, 0.7, opacity );
-const textColor = new VariableColor( 0, 0, 0.7, opacity );
+
+const defaultFillColor = new VariableColor(
+		120, 0.5, { a: 0.15, b: 0.38 }, opacity );
+
+const defaultStrokeColor = new VariableColor( 0, 0, 0.7, opacity );
 
 const smoothing = 0.75;
 
@@ -28,6 +30,10 @@ export class Button {
 			opacity: this.enabled ? 1 : 0,
 			lightness: this.highlit ? 1 : 0
 		};
+
+		this.fillColor = defaultFillColor;
+		this.textColor = defaultStrokeColor;
+		this.strokeColor = defaultStrokeColor;
 	}
 
 	paint( c2d ) {
@@ -36,8 +42,9 @@ export class Button {
 
 		c2d.lineWidth = 2;
 		c2d.setLineDash( [] );
-		c2d.strokeStyle = strokeColor.toString( state.opacity );
-		c2d.fillStyle = fillColor.toString( state.lightness, state.opacity );
+		c2d.strokeStyle = this.strokeColor.toString( state.opacity );
+		c2d.fillStyle =
+				this.fillColor.toString( state.lightness, state.opacity );
 
 		c2d.beginPath();
 		c2d.rect( this.xLeft, this.yTop, this.width, this.height );
@@ -45,7 +52,7 @@ export class Button {
 		c2d.fill();
 		c2d.stroke();
 
-		c2d.fillStyle = textColor.toString( state.opacity );
+		c2d.fillStyle = this.textColor.toString( state.opacity );
 		c2d.font = '18px arial';
 		c2d.textBaseline = 'middle';
 

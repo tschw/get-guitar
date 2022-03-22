@@ -12,13 +12,13 @@ export class Button {
 
 	#animationState;
 
-	constructor( xLeft, yTop, width, height, caption, enabled, highlit ) {
+	constructor( xLeft, yTop, width, height, label, enabled, highlit ) {
 
 		this.xLeft = xLeft;
 		this.yTop = yTop;
 		this.width = width;
 		this.height = height;
-		this.caption = caption;
+		this.label = label;
 
 		this.enabled = enabled != null ? enabled : true;
 		this.highlit = highlit != null ? highlit : false;
@@ -49,7 +49,7 @@ export class Button {
 		c2d.font = '18px arial';
 		c2d.textBaseline = 'middle';
 
-		const textMeasure = c2d.measureText( this.caption );
+		const textMeasure = c2d.measureText( this.label );
 
 		const textWidth =
 				textMeasure.actualBoundingBoxRight -
@@ -58,7 +58,7 @@ export class Button {
 				textMeasure.actualBoundingBoxAscent +
 				textMeasure.actualBoundingBoxDescent;
 
-		c2d.fillText( this.caption,
+		c2d.fillText( this.label,
 				this.xLeft + ( this.width - textWidth ) / 2,
 				this.yTop + this.height / 2 );
 

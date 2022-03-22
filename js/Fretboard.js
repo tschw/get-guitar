@@ -34,15 +34,15 @@ export class Fretboard {
 		const eachString = /(([A-G][#b\u{1d130}\u{1d12c}]?)\d)\s*/gu;
 
 		const fail = tuning.replaceAll(
-				splitParts, function(_, caption, strings) {
+				splitParts, function(_, label, strings) {
 
-			result.push( { caption, tuning: null } );
+			result.push( { label, tuning: null } );
 
 			const parsed = [];
 			strings.replaceAll(eachString,
 					function(_, noteWithOctave, note) {
 
-				parsed.push( { caption: note, tuning:
+				parsed.push( { label: note, tuning:
 					noteNameToNumber( noteWithOctave ) } );
 			});
 			Array.prototype.push.apply( result, parsed.reverse() );
@@ -143,7 +143,7 @@ export class Fretboard {
 			c2d.lineWidth = 1;
 			c2d.setLineDash( [] );
 
-			// Paint caption:
+			// Paint caption or label:
 
 			c2d.fillStyle = '#cccccc';
 
@@ -152,7 +152,7 @@ export class Fretboard {
 				c2d.font = '24px arial';
 				c2d.textBaseline = 'alphabetic';
 
-				const textMeasure = c2d.measureText( stringSlot.caption );
+				const textMeasure = c2d.measureText( stringSlot.label );
 
 				c2d.clearRect(
 						textMeasure.actualBoundingBoxLeft,
@@ -162,12 +162,12 @@ export class Fretboard {
 						textMeasure.actualBoundingBoxDescent +
 							textMeasure.actualBoundingBoxAscent );
 
-				c2d.fillText( stringSlot.caption, 0, yMax );
+				c2d.fillText( stringSlot.label, 0, yMax );
 			} else {
 
 				c2d.font = '12px arial';
 				c2d.textBaseline = 'middle';
-				c2d.fillText( stringSlot.caption, 0, y );
+				c2d.fillText( stringSlot.label, 0, y );
 			}
 
 			// Paint string and slot separator:
@@ -175,7 +175,7 @@ export class Fretboard {
 			if ( ! haveString ) continue;
 
 			const xAfterText = c2d.measureText(
-					stringSlot.caption + ' ' ).width;
+					stringSlot.label + ' ' ).width;
 			c2d.beginPath();
 			c2d.moveTo( xAfterText, y );
 			c2d.lineTo( this.width, y );

@@ -89,4 +89,9 @@ export class Button {
 			this.highlit = animation.ifStateChange( this.highlit, contained );
 		return contained;
 	}
+
+	unhighlight() {
+
+		this.highlit = animation.ifStateChange( this.highlit, false );
+	}
 }

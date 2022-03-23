@@ -169,11 +169,8 @@ class App {
 
 	unhighlight() {
 
-		for ( let button of this.buttons ) {
+		for ( let button of this.buttons ) button.widget.unhighlight();
 
-			const widget = button.widget;
-			widget.highlit = animation.ifStateChange( widget.highlit, false );
-		}
 
 		this.highlighting.highlitNote =
 				animation.ifStateChange( this.highlighting.highlitNote, null );

@@ -13,6 +13,8 @@ export class Highlighting {
 
 		this.selection = 0;
 		this.highlitNote = null;
+		this.highlitTonality = 0;
+
 		this.#colors = [
 			new VariableColor(   0, 0.9, 0.4, {} ), // C
 			new VariableColor(   0, 0.5, 0.8, {} ), // C#
@@ -42,8 +44,11 @@ export class Highlighting {
 
 			const s = this.#animationState[ i ];
 
-			const isSelected = ( this.selection & (1 << i) ) != 0;
-			const isHighlit = i == highlightInOctave;
+			const noteBit = 1 << i;
+			const isHighlit =
+					i == highlightInOctave ||
+					( this.highlitTonality & noteBit ) != 0;
+			const isSelected = ( this.selection & noteBit ) != 0;
 
 			const targetOpacity = isSelected ? 0.7 : 0.0;
 			const targetHighlight = isHighlit ? 1.0 : 0.0;
@@ -70,7 +75,8 @@ export class Highlighting {
 
 		c2d.beginPath();
 
-		if ( this.highlitNote == null ||
+		if ( this.highlitTonality != 0 ||
+				this.highlitNote == null ||
 				this.highlitNote == note ||
 				this.highlitNote % 12 != noteInOctave ) {
 

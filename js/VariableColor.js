@@ -67,7 +67,7 @@ export class VariableColor {
 					: i == 2 ? valueVar2
 					: valueVar3;
 
-			return x.a + v * ( x.b - x.a );
+			return v == null ? x.b : x.a + v * ( x.b - x.a );
 		}
 
 		if ( _.cachedString != null ) {

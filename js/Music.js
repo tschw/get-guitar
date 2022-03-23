@@ -30,6 +30,9 @@ export function noteNameToNumber( s ) {
 }
 
 export const naturalScale = 0b101010110101;
+export const harmonicScale = 0b101100110101;
+export const melodicScale = 0b101101010101;
+export const bluesScale = 0b001010011101;
 
 export function transpose( tonality, semitones ) {
 

@@ -1,4 +1,6 @@
 Get Guitar!
 ===========
 
-"Music calculator" written on a Sunday. Just [try it](http://tschw.github.io/get-guitar)!
+The calculator for guitar and music in general I always wanted to have.
+
+Just [try it](http://tschw.github.io/get-guitar)!

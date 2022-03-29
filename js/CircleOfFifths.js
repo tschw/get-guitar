@@ -1,20 +1,20 @@
-import { noteNameInOctave, transpose, naturalScale, harmonicScale, melodicScale, bluesScale } from './Music.js'
+import { transpose, NoteNameInOctave, NaturalScale, HarmonicScale, MelodicScale, BluesScale } from './Music.js'
 import { VariableColor } from './VariableColor.js'
 import { animation } from './Animation.js'
 
 const Deg2Rad = Math.PI / 180;
 const TwoPi = Math.PI * 2;
 
-const bullsEyeFraction = 0.25;
+const FractionalBullsEyeRadius = 0.25;
 
-const strokeColor = new VariableColor( 0, 0, 1, {} );
-const fillSmoothing = 0.9;
-const strokeSmoothing = 0.85;
-const motionSmoothing = 0.75;
+const StrokeColor = new VariableColor( 0, 0, 1, {} );
+const FillSmoothing = 0.9;
+const StrokeSmoothing = 0.85;
+const MotionSmoothing = 0.75;
 
 
-const scaleColor = ( hue ) =>
-		new VariableColor( hue, { i: 0, a: 0.6, b: 0.8 }, { i: 0, a: 0.05, b: 0.35 }, { i: 1 } );
+const scaleColor = ( hue ) => new VariableColor( hue,
+			{ i: 0, a: 0.6, b: 0.8 }, { i: 0, a: 0.05, b: 0.35 }, { i: 1 } );
 
 export class CircleOfFifths {
 
@@ -29,10 +29,10 @@ export class CircleOfFifths {
 
 		this.scales = [
 
-			{ color: scaleColor( 80 ), label: "Natural major/minor", tonality: naturalScale },
-			{ color: scaleColor( 50 ), label: "Harmonic minor", tonality: harmonicScale },
-			{ color: scaleColor( 30 ), label: "Melodic minor", tonality: melodicScale },
-			{ color: scaleColor( 210 ), label: "Pentatonic + blue note", tonality: bluesScale }
+			{ color: scaleColor( 80 ), label: "Natural major/minor", tonality: NaturalScale },
+			{ color: scaleColor( 50 ), label: "Harmonic minor", tonality: HarmonicScale },
+			{ color: scaleColor( 30 ), label: "Melodic minor", tonality: MelodicScale },
+			{ color: scaleColor( 210 ), label: "Pentatonic + blue note", tonality: BluesScale }
 		];
 
 		this.matchTonality = 0;
@@ -74,7 +74,7 @@ export class CircleOfFifths {
 		c2d.textBaseline = 'middle';
 
 		const rMax = this.size / 2;
-		const rMin = rMax * bullsEyeFraction;
+		const rMin = rMax * FractionalBullsEyeRadius;
 		const rSeg = ( rMax - rMin ) / nScales;
 		const rText = rMax * 0.83;
 
@@ -108,7 +108,7 @@ export class CircleOfFifths {
 		const selectedness = (
 				animationState.selectedness += animation.delta( 
 					animationState.selectedness,
-					targetSelectedness, motionSmoothing ) );
+					targetSelectedness, MotionSmoothing ) );
 
 		const rSelectedInner = ! flipMode ? lerp(
 				rMin + rSeg * jSelectedScale, rMin, selectedness ) : rMin;
@@ -182,12 +182,12 @@ export class CircleOfFifths {
 
 				state.fill += animation.delta( state.fill,
 						Math.pow( match, 4.0 ) * 0.6 +
-							( isSelected ? 0.4 : 0 ), fillSmoothing );
+							( isSelected ? 0.4 : 0 ), FillSmoothing );
 
 				state.stroke += animation.delta( state.stroke,
-						isHighlit || isSelected ? 1 : 0, strokeSmoothing );
+						isHighlit || isSelected ? 1 : 0, StrokeSmoothing );
 
-				c2d.strokeStyle = strokeColor.toString( state.stroke );
+				c2d.strokeStyle = StrokeColor.toString( state.stroke );
 				c2d.fillStyle = scale.color.toString( state.fill );
 
 				c2d.beginPath();
@@ -200,8 +200,8 @@ export class CircleOfFifths {
 				c2d.stroke();
 			}
 
-			const name = noteNameInOctave[ key ] +
-					" " + noteNameInOctave[ ( key + 9 ) % 12 ].toLowerCase();
+			const name = NoteNameInOctave[ key ] +
+					" " + NoteNameInOctave[ ( key + 9 ) % 12 ].toLowerCase();
 			c2d.fillStyle = '#fff';
 			c2d.fillText( name, xCenter + x1 * rText - 
 					c2d.measureText( name ).width / 2, yCenter - y1 * rText );
@@ -241,7 +241,7 @@ export class CircleOfFifths {
 		const x0 = Math.cos( a0 ), y0 = Math.sin( a0 );
 		const x2 = Math.cos( a2 ), y2 = Math.sin( a2 );
 
-		const rMin = rMax * bullsEyeFraction;
+		const rMin = rMax * FractionalBullsEyeRadius;
 
 		if ( clockwise( rx, ry,
 				rMin * x0, rMin * y0,  rMin * x2, rMin * y2 ) )

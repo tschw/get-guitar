@@ -1,6 +1,11 @@
 import { Highlighting } from './Highlighting.js'
 import { noteNameToNumber } from './Music.js'
 
+const FractionalMarkerRadius = 0.125;
+const FractionalMarkerElevation = 0.125;
+const FractionalMarkerLeftDisplace = 0.245;
+const FractionalMarkerRightDisplace = 0.24;
+
 // The frequency is inverse proportional to the length of that
 // part of the string that can oscillate. Semitones affect the
 // frequency exponentially, that is there is a constant factor
@@ -10,7 +15,8 @@ import { noteNameToNumber } from './Music.js'
 // octave (that is, shortening the string to its half, thus
 // doubling the frequency) we can calculate the position of
 // each fret in respect to the length of the entire string.
-const fretStringPosition = (i) => 1 - 2**(-i/12);
+const fretStringPosition = (i) => 1 - 2 ** ( -i / 12 );
+
 
 export class Fretboard {
 
@@ -60,8 +66,8 @@ export class Fretboard {
 
 		const nSlots = this.stringSlots.length;
 		const stringSlotHeight = this.height / nSlots;
-		const markerRadius = stringSlotHeight * 0.125;
-		const markerElevation = stringSlotHeight * 0.125;
+		const markerRadius = stringSlotHeight * FractionalMarkerRadius;
+		const markerElevation = stringSlotHeight * FractionalMarkerElevation;
 
 		for ( let i = 0; i < this.numberOfFrets; ++ i ) {
 
@@ -103,8 +109,8 @@ export class Fretboard {
 			const xPrev = this.#fretPosition( i - 1 ) * this.width;
 			const xMiddle = ( x + xPrev ) / 2;
 			const fretWidth = x - xPrev;
-			const xLeft = xMiddle - fretWidth * 0.245;
-			const xRight = xMiddle + fretWidth * 0.24;
+			const xLeft = xMiddle - fretWidth * FractionalMarkerLeftDisplace;
+			const xRight = xMiddle + fretWidth * FractionalMarkerRightDisplace;
 
 			c2d.fillStyle = '#dddddd';
 

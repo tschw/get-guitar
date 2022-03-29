@@ -1,6 +1,18 @@
 import { Button } from './Button.js'
 import { animation } from './Animation.js'
 
+const ButtonsLeft = 4;
+const ButtonsTop = 4;
+const ButtonsWidth = 24;
+const ButtonsHeight = 24;
+const ButtonsSpacing = 14;
+const ButtonsTextSpacing = 6;
+
+const ButtonsDistance = ButtonsHeight + ButtonsSpacing;
+
+const FractionalTextMiddle = 0.58;
+
+
 export class ScaleLegend {
 
 	#buttons;
@@ -11,21 +23,19 @@ export class ScaleLegend {
 		this.selectedScaleIndex = -1;
 		this.toggleMode = true;
 
-		const buttonsTop = 4;
-		const buttonWidth = 24;
-		const buttonHeight = 24;
-		const buttonSpacing = 38;
-
 		const nScales = scales.length;
 		const buttons = new Array( nScales );
 		const labels = new Array( nScales );
 
+		const buttonsLeft = xLeft + ButtonsLeft;
+		const buttonsTop = yTop + ButtonsTop;
+
 		for ( let i = 0; i != nScales; ++ i ) {
 
 			const scale = scales[ i ];
-			const button = new Button(
-					xLeft + 4, yTop + buttonsTop + buttonSpacing * i,
-					buttonWidth, buttonHeight, '' );
+			const button = new Button( buttonsLeft,
+					buttonsTop + ButtonsDistance * i,
+					ButtonsWidth, ButtonsHeight, '' );
 
 			button.strokeColor = button.fillColor = scale.color;
 
@@ -39,20 +49,19 @@ export class ScaleLegend {
 
 	paint( c2d ) {
 
-		const buttonTextDistance = 6;
 
 		const buttons = this.#buttons;
 		const nButtons = buttons.length;
 
 		const aButton = buttons[ 0 ];
-		const x = aButton.xLeft + aButton.width + buttonTextDistance;
+		const x = aButton.xLeft + aButton.width + ButtonsTextSpacing;
 
 		for ( let i = 0; i != nButtons; ++ i ) {
 
 			const button = buttons[ i ];
 			button.paint( c2d );
 
-			const y = button.yTop + button.height * 0.58;
+			const y = button.yTop + button.height * FractionalTextMiddle;
 			c2d.fillText( this.#labels[ i ], x, y );
 		}
 	}

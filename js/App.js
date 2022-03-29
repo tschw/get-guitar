@@ -7,19 +7,28 @@ import { Button } from './Button.js'
 import { transpose, noteNameToNumber } from './Music.js'
 import { animation } from './Animation.js'
 
-const defaultTuning = 'Guitar - standard tuning: E2 A2 D3 G3 B3 E4';
+const DefaultTuning = 'Guitar - standard tuning: E2 A2 D3 G3 B3 E4';
 
-const numberOfFrets = 16;
-const numberOfPianoWhiteKeys = 9;
-const lowestPianoKey = noteNameToNumber( 'C2' );
+const NumberOfFrets = 16;
+const NumberOfPianoWhiteKeys = 9;
+const LowestPianoKey = noteNameToNumber( 'C2' );
 
-const pianoUpperSpace = 8;
+const FretsFractionalHeight = 0.62;
+const FretsKeysSpacing = 8;
+const FretsCoFSpacing = 4;
+const KeysScalesSpacing = 10;
 
-const buttonWidth = 38;
-const buttonHeight = 32;
-const buttonSpacing = buttonWidth + 12;
-const buttonsHorizontalSpace = 10;
-const buttonsUpperSpace = 21;
+const HorizEdgeButtonsSpacing = 10;
+const UpperEdgeButtonsSpacing = 21;
+const LowerEdgeButtonsSpacing = 7;
+
+const UpperEdgeOfKeysButtonsSpacing = 6;
+
+const ButtonsWidth = 38;
+const ButtonsHeight = 32;
+const ButtonsRowSpacing = 12;
+
+const ButtonsRowDistance = ButtonsWidth + ButtonsRowSpacing;
 
 class App {
 
@@ -28,102 +37,108 @@ class App {
 		this.element = document.getElementById( 'canvas' );
 		this.c2d = this.element.getContext( '2d' );
 		this.pointerPosition = { x: 0, y: 0 };
-
-		const width = this.element.width;
-		const height = this.element.height;
+		this.tuning = DefaultTuning
+		this.selectedKey = -1;
 
 		const highlighting = new Highlighting();
 		this.highlighting = highlighting;
 
-		this.tuning = defaultTuning
+		const width = this.element.width;
+		const height = this.element.height;
+
+		const fretsHeight = height * FretsFractionalHeight;
 		this.frets = new Fretboard(
-				width, height * 0.62, this.tuning, numberOfFrets, highlighting );
+				width, fretsHeight, this.tuning, NumberOfFrets, highlighting );
 
+		const keysTop = fretsHeight + FretsKeysSpacing;
+		const halfWidth = width / 2;
 		this.keys = new PianoKeyboard(
-				height * 0.62 + pianoUpperSpace,
-				width / 2, height * 0.38 - pianoUpperSpace,
-				lowestPianoKey, numberOfPianoWhiteKeys, highlighting );
+				keysTop, halfWidth, height - keysTop,
+				LowestPianoKey, NumberOfPianoWhiteKeys, highlighting );
 
-		const cofSize = height * 0.38 - pianoUpperSpace + 4;
-		this.cof = new CircleOfFifths( width - cofSize - buttonWidth, height * 0.62 + pianoUpperSpace - 4, cofSize );
+		const cofTop = fretsHeight + FretsCoFSpacing;
+		const cofSize = height - cofTop;
+		const cofLeft = width - cofSize - ButtonsWidth;
+		this.cof = new CircleOfFifths( cofLeft, cofTop, cofSize );
 
-		this.selectedKey = -1;
-
-		const yFretsButtons = buttonsUpperSpace;
-		const yKeysButtons = this.keys.yTop + 6;
-		const yButtonsBottom = height - buttonHeight - 7;
+		const yFretsButtons = UpperEdgeButtonsSpacing;
+		const yKeysButtons = keysTop + UpperEdgeOfKeysButtonsSpacing;
+		const yButtonsBottom = height - ButtonsHeight - LowerEdgeButtonsSpacing;
 
 		this.legend = new ScaleLegend(
-				width / 2 + 10, yKeysButtons,
+				halfWidth + KeysScalesSpacing, yKeysButtons,
 				width * 0.25 - 20, cofSize, this.cof.scales );
 
-		const xFirstButton = buttonsHorizontalSpace;
-		const xLastButton = width - buttonsHorizontalSpace - buttonWidth;
+		const xFirstButton = HorizEdgeButtonsSpacing;
+		const xLastButton = width - ButtonsWidth - HorizEdgeButtonsSpacing;
+		const xCoFButtonsLeft =
+				cofLeft - ButtonsWidth + HorizEdgeButtonsSpacing;
+		const xKeysButtonsRight =
+				halfWidth - ButtonsWidth - HorizEdgeButtonsSpacing;
 
 		this.buttons = [
 
 			{
 				widget:
-					new Button( xLastButton,
-							yFretsButtons, buttonWidth, buttonHeight, "\u2261" ),
+					new Button( xLastButton, yFretsButtons,
+							ButtonsWidth, ButtonsHeight, "\u2261" ),
 
 				action: () => this.configure()
 
 			}, {
 				widget:
-					new Button( xLastButton - buttonSpacing, yFretsButtons,
-							buttonWidth, buttonHeight, "\ud834\udd30" ),
+					new Button( xLastButton - ButtonsRowDistance, yFretsButtons,
+							ButtonsWidth, ButtonsHeight, "\ud834\udd30" ),
 
 				action: () => this.transpose(1)
 
 			}, {
 				widget:
-					new Button( xLastButton - buttonSpacing * 2, yFretsButtons,
-							buttonWidth, buttonHeight, "\ud834\udd2c" ),
+					new Button(
+							xLastButton - ButtonsRowDistance * 2, yFretsButtons,
+							ButtonsWidth, ButtonsHeight, "\ud834\udd2c" ),
 
 				action: () => this.transpose(-1)
 
 			}, {
 				widget:
-					this.buttonKeysLeft = new Button( xFirstButton,
-							yKeysButtons, buttonWidth, buttonHeight, "\u25c5" ),
+					this.buttonKeysLeft = new Button(
+							xFirstButton, yKeysButtons,
+							ButtonsWidth, ButtonsHeight, "\u25c5" ),
 
 				action: () => this.scrollKeysViewport(-1)
 
 			}, {
 				widget:
 					this.buttonKeysRight = new Button(
-							width / 2 - buttonWidth - buttonsHorizontalSpace,
-							yKeysButtons, buttonWidth, buttonHeight, "\u25bb" ),
+							xKeysButtonsRight, yKeysButtons,
+							ButtonsWidth, ButtonsHeight, "\u25bb" ),
 
 				action: () => this.scrollKeysViewport(1)
 			}, {
 				widget:
 					new Button( xLastButton, yKeysButtons,
-							buttonWidth, buttonHeight, '\u21bb' ),
+							ButtonsWidth, ButtonsHeight, '\u21bb' ),
 
 				action: () => this.transpose( 7 )
 			}, {
 				widget:
-					new Button(
-							this.cof.xLeft - buttonWidth +
-								buttonsHorizontalSpace, yKeysButtons,
-							buttonWidth, buttonHeight, '\u21ba' ),
+					new Button( xCoFButtonsLeft, yKeysButtons,
+							ButtonsWidth, ButtonsHeight, '\u21ba' ),
 
 				action: () => this.transpose( -7 )
 			}, {
 				widget:
 					this.buttonApplyCoF = new Button(
 							xLastButton, yButtonsBottom,
-							buttonWidth, buttonHeight, '\u2713' ),
+							ButtonsWidth, ButtonsHeight, '\u2713' ),
 
 				action: () => this.applyOrCancelCoF( true )
 			}, {
 				widget:
 					this.buttonCancelCoF = new Button(
-							this.cof.xLeft - buttonWidth +
-								buttonsHorizontalSpace, yButtonsBottom,
-							buttonWidth, buttonHeight, '\u2717' ),
+							xCoFButtonsLeft, yButtonsBottom,
+							ButtonsWidth, ButtonsHeight, '\u2717' ),
 
 				action: () => this.applyOrCancelCoF( false )
 			}
@@ -181,7 +196,6 @@ class App {
 							highlighting.highlitNote, null );
 				return;
 			}
-
 
 		const note = this.#findNote( p.x, p.y );
 
@@ -360,7 +374,7 @@ class App {
 
 		let tuning = prompt("Edit tuning:", this.tuning);
 		if ( tuning == null ) return; // cancel
-		if ( tuning == "" ) tuning = defaultTuning;
+		if ( tuning == "" ) tuning = DefaultTuning;
 
 		const stringSlots = Fretboard.parseStringSlots( tuning );
 		if ( ! stringSlots ) {

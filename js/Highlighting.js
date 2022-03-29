@@ -1,8 +1,8 @@
 import { VariableColor } from './VariableColor.js'
 import { animation } from './Animation.js'
 
-const fillSmoothing = 0.9;
-const strokeSmoothing = 0.85;
+const FillSmoothing = 0.9;
+const StrokeSmoothing = 0.85;
 
 export class Highlighting {
 
@@ -53,9 +53,9 @@ export class Highlighting {
 			const targetOpacity = isSelected ? 0.7 : 0.0;
 			const targetHighlight = isHighlit ? 1.0 : 0.0;
 
-			s.fill += animation.delta( s.fill, targetOpacity, fillSmoothing);
+			s.fill += animation.delta( s.fill, targetOpacity, FillSmoothing);
 			s.stroke += animation.delta(
-					s.stroke, targetHighlight, strokeSmoothing );
+					s.stroke, targetHighlight, StrokeSmoothing );
 		}
 	}
 

@@ -1,16 +1,17 @@
-import { naturalScale, numberToNoteName } from './Music.js'
+import { numberToNoteName, NaturalScale } from './Music.js'
 
-const isBlackKey = (index) => ( naturalScale & ( 1 << ( index % 12 ) ) ) == 0;
+const isBlackKey = (index) => ( NaturalScale & ( 1 << ( index % 12 ) ) ) == 0;
 
-const blackKeyFractionalHeight = 0.65;
-const blackKeyWidthUpscale = 1.1;
+const BlackKeyFractionalHeight = 0.65;
+const BlackKeyWidthUpscale = 1.1;
 
-const highestNote = 9 * 12 - 1;
+const HighestNoteLimit = 9 * 12 - 1;
 
 
 export class PianoKeyboard {
 
-	constructor( yTop, width, height, lowestNote, numberOfWhiteKeys, highlighting ) {
+	constructor( yTop, width, height,
+			lowestNote, numberOfWhiteKeys, highlighting ) {
 
 		this.yTop = yTop;
 		this.width = width;
@@ -26,7 +27,7 @@ export class PianoKeyboard {
 
 		const lowest = this.lowestNote + direction;
 		const highest = lowest + this.#numberOfKeys();
-		return lowest >= 0 && highest <= highestNote;
+		return lowest >= 0 && highest <= HighestNoteLimit;
 	}
 
 	scrollViewport( direction ) {
@@ -55,7 +56,7 @@ export class PianoKeyboard {
 		const h = this.height;
 		const n = this.#numberOfKeys();
 		const nW = this.numberOfWhiteKeys;
-		const hB = h * blackKeyFractionalHeight;
+		const hB = h * BlackKeyFractionalHeight;
 
 		const yMin = this.yTop;
 		const yMaxW = yMin + h;
@@ -100,7 +101,7 @@ export class PianoKeyboard {
 		}
 
 		iW = 0;
-		const xExtent = ( w * 0.5 / n ) * blackKeyWidthUpscale;
+		const xExtent = ( w * 0.5 / n ) * BlackKeyWidthUpscale;
 		const yMinH = yMin + hB / 2;
 
 		for ( let i = -1; i <= n; ++ i ) {
@@ -137,12 +138,12 @@ export class PianoKeyboard {
 		const h = this.height;
 		const n = this.#numberOfKeys();
 		const nW = this.numberOfWhiteKeys;
-		const hB = h * blackKeyFractionalHeight;
+		const hB = h * BlackKeyFractionalHeight;
 
 		const yMin = this.yTop;
 		const yMaxB = yMin + hB;
 
-		const xExtent = ( w * 0.5 / n ) * blackKeyWidthUpscale;
+		const xExtent = ( w * 0.5 / n ) * BlackKeyWidthUpscale;
 
 		let iW = 0;
 		for ( let i = 0; i < n; ++ i ) {

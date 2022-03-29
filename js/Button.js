@@ -1,14 +1,15 @@
 import { VariableColor } from './VariableColor.js'
 import { animation } from './Animation.js'
 
-const opacity = { a: 0.2, b: 0.9 };
+const Opacity = { a: 0.2, b: 0.9 };
 
-const defaultFillColor = new VariableColor(
-		120, 0.5, { a: 0.15, b: 0.38 }, opacity );
+const DefaultFillColor = new VariableColor(
+		120, 0.5, { a: 0.15, b: 0.38 }, Opacity );
 
-const defaultStrokeColor = new VariableColor( 0, 0, 0.7, opacity );
+const DefaultStrokeColor = new VariableColor( 0, 0, 0.7, Opacity );
 
-const smoothing = 0.75;
+const Smoothing = 0.75;
+
 
 export class Button {
 
@@ -31,9 +32,9 @@ export class Button {
 			lightness: this.highlit ? 1 : 0
 		};
 
-		this.fillColor = defaultFillColor;
-		this.textColor = defaultStrokeColor;
-		this.strokeColor = defaultStrokeColor;
+		this.fillColor = DefaultFillColor;
+		this.textColor = DefaultStrokeColor;
+		this.strokeColor = DefaultStrokeColor;
 	}
 
 	paint( c2d ) {
@@ -70,10 +71,10 @@ export class Button {
 				this.yTop + this.height / 2 );
 
 		state.opacity += animation.delta(
-				state.opacity, this.enabled ? 1 : 0, smoothing );
+				state.opacity, this.enabled ? 1 : 0, Smoothing );
 
 		state.lightness += animation.delta(
-				state.lightness, this.highlit ? 1 : 0, smoothing );
+				state.lightness, this.highlit ? 1 : 0, Smoothing );
 	}
 
 	isContained( x, y ) {

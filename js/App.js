@@ -264,6 +264,8 @@ class App {
 			return;
 		}
 
+		if ( cof.isAnimating() ) return;
+
 		const legend = this.legend;
 
 		let zoomedIn = cof.selectedScale != null;

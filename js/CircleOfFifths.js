@@ -215,7 +215,7 @@ export class CircleOfFifths {
 		const nScales = scales.length;
 
 		const prevSelectedScale = scales[
-				nScales - 1 - this.animationState.jPrevSelectedScale ];
+				nScales - 1 - this.#animationState.jLastSelectedScale ];
 
 		return this.selectedScale != prevSelectedScale;
 	}

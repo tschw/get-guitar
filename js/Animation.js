@@ -27,7 +27,7 @@ class Animation {
 		return target;
 	}
 
-	static #EPSILON = 1 / 1024;
+	static #EPSILON = 1 / 256;
 
 	delta( now, target, smoothing ) {
 

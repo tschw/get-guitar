@@ -20,38 +20,41 @@ const fretStringPosition = (i) => 1 - 2 ** ( -i / 12 );
 
 export class Fretboard {
 
-	constructor( width, height, tuning, numberOfFrets, highlighting ) {
+	constructor( width, height, tunings, numberOfFrets, highlighting ) {
 
 		this.width = width;
 		this.height = height;
 
 		this.highlighting = highlighting;
 
-		this.stringSlots = Fretboard.parseStringSlots( tuning );
 		this.numberOfFrets = numberOfFrets;
+
+		this.tuningIndex = 0;
+		this.tunings = Fretboard.parseTunings( tunings );
 	}
 
-	static parseStringSlots( tuning ) {
+	static parseTunings( tuning ) {
 
 		const result = [];
 
 		const splitParts =
-				/([^:]*):\s*((?:[A-G][#b\u{1d130}\u{1d12c}]?\d\s*)+)/gu;
+				/\s*([^:]*):\s*((?:[A-G][#b\u{1d130}\u{1d12c}]?\d\s*)+)/gu;
 		const eachString = /(([A-G][#b\u{1d130}\u{1d12c}]?)\d)\s*/gu;
 
 		const fail = tuning.replaceAll(
-				splitParts, function(_, label, strings) {
-
-			result.push( { label, tuning: null } );
+				splitParts, function( _, label, strings ) {
 
 			const parsed = [];
 			strings.replaceAll(eachString,
-					function(_, noteWithOctave, note) {
+					function( _, noteWithOctave, note ) {
 
 				parsed.push( { label: note, tuning:
 					noteNameToNumber( noteWithOctave ) } );
 			});
-			Array.prototype.push.apply( result, parsed.reverse() );
+
+			parsed.push( { label, tuning: null } );
+
+			result.push( parsed.reverse() );
 
 			return "";
 		});
@@ -64,7 +67,8 @@ export class Fretboard {
 
 		// Paint frets:
 
-		const nSlots = this.stringSlots.length;
+		const tuning = this.tunings[ this.tuningIndex ];
+		const nSlots = tuning.length;
 		const stringSlotHeight = this.height / nSlots;
 		const markerRadius = stringSlotHeight * FractionalMarkerRadius;
 		const markerElevation = stringSlotHeight * FractionalMarkerElevation;
@@ -116,7 +120,7 @@ export class Fretboard {
 
 			for ( let j = 0; j < nSlots; ++ j ) {
 
-				const stringSlot = this.stringSlots[ j ];
+				const stringSlot = tuning[ j ];
 				if ( stringSlot.tuning != null ) continue;
 
 				const y = this.height * ( j + 1 ) / nSlots - markerElevation;
@@ -138,7 +142,7 @@ export class Fretboard {
 		let yMin = 0, yMax = 0;
 		for ( let i = 0; i < nSlots; ++ i ) {
 
-			const stringSlot = this.stringSlots[ i ];
+			const stringSlot = tuning[ i ];
 			const haveString = stringSlot.tuning != null;
 
 			yMin = yMax;
@@ -158,7 +162,8 @@ export class Fretboard {
 				c2d.font = '24px arial';
 				c2d.textBaseline = 'alphabetic';
 
-				const textMeasure = c2d.measureText( stringSlot.label );
+				const label = ' ' + stringSlot.label;
+				const textMeasure = c2d.measureText( label );
 
 				c2d.clearRect(
 						textMeasure.actualBoundingBoxLeft,
@@ -168,7 +173,7 @@ export class Fretboard {
 						textMeasure.actualBoundingBoxDescent +
 							textMeasure.actualBoundingBoxAscent );
 
-				c2d.fillText( stringSlot.label, 0, yMax );
+				c2d.fillText( label, 0, yMax );
 			} else {
 
 				c2d.font = '12px arial';
@@ -222,6 +227,8 @@ export class Fretboard {
 
 	#forEachBoundingBox( f ) {
 
+		const tuning = this.tunings[ this.tuningIndex ];
+
 		let xMin = 0, xMax = 0;
 		for ( let i = 0; i < this.numberOfFrets + 1; ++ i ) {
 
@@ -229,12 +236,12 @@ export class Fretboard {
 			xMax = this.#fretPosition( i ) * this.width;
 
 			let yMin = 0, yMax = 0;
-			const nSlots = this.stringSlots.length;
+			const nSlots = tuning.length;
 			for ( let j = 0; j < nSlots; ++ j ) {
 
 				yMin = yMax;
 				yMax = this.height * ( j + 1 ) / nSlots;
-				const stringSlot = this.stringSlots[ j ];
+				const stringSlot = tuning[ j ];
 
 				if ( stringSlot.tuning == null ) continue;
 
@@ -243,5 +250,7 @@ export class Fretboard {
 				if ( result != null ) return result;
 			}
 		}
+
+		return null;
 	}
 }

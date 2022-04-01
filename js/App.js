@@ -7,7 +7,11 @@ import { Button } from './Button.js'
 import { transpose, noteNameToNumber } from './Music.js'
 import { animation } from './Animation.js'
 
-const DefaultTuning = 'Guitar - standard tuning: E2 A2 D3 G3 B3 E4';
+const DefaultTunings = `${''
+} Guitar - standard tuning: E2 A2 D3 G3 B3 E4 ${''
+} Ukulele - GCEA: G4 C4 E4 A4 ${''
+} Mandola | Violin: C3 G3 D4 A4 E5 ${''
+}`;
 
 const NumberOfFrets = 16;
 const NumberOfPianoWhiteKeys = 9;
@@ -37,7 +41,7 @@ class App {
 		this.element = document.getElementById( 'canvas' );
 		this.c2d = this.element.getContext( '2d' );
 		this.pointerPosition = { x: 0, y: 0 };
-		this.tuning = DefaultTuning
+		this.tunings = DefaultTunings;
 		this.selectedKey = -1;
 
 		const highlighting = new Highlighting();
@@ -48,7 +52,7 @@ class App {
 
 		const fretsHeight = height * FretsFractionalHeight;
 		this.frets = new Fretboard(
-				width, fretsHeight, this.tuning, NumberOfFrets, highlighting );
+				width, fretsHeight, this.tunings, NumberOfFrets, highlighting );
 
 		const keysTop = fretsHeight + FretsKeysSpacing;
 		const halfWidth = width / 2;
@@ -253,13 +257,21 @@ class App {
 				return;
 			}
 
-		const highlighting = this.highlighting, cof = this.cof;
+		const highlighting = this.highlighting,
+				frets = this.frets, cof = this.cof;
 
 		const note = this.#findNote( p.x, p.y );
 		if ( note != null ) {
 
 			highlighting.selection ^= 1 << note % 12;
 			cof.matchTonality = highlighting.selection;
+			animation.requestRefresh();
+			return;
+
+		} else if ( p.y < frets.height && p.x < frets.width * 0.25 ) {
+
+			++ frets.tuningIndex;
+			frets.tuningIndex %= frets.tunings.length
 			animation.requestRefresh();
 			return;
 		}
@@ -374,18 +386,21 @@ class App {
 
 	configure() {
 
-		let tuning = prompt("Edit tuning:", this.tuning);
-		if ( tuning == null ) return; // cancel
-		if ( tuning == "" ) tuning = DefaultTuning;
+		let tunings = prompt( "Edit tunings:", this.tunings );
+		if ( tunings == null ) return; // cancel
+		if ( tunings == "" ) tunings = DefaultTunings;
 
-		const stringSlots = Fretboard.parseStringSlots( tuning );
-		if ( ! stringSlots ) {
-			alert("Something in your tuning did not quite add up. ");
+		const parsed = Fretboard.parseTunings( tunings );
+		if ( ! parsed ) {
+			alert( "Something in your tunings did not quite add up." );
 			return;
 		}
 
-		this.tuning = tuning;
-		this.frets.stringSlots = stringSlots;
+		this.tunings = tunings;
+
+		const frets = this.frets;
+		this.frets.tunings = parsed;
+		this.frets.tuningIndex %= parsed.length;
 	}
 
 	transpose( semitones ) {

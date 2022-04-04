@@ -1,4 +1,4 @@
-import { transpose, NoteNameInOctave, NaturalScale, HarmonicScale, MelodicScale, BluesScale } from './Music.js'
+import { transpose, Tonality, noteNameInOctave } from './Music.js'
 import { VariableColor } from './VariableColor.js'
 import { animation } from './Animation.js'
 
@@ -29,10 +29,10 @@ export class CircleOfFifths {
 
 		this.scales = [
 
-			{ color: scaleColor( 80 ), label: "Natural major/minor", tonality: NaturalScale },
-			{ color: scaleColor( 50 ), label: "Harmonic minor", tonality: HarmonicScale },
-			{ color: scaleColor( 30 ), label: "Melodic minor", tonality: MelodicScale },
-			{ color: scaleColor( 210 ), label: "Pentatonic + blue note", tonality: BluesScale }
+			{ color: scaleColor( 80 ), label: "Natural major/minor", tonality: Tonality.Natural },
+			{ color: scaleColor( 50 ), label: "Harmonic minor", tonality: Tonality.MinorHarmonic },
+			{ color: scaleColor( 30 ), label: "Melodic minor", tonality: Tonality.MinorMelodic },
+			{ color: scaleColor( 210 ), label: "Pentatonic + blue note", tonality: Tonality.Blues6 },
 		];
 
 		this.matchTonality = 0;
@@ -200,8 +200,8 @@ export class CircleOfFifths {
 				c2d.stroke();
 			}
 
-			const name = NoteNameInOctave[ key ] +
-					" " + NoteNameInOctave[ ( key + 9 ) % 12 ].toLowerCase();
+			const name = noteNameInOctave( key ) +
+					" " + noteNameInOctave( ( key + 9 ) % 12 ).toLowerCase();
 			c2d.fillStyle = '#fff';
 			c2d.fillText( name, xCenter + x1 * rText - 
 					c2d.measureText( name ).width / 2, yCenter - y1 * rText );

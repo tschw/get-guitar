@@ -1,6 +1,6 @@
-import { numberToNoteName, NaturalScale } from './Music.js'
+import { numberToNoteName, Tonality } from './Music.js'
 
-const isBlackKey = (index) => ( NaturalScale & ( 1 << ( index % 12 ) ) ) == 0;
+const isBlackKey = ( i ) => ( Tonality.Natural & ( 1 << ( i % 12 ) ) ) == 0;
 
 const BlackKeyFractionalHeight = 0.65;
 const BlackKeyWidthUpscale = 1.1;

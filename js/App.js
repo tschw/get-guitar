@@ -92,7 +92,7 @@ class App {
 			}, {
 				widget:
 					new Button( xLastButton - ButtonsRowDistance, yFretsButtons,
-							ButtonsWidth, ButtonsHeight, "\ud834\udd30" ),
+							ButtonsWidth, ButtonsHeight, "\u{1d130}" ),
 
 				action: () => this.transpose(1)
 
@@ -100,7 +100,7 @@ class App {
 				widget:
 					new Button(
 							xLastButton - ButtonsRowDistance * 2, yFretsButtons,
-							ButtonsWidth, ButtonsHeight, "\ud834\udd2c" ),
+							ButtonsWidth, ButtonsHeight, "\u{1d12c}" ),
 
 				action: () => this.transpose(-1)
 

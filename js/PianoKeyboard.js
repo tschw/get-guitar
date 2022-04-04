@@ -4,12 +4,17 @@ import { animation } from './Animation.js'
 const isBlackKey = ( i ) => ( Tonality.Natural & ( 1 << ( i % 12 ) ) ) == 0;
 
 const BlackKeyFractionalHeight = 0.65;
-const BlackKeyWidthUpscale = 1.1;
+const BlackKeyFractionalWidth = 0.65;
 
 const HighestNoteLimit = 9 * 12 - 1;
 
+const MotionSmoothing = 0.4;
+
 
 export class PianoKeyboard {
+
+	#scrollOffset;
+	#scrollTarget;
 
 	constructor( yTop, width, height,
 			lowestNote, numberOfWhiteKeys, highlighting ) {
@@ -22,6 +27,9 @@ export class PianoKeyboard {
 
 		this.lowestNote = lowestNote;
 		this.numberOfWhiteKeys = numberOfWhiteKeys;
+
+		this.#scrollOffset = 0;
+		this.#scrollTarget = -1;
 	}
 
 	canScrollViewport( direction ) {
@@ -33,29 +41,25 @@ export class PianoKeyboard {
 
 	scrollViewport( direction ) {
 
-		if ( ! this.canScrollViewport( direction ) ) return;
+		if ( this.isScrolling() ||
+				! this.canScrollViewport( direction ) ) return;
 
-		do {
+		const o = ( this.#scrollOffset = 1 - (
+				this.#scrollTarget = direction * 0.5 + 0.5 ) );
 
-			this.lowestNote += direction;
-
-		} while ( isBlackKey( this.lowestNote ) );
+		if ( o == 1 ) this.lowestNote = this.#nextLowestWhiteKey( -1 );
 
 		animation.requestRefresh();
 	}
 
-	#numberOfKeys() {
+	isScrolling() {
 
-		let n = 0;
-
-		for ( let nW = 0; nW < this.numberOfWhiteKeys; ++ n )
-
-			if ( ! isBlackKey( n + this.lowestNote ) ) ++ nW;
-
-		return n;
+		return this.#scrollTarget != -1;
 	}
 
 	paint( c2d ) {
+
+		const o = this.#updatedScrollOffset();
 
 		const w = this.width;
 		const h = this.height;
@@ -81,8 +85,8 @@ export class PianoKeyboard {
 			const note = this.lowestNote + i;
 			if ( isBlackKey( note ) ) continue;
 
-			const xMin = w * iW / nW;
-			const xMax = w * ++ iW / nW;
+			const xMin = w * ( iW - o ) / nW;
+			const xMax = w * ( ++ iW - o ) / nW;
 
 			c2d.fillStyle = '#777777';
 			c2d.strokeStyle = '#ffffff';
@@ -94,19 +98,16 @@ export class PianoKeyboard {
 
 			this.highlighting.paint( c2d, note, xMin, yMaxB, xMax, yMaxW );
 
-			if ( i == 0 || i == n - 1 ) {
+			const label = numberToNoteName( note );
+			const wC = c2d.measureText( label ).width;
 
-				const label = numberToNoteName( note );
-				const wC = c2d.measureText( label ).width;
-
-				c2d.fillStyle = '#ffffff';
-				c2d.fillText( label,
-						( xMin + xMax - wC ) / 2, ( yMaxB + yMaxW ) / 2 );
-			}
+			c2d.fillStyle = '#ffffff';
+			c2d.fillText( label,
+					( xMin + xMax - wC ) / 2, ( yMaxB + yMaxW ) / 2 );
 		}
 
 		iW = 0;
-		const xExtent = ( w * 0.5 / n ) * BlackKeyWidthUpscale;
+		const xExtent = ( w * 0.5 / nW ) * BlackKeyFractionalWidth;
 		const yMinH = yMin + hB / 2;
 
 		for ( let i = -1; i <= n; ++ i ) {
@@ -119,7 +120,7 @@ export class PianoKeyboard {
 				continue;
 			}
 
-			const xCenter = w * iW / nW;
+			const xCenter = w * ( iW - o ) / nW;
 			const xMin = xCenter - xExtent;
 			const xMax = xCenter + xExtent;
 
@@ -141,14 +142,18 @@ export class PianoKeyboard {
 
 		const w = this.width;
 		const h = this.height;
-		const n = this.#numberOfKeys();
-		const nW = this.numberOfWhiteKeys;
-		const hB = h * BlackKeyFractionalHeight;
-
 		const yMin = this.yTop;
+
+		if ( x > w || y < yMin || y > yMin + h ) return null;
+
+		const hB = h * BlackKeyFractionalHeight;
 		const yMaxB = yMin + hB;
 
-		const xExtent = ( w * 0.5 / n ) * BlackKeyWidthUpscale;
+		const o = this.#scrollOffset;
+		const n = this.#numberOfKeys();
+		const nW = this.numberOfWhiteKeys;
+
+		const xExtent = ( w * 0.5 / nW ) * BlackKeyFractionalWidth;
 
 		let iW = 0;
 		for ( let i = 0; i < n; ++ i ) {
@@ -156,7 +161,7 @@ export class PianoKeyboard {
 			const note = this.lowestNote + i;
 			if ( ! isBlackKey( note ) ) { ++ iW; continue; }
 
-			const xCenter = w * iW / nW;
+			const xCenter = w * ( iW - o ) / nW;
 			const xMin = xCenter - xExtent;
 			const xMax = xCenter + xExtent;
 
@@ -173,9 +178,8 @@ export class PianoKeyboard {
 			const note = this.lowestNote + i;
 			if ( isBlackKey( note ) ) continue;
 
-			const xMin = w * iW / nW;
-			const xMax = w * ( iW + 1 ) / nW;
-			++ iW;
+			const xMin = w * ( iW - o ) / nW;
+			const xMax = w * ( ++ iW - o ) / nW;
 
 			if ( x < xMin || x >= xMax || y < yMin || y >= yMaxW ) continue;
 
@@ -183,5 +187,53 @@ export class PianoKeyboard {
 		}
 
 		return null;
+	}
+
+	#nextLowestWhiteKey( direction ) {
+
+		let result = this.lowestNote;
+		do { result += direction; } while ( isBlackKey( result ) );
+		return result;
+	}
+
+	#numberOfVisibleWhiteKeys() {
+
+		return this.numberOfWhiteKeys + ( this.isScrolling() ? 1 : 0 );
+	}
+
+	#numberOfKeys() {
+
+		let n = 0;
+
+		for ( let iW = 0, nW = this.#numberOfVisibleWhiteKeys(); iW < nW; ++ n )
+
+			if ( ! isBlackKey( n + this.lowestNote ) ) ++ iW;
+
+		return n;
+	}
+
+	#updatedScrollOffset() {
+
+		const scrollTarget = this.#scrollTarget;
+		if ( scrollTarget == -1 ) return 0;
+
+		let scrollOffset = this.#scrollOffset;
+
+		scrollOffset += animation.delta(
+				scrollOffset, scrollTarget, MotionSmoothing );
+
+		if ( scrollOffset == scrollTarget ) {
+
+			if ( scrollOffset == 1 ) {
+
+				scrollOffset = 0;
+				this.lowestNote = this.#nextLowestWhiteKey( 1 );
+			}
+
+			this.#scrollTarget = -1;
+		}
+
+		this.#scrollOffset = scrollOffset;
+		return scrollOffset;
 	}
 }

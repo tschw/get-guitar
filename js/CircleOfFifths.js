@@ -29,10 +29,13 @@ export class CircleOfFifths {
 
 		this.scales = [
 
-			{ color: scaleColor( 80 ), label: "Natural major/minor", tonality: Tonality.Natural },
-			{ color: scaleColor( 50 ), label: "Harmonic minor", tonality: Tonality.MinorHarmonic },
-			{ color: scaleColor( 30 ), label: "Melodic minor", tonality: Tonality.MinorMelodic },
-			{ color: scaleColor( 210 ), label: "Pentatonic + blue note", tonality: Tonality.Blues6 },
+			{ color: scaleColor( 80 ), label: "Natural: Major / minor", tonality: Tonality.Natural },
+			{ color: scaleColor( 50 ), label: "Ionian \u{1d130}5 / harmonic", tonality: Tonality.MinorHarmonic },
+			{ color: scaleColor( 30 ), label: "Lydian \u{1d130}5 / melodic", tonality: Tonality.MinorMelodic },
+			{ color: scaleColor( 6 ), label: "Harmonic / \u{1d12c} lydian \u{1d130}2 \u{1d130}5", tonality: Tonality.Harmonic },
+			{ color: scaleColor( 290 ), label: "Dbl. harmonic / \u{1d12c} ionian \u{1d130}2 \u{1d130}5", tonality: Tonality.DoubleHarmonic },
+			{ color: scaleColor( 205 ), label: "Pentatonic + blue note", tonality: Tonality.Blues6 },
+			{ color: scaleColor( 170 ), label: "Natural + two blue notes", tonality: Tonality.Blues9 }
 		];
 
 		this.matchTonality = 0;

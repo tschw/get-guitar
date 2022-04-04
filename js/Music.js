@@ -37,7 +37,10 @@ export const Tonality = Object.freeze( {
 	Natural: 0b101010110101,
 	MinorHarmonic: 0b101100110101,
 	MinorMelodic: 0b101101010101,
+	Harmonic: 0b100110110101,
+	DoubleHarmonic: 0b100110110011,
 	Blues6: 0b001010011101,
+	Blues9: 0b111010111101
 } );
 
 export function transpose( tonality, semitones ) {

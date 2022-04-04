@@ -14,7 +14,7 @@ const DefaultTunings = `${''
 		}`;
 
 const NumberOfFrets = 16;
-const NumberOfPianoWhiteKeys = 9;
+const NumberOfPianoWhiteKeys = 8;
 const LowestPianoKey = noteNameToNumber( 'C2' );
 
 const FretsFractionalHeight = 0.62;
@@ -55,7 +55,7 @@ class App {
 				width, fretsHeight, this.tunings, NumberOfFrets, highlighting );
 
 		const keysTop = fretsHeight + FretsKeysSpacing;
-		const keysWidth = width / 2;
+		const keysWidth = width * 0.42;
 		this.keys = new PianoKeyboard(
 				keysTop, keysWidth, height - keysTop,
 				LowestPianoKey, NumberOfPianoWhiteKeys, highlighting );
@@ -80,6 +80,7 @@ class App {
 				cofLeft - ButtonsWidth + HorizEdgeButtonsSpacing;
 		const xKeysButtonsRight =
 				keysWidth - ButtonsWidth - HorizEdgeButtonsSpacing;
+		const xLegendScrollButtons = xCoFButtonsLeft - ButtonsRowDistance;
 
 		this.buttons = [
 
@@ -120,6 +121,22 @@ class App {
 							ButtonsWidth, ButtonsHeight, "\u25bb" ),
 
 				action: () => this.keys.scrollViewport( 1 )
+
+			}, {
+				widget:
+					this.buttonLegendUp = new Button(
+							xLegendScrollButtons, yKeysButtons,
+							ButtonsWidth, ButtonsHeight, "\u25b5" ),
+
+				action: () => this.legend.scrollViewport( -1 )
+
+			}, {
+				widget:
+					this.buttonLegendDown = new Button(
+							xLegendScrollButtons, yButtonsBottom,
+							ButtonsWidth, ButtonsHeight, "\u25bf" ),
+
+				action: () => this.legend.scrollViewport( 1 )
 
 			}, {
 				widget:
@@ -179,7 +196,11 @@ class App {
 		keys.paint( c2d );
 
 		this.cof.paint( c2d );
-		this.legend.paint( c2d );
+
+		const legend = this.legend;
+		this.buttonLegendUp.enabled = legend.canScrollViewport( -1 );
+		this.buttonLegendDown.enabled = legend.canScrollViewport( 1 );
+		legend.paint( c2d );
 
 		for ( let button of this.buttons ) button.widget.paint( c2d );
 
@@ -294,19 +315,16 @@ class App {
 		let tonality = 0;
 		let selecting = false;
 
-		if ( legend.select( p.x, p.y ) ) {
+		if ( ! legend.isAnimating() && legend.select( p.x, p.y ) ) {
 
 			const iSelectedScale = legend.selectedScaleIndex;
 
-			if ( this.selectedKey != -1 ) {
+			if ( this.selectedKey != -1 && iSelectedScale != -1 ) {
 
-				if ( iSelectedScale != -1 ) {
-
-					tonality = cof.scales[ iSelectedScale ].tonality;
-					tonality = transpose( tonality, this.selectedKey );
-					selecting = true;
-				}
-
+				const scale = cof.scales[ iSelectedScale ];
+				cof.highlitScale = scale;
+				tonality = transpose( scale.tonality, this.selectedKey );
+				selecting = true;
 			}
 
 			if ( this.selectedKey == -1 || zoomedIn ) {
@@ -319,19 +337,23 @@ class App {
 
 				let scale = null;
 
-				if ( iSelectedScale != -1 )
-					scale = cof.scales[ iSelectedScale ];
+				if ( iSelectedScale != -1 ) {
 
-				else {
+					scale = cof.scales[ iSelectedScale ];
+					cof.highlitScale = scale;
+
+				} else {
 
 					if ( selecting )
-						legend.selectedScaleIndex = cof.scales.indexOf( cof.selectedScale );
+
+						legend.selectedScaleIndex =
+								cof.scales.indexOf( cof.selectedScale );
+
 					zoomedIn = false;
 				}
 
 				cof.selectedScale =
 						animation.ifStateChange( cof.selectedScale, scale );
-
 			}
 
 			if ( ! selecting ) this.selectedKey = -1;
@@ -345,8 +367,16 @@ class App {
 			tonality = pick.tonality;
 			selecting = tonality != cof.selectedTonality;
 
-			legend.selectedScaleIndex = animation.ifStateChange(
-					legend.selectedScaleIndex, selecting || zoomedIn ? pick.scaleIndex : -1 );
+			let scaleIndex = -1;
+			if ( selecting || zoomedIn ) {
+
+				scaleIndex = pick.scaleIndex;
+				legend.scrollToView( scaleIndex );
+			}
+
+			legend.selectedScaleIndex =
+					animation.ifStateChange(
+						legend.selectedScaleIndex, scaleIndex );
 
 			this.selectedKey = selecting ? pick.key : -1;
 
@@ -361,6 +391,10 @@ class App {
 
 		cof.selectedTonality = animation.ifStateChange(
 				cof.selectedTonality, selecting ? tonality : 0 );
+
+		if ( selecting && tonality == cof.highlitTonality )
+
+			cof.highlitTonality = 0;
 
 		highlighting.selection =
 				animation.ifStateChange(

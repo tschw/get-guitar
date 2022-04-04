@@ -124,21 +124,21 @@ class App {
 			}, {
 				widget:
 					new Button( xLastButton, yKeysButtons,
-							ButtonsWidth, ButtonsHeight, '\u21bb' ),
+							ButtonsWidth, ButtonsHeight, "\u21bb" ),
 
 				action: () => this.transpose( 7 )
 
 			}, {
 				widget:
 					new Button( xCoFButtonsLeft, yKeysButtons,
-							ButtonsWidth, ButtonsHeight, '\u21ba' ),
+							ButtonsWidth, ButtonsHeight, "\u21ba" ),
 
 				action: () => this.transpose( -7 )
 			}, {
 				widget:
 					this.buttonApplyCoF = new Button(
 							xLastButton, yButtonsBottom,
-							ButtonsWidth, ButtonsHeight, '\u2713' ),
+							ButtonsWidth, ButtonsHeight, "\u2713" ),
 
 				action: () => this.applyOrCancelCoF( true )
 
@@ -146,7 +146,7 @@ class App {
 				widget:
 					this.buttonCancelCoF = new Button(
 							xCoFButtonsLeft, yButtonsBottom,
-							ButtonsWidth, ButtonsHeight, '\u2717' ),
+							ButtonsWidth, ButtonsHeight, "\u2717" ),
 
 				action: () => this.applyOrCancelCoF( false )
 

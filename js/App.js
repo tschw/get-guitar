@@ -298,7 +298,7 @@ class App {
 			animation.requestRefresh();
 			return;
 
-		} else if ( p.y < frets.height && p.x < frets.width * 0.25 ) {
+		} else if ( p.y < frets.height && p.x < frets.width ) {
 
 			++ frets.tuningIndex;
 			frets.tuningIndex %= frets.tunings.length

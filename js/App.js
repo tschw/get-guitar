@@ -415,6 +415,8 @@ class App {
 				animation.ifStateChange( highlighting.highlitTonality, 0 );
 
 		cof.highlitTonality = animation.ifStateChange( cof.highlitTonality, 0 );
+		cof.highlitScale = animation.ifStateChange( cof.highlitScale, null );
+
 		this.legend.unhighlight();
 	}
 

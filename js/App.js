@@ -55,9 +55,9 @@ class App {
 				width, fretsHeight, this.tunings, NumberOfFrets, highlighting );
 
 		const keysTop = fretsHeight + FretsKeysSpacing;
-		const halfWidth = width / 2;
+		const keysWidth = width / 2;
 		this.keys = new PianoKeyboard(
-				keysTop, halfWidth, height - keysTop,
+				keysTop, keysWidth, height - keysTop,
 				LowestPianoKey, NumberOfPianoWhiteKeys, highlighting );
 
 		const cofTop = fretsHeight + FretsCoFSpacing;
@@ -69,16 +69,17 @@ class App {
 		const yKeysButtons = keysTop + UpperEdgeOfKeysButtonsSpacing;
 		const yButtonsBottom = height - ButtonsHeight - LowerEdgeButtonsSpacing;
 
+		const legendWidth = cofLeft - keysWidth - KeysScalesSpacing;
 		this.legend = new ScaleLegend(
-				halfWidth + KeysScalesSpacing, yKeysButtons,
-				width * 0.25 - 20, cofSize, this.cof.scales );
+				keysWidth + KeysScalesSpacing, yKeysButtons,
+				legendWidth, cofSize, this.cof.scales );
 
 		const xFirstButton = HorizEdgeButtonsSpacing;
 		const xLastButton = width - ButtonsWidth - HorizEdgeButtonsSpacing;
 		const xCoFButtonsLeft =
 				cofLeft - ButtonsWidth + HorizEdgeButtonsSpacing;
 		const xKeysButtonsRight =
-				halfWidth - ButtonsWidth - HorizEdgeButtonsSpacing;
+				keysWidth - ButtonsWidth - HorizEdgeButtonsSpacing;
 
 		this.buttons = [
 

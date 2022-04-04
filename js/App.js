@@ -111,7 +111,7 @@ class App {
 							xFirstButton, yKeysButtons,
 							ButtonsWidth, ButtonsHeight, "\u25c5" ),
 
-				action: () => this.scrollKeysViewport( -1 )
+				action: () => this.keys.scrollViewport( -1 )
 
 			}, {
 				widget:
@@ -119,7 +119,7 @@ class App {
 							xKeysButtonsRight, yKeysButtons,
 							ButtonsWidth, ButtonsHeight, "\u25bb" ),
 
-				action: () => this.scrollKeysViewport( 1 )
+				action: () => this.keys.scrollViewport( 1 )
 
 			}, {
 				widget:
@@ -172,7 +172,12 @@ class App {
 
 		c2d.clearRect( 0, 0, element.width, element.height );
 		this.frets.paint( c2d );
-		this.keys.paint( c2d );
+
+		const keys = this.keys;
+		this.buttonKeysLeft.enabled = keys.canScrollViewport( -1 );
+		this.buttonKeysRight.enabled = keys.canScrollViewport( 1 );
+		keys.paint( c2d );
+
 		this.cof.paint( c2d );
 		this.legend.paint( c2d );
 
@@ -420,16 +425,6 @@ class App {
 		}
 
 		else cof.matchTonality = highlighting.selection;
-
-		animation.requestRefresh();
-	}
-
-	scrollKeysViewport( direction ) {
-
-		const keys = this.keys;
-		keys.scrollViewport( direction );
-		this.buttonKeysLeft.enabled = keys.canScrollViewport( -1 );
-		this.buttonKeysRight.enabled = keys.canScrollViewport( 1 );
 
 		animation.requestRefresh();
 	}

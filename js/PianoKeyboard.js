@@ -1,4 +1,5 @@
 import { numberToNoteName, Tonality } from './Music.js'
+import { animation } from './Animation.js'
 
 const isBlackKey = ( i ) => ( Tonality.Natural & ( 1 << ( i % 12 ) ) ) == 0;
 
@@ -32,11 +33,15 @@ export class PianoKeyboard {
 
 	scrollViewport( direction ) {
 
+		if ( ! this.canScrollViewport( direction ) ) return;
+
 		do {
 
 			this.lowestNote += direction;
 
 		} while ( isBlackKey( this.lowestNote ) );
+
+		animation.requestRefresh();
 	}
 
 	#numberOfKeys() {

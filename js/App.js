@@ -8,10 +8,10 @@ import { transpose, noteNameToNumber } from './Music.js'
 import { animation } from './Animation.js'
 
 const DefaultTunings = `${''
-} Guitar - standard tuning: E2 A2 D3 G3 B3 E4 ${''
-} Ukulele - GCEA: G4 C4 E4 A4 ${''
-} Mandola | Violin: C3 G3 D4 A4 E5 ${''
-}`;
+		} Guitar - standard tuning: E2 A2 D3 G3 B3 E4 ${''
+		} Ukulele - GCEA: G4 C4 E4 A4 ${''
+		} Mandola | Violin: C3 G3 D4 A4 E5 ${''
+		}`;
 
 const NumberOfFrets = 16;
 const NumberOfPianoWhiteKeys = 9;
@@ -94,7 +94,7 @@ class App {
 					new Button( xLastButton - ButtonsRowDistance, yFretsButtons,
 							ButtonsWidth, ButtonsHeight, "\u{1d130}" ),
 
-				action: () => this.transpose(1)
+				action: () => this.transpose( 1 )
 
 			}, {
 				widget:
@@ -102,7 +102,7 @@ class App {
 							xLastButton - ButtonsRowDistance * 2, yFretsButtons,
 							ButtonsWidth, ButtonsHeight, "\u{1d12c}" ),
 
-				action: () => this.transpose(-1)
+				action: () => this.transpose( -1 )
 
 			}, {
 				widget:
@@ -110,7 +110,7 @@ class App {
 							xFirstButton, yKeysButtons,
 							ButtonsWidth, ButtonsHeight, "\u25c5" ),
 
-				action: () => this.scrollKeysViewport(-1)
+				action: () => this.scrollKeysViewport( -1 )
 
 			}, {
 				widget:
@@ -118,13 +118,15 @@ class App {
 							xKeysButtonsRight, yKeysButtons,
 							ButtonsWidth, ButtonsHeight, "\u25bb" ),
 
-				action: () => this.scrollKeysViewport(1)
+				action: () => this.scrollKeysViewport( 1 )
+
 			}, {
 				widget:
 					new Button( xLastButton, yKeysButtons,
 							ButtonsWidth, ButtonsHeight, '\u21bb' ),
 
 				action: () => this.transpose( 7 )
+
 			}, {
 				widget:
 					new Button( xCoFButtonsLeft, yKeysButtons,
@@ -138,6 +140,7 @@ class App {
 							ButtonsWidth, ButtonsHeight, '\u2713' ),
 
 				action: () => this.applyOrCancelCoF( true )
+
 			}, {
 				widget:
 					this.buttonCancelCoF = new Button(
@@ -145,6 +148,7 @@ class App {
 							ButtonsWidth, ButtonsHeight, '\u2717' ),
 
 				action: () => this.applyOrCancelCoF( false )
+
 			}
 		];
 
@@ -222,7 +226,6 @@ class App {
 						highlitScale.tonality, this.selectedKey );
 
 		} else if ( note == null ) {
-
 
 			const pick = cof.pickAtCoordinates( p.x, p.y );
 			if ( pick != null ) {

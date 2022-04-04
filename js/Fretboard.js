@@ -15,7 +15,7 @@ const FractionalMarkerRightDisplace = 0.24;
 // octave (that is, shortening the string to its half, thus
 // doubling the frequency) we can calculate the position of
 // each fret in respect to the length of the entire string.
-const fretStringPosition = (i) => 1 - 2 ** ( -i / 12 );
+const fretStringPosition = ( i ) => 1 - 2 ** ( -i / 12 );
 
 
 export class Fretboard {

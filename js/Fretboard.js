@@ -6,6 +6,9 @@ const FractionalMarkerElevation = 0.125;
 const FractionalMarkerLeftDisplace = 0.245;
 const FractionalMarkerRightDisplace = 0.24;
 
+const LineDashOn = [ 1, 15 ];
+const LineDashOff = [];
+
 // The frequency is inverse proportional to the length of that
 // part of the string that can oscillate. Semitones affect the
 // frequency exponentially, that is there is a constant factor
@@ -62,8 +65,6 @@ export class Fretboard {
 	}
 
 	paint( c2d ) {
-
-		c2d.setLineDash( [] );
 
 		// Paint frets:
 
@@ -151,7 +152,7 @@ export class Fretboard {
 			const y = ( yMax + yMin ) / 2;
 
 			c2d.lineWidth = 1;
-			c2d.setLineDash( [] );
+			c2d.setLineDash( LineDashOff );
 
 			// Paint caption or label:
 
@@ -194,7 +195,7 @@ export class Fretboard {
 
 			if ( i == nSlots - 1 ) continue;
 
-			c2d.setLineDash( [ 1, 15 ] );
+			c2d.setLineDash( LineDashOn );
 			c2d.beginPath();
 			c2d.moveTo( 0, yMax );
 			c2d.lineTo( this.width, yMax );

@@ -300,9 +300,7 @@ class App {
 
 		} else if ( p.y < frets.height && p.x < frets.width ) {
 
-			++ frets.tuningIndex;
-			frets.tuningIndex %= frets.tunings.length
-			animation.requestRefresh();
+			frets.transitionToNextTuning();
 			return;
 		}
 

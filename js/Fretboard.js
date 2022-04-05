@@ -1,5 +1,6 @@
 import { Highlighting } from './Highlighting.js'
 import { noteNameToNumber } from './Music.js'
+import { animation } from './Animation.js'
 
 const FractionalMarkerRadius = 0.125;
 const FractionalMarkerElevation = 0.125;
@@ -8,6 +9,8 @@ const FractionalMarkerRightDisplace = 0.24;
 
 const LineDashOn = [ 1, 15 ];
 const LineDashOff = [];
+
+const MotionSmoothing = 0.7;
 
 // The frequency is inverse proportional to the length of that
 // part of the string that can oscillate. Semitones affect the
@@ -23,6 +26,9 @@ const fretStringPosition = ( i ) => 1 - 2 ** ( -i / 12 );
 
 export class Fretboard {
 
+	#transitionOffset;
+	#transitionTarget;
+
 	constructor( width, height, tunings, numberOfFrets, highlighting ) {
 
 		this.width = width;
@@ -33,6 +39,10 @@ export class Fretboard {
 		this.numberOfFrets = numberOfFrets;
 
 		this.tuningIndex = 0;
+
+		this.#transitionOffset = 0;
+		this.#transitionTarget = -1;
+
 		this.tunings = Fretboard.parseTunings( tunings );
 	}
 
@@ -64,11 +74,30 @@ export class Fretboard {
 		return ! fail ? result : null;
 	}
 
+	transitionToNextTuning() {
+
+		if ( this.#transitionTarget == -1 ) {
+
+			this.#transitionTarget = 1;
+			animation.requestRefresh();
+		}
+	}
+
 	paint( c2d ) {
+
+		const tunings = this.tunings;
+		const nTunings = tunings.length;
+
+		const transitionOffset = this.#updatedTransitionOffset();
+		const visibility = Math.abs( transitionOffset * 2 - 1 ) ** 2;
+
+		c2d.save();
+		c2d.rect( 0, 0, this.width, this.height * visibility );
+		c2d.clip();
 
 		// Paint frets:
 
-		const tuning = this.tunings[ this.tuningIndex ];
+		const tuning = this.tunings[ this.#actualTuningIndex() ];
 		const nSlots = tuning.length;
 		const stringSlotHeight = this.height / nSlots;
 		const markerRadius = stringSlotHeight * FractionalMarkerRadius;
@@ -204,14 +233,42 @@ export class Fretboard {
 
 		// Paint highlighting:
 
-		return this.#forEachBoundingBox( (note, xMin, yMin, xMax, yMax) =>
+		this.#forEachBoundingBox( (note, xMin, yMin, xMax, yMax) =>
 			this.highlighting.paint( c2d, note, xMin, yMin, xMax, yMax ) );
+
+		c2d.restore();
 	}
 
 	noteAtCoordinates( x, y ) {
 
 		return this.#forEachBoundingBox( (note, xMin, yMin, xMax, yMax) =>
 				(x >= xMin && y >= yMin && x < xMax && y < yMax) ? note : null );
+	}
+
+	#actualTuningIndex() {
+
+		return ( this.tuningIndex + Math.round( this.#transitionOffset ) ) % this.tunings.length;
+	}
+
+	#updatedTransitionOffset() {
+
+		const transitionTarget = this.#transitionTarget;
+		let transitionOffset = this.#transitionOffset;
+
+		if ( transitionTarget == -1 ) return transitionOffset;
+
+		transitionOffset += animation.delta(
+				transitionOffset, transitionTarget, MotionSmoothing );
+
+		if ( transitionOffset == 1 ) {
+
+			transitionOffset = 0;
+			this.tuningIndex = ( this.tuningIndex + 1 ) % this.tunings.length;
+
+			this.#transitionTarget = -1;
+		}
+		this.#transitionOffset = transitionOffset;
+		return transitionOffset;
 	}
 
 
@@ -228,7 +285,8 @@ export class Fretboard {
 
 	#forEachBoundingBox( f ) {
 
-		const tuning = this.tunings[ this.tuningIndex ];
+		const tunings = this.tunings;
+		const tuning = tunings[ this.#actualTuningIndex() ];
 
 		let xMin = 0, xMax = 0;
 		for ( let i = 0; i < this.numberOfFrets + 1; ++ i ) {

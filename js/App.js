@@ -6,6 +6,8 @@ import { ScaleLegend } from './ScaleLegend.js'
 import { Button } from './Button.js'
 import { transpose, noteNameToNumber } from './Music.js'
 import { animation } from './Animation.js'
+import * as audioAnalyzer from './audio-analyzer/api.js'
+import { BitMaskDelta } from './BitMaskDelta.js'
 
 const DefaultTunings = `${''
 		} Guitar - standard tuning: E2 A2 D3 G3 B3 E4 ${''
@@ -34,6 +36,7 @@ const ButtonsRowSpacing = 12;
 
 const ButtonsRowDistance = ButtonsWidth + ButtonsRowSpacing;
 
+
 class App {
 
 	constructor() {
@@ -43,6 +46,9 @@ class App {
 		this.pointerPosition = { x: 0, y: 0 };
 		this.tunings = DefaultTunings;
 		this.selectedKey = -1;
+		this.analyzerData = audioAnalyzer.createDataVector();
+		this.diffCandidates = new BitMaskDelta();
+		this.diffStimuli = new BitMaskDelta();
 
 		const highlighting = new Highlighting();
 		this.highlighting = highlighting;
@@ -93,18 +99,27 @@ class App {
 
 			}, {
 				widget:
-					new Button( xLastButton - ButtonsRowDistance, yFretsButtons,
+					this.buttonSharp = new Button(
+							xLastButton - ButtonsRowDistance, yFretsButtons,
 							ButtonsWidth, ButtonsHeight, "\u{1d130}" ),
 
 				action: () => this.transpose( 1 )
 
 			}, {
 				widget:
-					new Button(
+					this.buttonFlat = new Button(
 							xLastButton - ButtonsRowDistance * 2, yFretsButtons,
 							ButtonsWidth, ButtonsHeight, "\u{1d12c}" ),
 
 				action: () => this.transpose( -1 )
+
+			}, {
+				widget:
+					this.buttonMic = new Button( xLastButton,
+							yFretsButtons + ButtonsHeight + ButtonsRowSpacing,
+							ButtonsWidth, ButtonsHeight, '\u{1f399}' ),
+
+				action: () => this.toggleListen()
 
 			}, {
 				widget:
@@ -140,14 +155,14 @@ class App {
 
 			}, {
 				widget:
-					new Button( xLastButton, yKeysButtons,
+					this.buttonFifthUp = new Button( xLastButton, yKeysButtons,
 							ButtonsWidth, ButtonsHeight, "\u21bb" ),
 
 				action: () => this.transpose( 7 )
 
 			}, {
 				widget:
-					new Button( xCoFButtonsLeft, yKeysButtons,
+					this.buttonFifthDown = new Button( xCoFButtonsLeft, yKeysButtons,
 							ButtonsWidth, ButtonsHeight, "\u21ba" ),
 
 				action: () => this.transpose( -7 )
@@ -170,6 +185,9 @@ class App {
 			}
 		];
 
+		this.buttonMic.enabled =
+				audioAnalyzer.getSystemState() != 'unavailable';
+
 		this.buttonApplyCoF.enabled = false;
 		this.buttonCancelCoF.enabled = false;
 
@@ -186,6 +204,59 @@ class App {
 	paint() {
 
 		const c2d = this.c2d, element = this.element;
+		const highlighting = this.highlighting, cof = this.cof;
+
+		const isListening = audioAnalyzer.getSystemState() == 'running';
+
+		if ( isListening ) {
+
+			this.buttonMic.highlit = true;
+			animation.requestRefresh();
+			const data = this.analyzerData;
+
+			if ( audioAnalyzer.getFrame(data) ) {
+
+				const candidates = this.diffCandidates.update(data[ 0 ]);
+				const stimuli = this.diffStimuli.update(data[ 0 ] | data[ 1 ]);
+
+				cof.matchTonality = stimuli.apply(this.cof.matchTonality);
+
+				if (cof.selectedTonality == 0) {
+
+					highlighting.selection = candidates.apply(highlighting.selection);
+					highlighting.highlitTonality =
+							stimuli.apply(highlighting.highlitTonality);
+
+					const melody = Math.round( data[ 2 ] );
+					highlighting.highlitNote = !Number.isNaN(melody) ? melody : null;
+				}
+
+/*
+				console.log("ui0:", fmtBin12(highlighting.selection));
+				console.log("ui1:", fmtBin12(cof.selectedTonality));
+				console.log("ui2:", fmtBin12(cof.matchTonality));
+
+				console.log("acc:", fmtBin12(data[0]));
+				console.log("now:", fmtBin12(data[1]),
+					"vol:", 1 + 0.5 * Math.log10(data[2] + Number.MIN_VALUE) );
+
+				function fmtBin12(bits) {
+
+					const binaryString = bits.toString(2);
+					const paddingZeroes = 12 - binaryString.length;
+					return "0".repeat(paddingZeroes) + binaryString;
+				}
+*/
+			}
+
+		} else this.buttonMic.highlit =
+				audioAnalyzer.getSystemState() == 'starting';
+
+		const enableTranspose = !isListening || cof.selectedTonality;
+		this.buttonSharp.enabled = enableTranspose;
+		this.buttonFlat.enabled = enableTranspose;
+		this.buttonFifthUp.enabled = enableTranspose;
+		this.buttonFifthDown.enabled = enableTranspose;
 
 		c2d.clearRect( 0, 0, element.width, element.height );
 		this.frets.paint( c2d );
@@ -195,7 +266,7 @@ class App {
 		this.buttonKeysRight.enabled = keys.canScrollViewport( 1 );
 		keys.paint( c2d );
 
-		this.cof.paint( c2d );
+		cof.paint( c2d );
 
 		const legend = this.legend;
 		this.buttonLegendUp.enabled = legend.canScrollViewport( -1 );
@@ -204,7 +275,7 @@ class App {
 
 		for ( let button of this.buttons ) button.widget.paint( c2d );
 
-		this.highlighting.attenuate();
+		highlighting.attenuate();
 	}
 
 	#getPointerCoordinates( event ) {
@@ -223,19 +294,24 @@ class App {
 		const highlighting = this.highlighting,
 				p = this.#getPointerCoordinates( event );
 
+		const isListening = audioAnalyzer.getSystemState() == 'running';
+
 		for ( let button of this.buttons )
 			if ( button.widget.highlightIfContained( p.x, p.y ) ) {
 
-				highlighting.highlitNote =
-						animation.ifStateChange(
-							highlighting.highlitNote, null );
+				if ( ! isListening )
+					highlighting.highlitNote =
+							animation.ifStateChange(
+								highlighting.highlitNote, null );
 				return;
 			}
 
 		const note = this.#findNote( p.x, p.y );
 
-		highlighting.highlitNote =
-				animation.ifStateChange( highlighting.highlitNote, note );
+		if ( ! isListening )
+
+			highlighting.highlitNote =
+					animation.ifStateChange( highlighting.highlitNote, note );
 
 		const cof = this.cof, legend = this.legend;
 		const iHighlitScale = legend.highlight( p.x, p.y );
@@ -461,6 +537,25 @@ class App {
 		else cof.matchTonality = highlighting.selection;
 
 		animation.requestRefresh();
+	}
+
+	toggleListen() {
+
+		audioAnalyzer.switchOnOff();
+		switch (audioAnalyzer.getSystemState()) {
+
+			case 'starting':
+				animation.requestRefresh();
+				break;
+
+			case 'stopping':
+				const cof = this.cof;
+				if (cof.selectedTonality == 0)
+					cof.matchTonality = this.highlighting.selection;
+				this.diffCandidates.prev = 0;
+				this.diffStimuli.prev = 0;
+				break;
+		}
 	}
 
 	applyOrCancelCoF( doApply ) {

@@ -185,8 +185,14 @@ class App {
 			}
 		];
 
-		this.buttonMic.enabled =
-				audioAnalyzer.getSystemState() != 'unavailable';
+		if ( audioAnalyzer.getSystemState() == 'unavailable' ) {
+
+			this.buttonMic.enabled = false;
+			const location = window.location.toString();
+			const redirect = location.replace(
+					'//tschw.github.io/get-guitar', '//get-guitar.netlify.app');
+			if ( redirect != location ) window.location = redirect;
+		}
 
 		this.buttonApplyCoF.enabled = false;
 		this.buttonCancelCoF.enabled = false;

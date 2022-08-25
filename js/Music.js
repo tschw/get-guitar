@@ -3,10 +3,9 @@ const BasePitch = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
 
 const Sharp = '\u{1d130}';
 
-const NoteNameInOctave = [ 'C', 'C' + Sharp, 'D', 'D' + Sharp,
-		'E', 'F', 'F' + Sharp, 'G', 'G' + Sharp, 'A', 'A' + Sharp, 'B' ];
-
-export const noteNameInOctave = ( i ) => NoteNameInOctave[ i ];
+export const NoteNameInOctave = Object.freeze( [
+		'C', 'C' + Sharp, 'D', 'D' + Sharp, 'E', 'F',
+		'F' + Sharp, 'G', 'G' + Sharp, 'A', 'A' + Sharp, 'B' ] );
 
 export function numberToNoteName( i ) {
 
@@ -34,13 +33,13 @@ export function noteNameToNumber( s ) {
 
 export const Tonality = Object.freeze( {
 
-	Natural: 0b101010110101,
-	MinorHarmonic: 0b101100110101,
-	MinorMelodic: 0b101101010101,
-	Harmonic: 0b100110110101,
-	DoubleHarmonic: 0b100110110011,
-	Blues6: 0b001010011101,
-	Blues9: 0b111010111101
+		Natural: 0b101010110101,
+		MinorHarmonic: 0b101100110101,
+		MinorMelodic: 0b101101010101,
+		Harmonic: 0b100110110101,
+		DoubleHarmonic: 0b100110110011,
+		Blues6: 0b001010011101,
+		Blues9: 0b111010111101
 } );
 
 export function transpose( tonality, semitones ) {

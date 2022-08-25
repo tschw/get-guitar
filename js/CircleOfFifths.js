@@ -1,4 +1,4 @@
-import { transpose, Tonality, noteNameInOctave } from './Music.js'
+import { transpose, Tonality, NoteNameInOctave } from './Music.js'
 import { VariableColor } from './VariableColor.js'
 import { animation } from './Animation.js'
 
@@ -203,8 +203,8 @@ export class CircleOfFifths {
 				c2d.stroke();
 			}
 
-			const name = noteNameInOctave( key ) +
-					" " + noteNameInOctave( ( key + 9 ) % 12 ).toLowerCase();
+			const name = NoteNameInOctave[ key ] +
+					" " + NoteNameInOctave[ ( key + 9 ) % 12 ].toLowerCase();
 			c2d.fillStyle = '#fff';
 			c2d.fillText( name, xCenter + x1 * rText - 
 					c2d.measureText( name ).width / 2, yCenter - y1 * rText );
@@ -330,7 +330,12 @@ function lerp( a, b, t ) {
 function bitCount( x ) {
 
 	let result = 0;
-	for ( let y = x; y != 0; y >>>= 1 ) result += y & 1;
+	let bits = x;
+	while ( bits !== 0 ) {
+
+		bits &= bits - 1;
+		result += 1;
+	}
 	return result;
 }
 

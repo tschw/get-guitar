@@ -91,6 +91,12 @@ export class Button {
 		return contained;
 	}
 
+	setEnabled( enable ) {
+
+		if ( this.enabled && ! enable ) this.highlit = false;
+		this.enabled = animation.ifStateChange( this.enabled, enable );
+	}
+
 	unhighlight() {
 
 		this.highlit = animation.ifStateChange( this.highlit, false );

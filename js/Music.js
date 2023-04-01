@@ -2,10 +2,27 @@
 const BasePitch = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
 
 const Sharp = '\u{1d130}';
+const Flat = '\u{1d12c}';
 
 export const NoteNameInOctave = Object.freeze( [
 		'C', 'C' + Sharp, 'D', 'D' + Sharp, 'E', 'F',
 		'F' + Sharp, 'G', 'G' + Sharp, 'A', 'A' + Sharp, 'B' ] );
+
+const equivs = new Object();
+for ( name of NoteNameInOctave ) {
+
+	if ( name.length == 1 ) {
+
+		equivs[ name ] = name;
+		continue;
+	}
+
+	const relativeTo = BasePitch[ name[ 0 ] ];
+	const equiv = NoteNameInOctave[ ( relativeTo + 2 ) % 12 ] + Flat;
+	equivs[ name ] = equiv;
+	equivs[ equiv ] = name;
+}
+export const EnharmonicEquivalent = Object.freeze( equivs );
 
 export function numberToNoteName( i ) {
 

@@ -1,4 +1,4 @@
-import { transpose, Tonality, NoteNameInOctave } from './Music.js'
+import { transpose, Tonality, NoteNameInOctave, EnharmonicEquivalent } from './Music.js'
 import { VariableColor } from './VariableColor.js'
 import { animation } from './Animation.js'
 
@@ -203,10 +203,14 @@ export class CircleOfFifths {
 				c2d.stroke();
 			}
 
-			const name = NoteNameInOctave[ key ] +
-					" " + NoteNameInOctave[ ( key + 9 ) % 12 ].toLowerCase();
+			let majorKeyName = NoteNameInOctave[ key ];
+			let minorKeyName = NoteNameInOctave[ ( key + 9 ) % 12 ];
+			if ( x2 < 0 ) majorKeyName = EnharmonicEquivalent[ majorKeyName ];
+			if ( x0 < 0 ) minorKeyName = EnharmonicEquivalent[ minorKeyName ];
+			const label = `${ majorKeyName } ${ minorKeyName.toLowerCase() }`;
+
 			c2d.fillStyle = '#fff';
-			c2d.fillText( name, xCenter + x1 * rText - 
+			c2d.fillText( label, xCenter + x1 * rText -
 					c2d.measureText( name ).width / 2, yCenter - y1 * rText );
 			c2d.stroke();
 		}

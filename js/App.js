@@ -4,7 +4,7 @@ import { PianoKeyboard } from './PianoKeyboard.js'
 import { CircleOfFifths } from './CircleOfFifths.js'
 import { ScaleLegend } from './ScaleLegend.js'
 import { Button } from './Button.js'
-import { transpose, noteNameToNumber } from './Music.js'
+import { Sharp, Flat, transpose, noteNameToNumber } from './Music.js'
 import { animation } from './Animation.js'
 import * as audioAnalyzer from './audio-analyzer/api.js'
 import { BitMaskDelta } from './BitMaskDelta.js'
@@ -101,7 +101,7 @@ class App {
 				widget:
 					this.buttonSharp = new Button(
 							xLastButton - ButtonsRowDistance, yFretsButtons,
-							ButtonsWidth, ButtonsHeight, "\u{1d130}" ),
+							ButtonsWidth, ButtonsHeight, Sharp ),
 
 				action: () => this.transpose( 1 )
 
@@ -109,7 +109,7 @@ class App {
 				widget:
 					this.buttonFlat = new Button(
 							xLastButton - ButtonsRowDistance * 2, yFretsButtons,
-							ButtonsWidth, ButtonsHeight, "\u{1d12c}" ),
+							ButtonsWidth, ButtonsHeight, Flat ),
 
 				action: () => this.transpose( -1 )
 

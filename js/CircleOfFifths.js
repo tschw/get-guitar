@@ -1,4 +1,4 @@
-import { transpose, Tonality, NoteNameInOctave, EnharmonicEquivalent } from './Music.js'
+import { transpose, Tonality, NoteNameInOctave, Sharp, Flat, EnharmonicEquivalent } from './Music.js'
 import { VariableColor } from './VariableColor.js'
 import { animation } from './Animation.js'
 
@@ -29,11 +29,11 @@ export class CircleOfFifths {
 
 		this.scales = [
 
-			{ color: scaleColor( 80 ), label: "Natural: Major / minor", tonality: Tonality.Natural },
-			{ color: scaleColor( 50 ), label: "Ionian \u{1d130}5 / harmonic", tonality: Tonality.MinorHarmonic },
-			{ color: scaleColor( 30 ), label: "Lydian \u{1d130}5 / melodic", tonality: Tonality.MinorMelodic },
-			{ color: scaleColor( 6 ), label: "Harmonic / \u{1d12c} lydian \u{1d130}2 \u{1d130}5", tonality: Tonality.Harmonic },
-			{ color: scaleColor( 290 ), label: "Dbl. harmonic / \u{1d12c} ionian \u{1d130}2 \u{1d130}5", tonality: Tonality.DoubleHarmonic },
+			{ color: scaleColor( 80 ), label: `Natural: Major / minor`, tonality: Tonality.Natural },
+			{ color: scaleColor( 50 ), label: `Ionian ${Sharp}5 / harmonic`, tonality: Tonality.MinorHarmonic },
+			{ color: scaleColor( 30 ), label: `Lydian ${Sharp}5 / melodic`, tonality: Tonality.MinorMelodic },
+			{ color: scaleColor( 6 ), label: `Harmonic / ${Flat} lydian ${Sharp}2 ${Sharp}5`, tonality: Tonality.Harmonic },
+			{ color: scaleColor( 290 ), label: `Dbl. harmonic / ${Flat} ionian ${Sharp}2 ${Sharp}5`, tonality: Tonality.DoubleHarmonic },
 			{ color: scaleColor( 205 ), label: "Pentatonic + blue note", tonality: Tonality.Blues6 },
 			{ color: scaleColor( 170 ), label: "Natural + two blue notes", tonality: Tonality.Blues9 }
 		];

@@ -8,7 +8,7 @@ export class BitMaskDelta {
 		this.prev = opt_startValue || 0;
 	}
 
-	update(currentValue) {
+	update( currentValue ) {
 
 		this.mask = currentValue ^ this.prev;
 		this.bits = currentValue & this.mask;
@@ -17,9 +17,9 @@ export class BitMaskDelta {
 		return this;
 	}
 
-	apply(value) {
+	apply( value ) {
 
-		return (value & ~this.mask) | this.bits;
+		return ( value & ~this.mask ) | this.bits;
 	}
 }
 

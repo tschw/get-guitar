@@ -255,8 +255,7 @@ class App {
 */
 			}
 
-		} else this.buttonMic.highlit =
-				audioAnalyzer.getSystemState() == 'starting';
+		}
 
 		const enableTranspose = !isListening || cof.selectedTonality;
 		this.buttonSharp.enabled = enableTranspose;
@@ -551,6 +550,7 @@ class App {
 		switch (audioAnalyzer.getSystemState()) {
 
 			case 'starting':
+				this.buttonMic.highlit = true;
 				animation.requestRefresh();
 				break;
 

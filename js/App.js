@@ -258,24 +258,24 @@ class App {
 		}
 
 		const enableTranspose = !isListening || cof.selectedTonality;
-		this.buttonSharp.enabled = enableTranspose;
-		this.buttonFlat.enabled = enableTranspose;
-		this.buttonFifthUp.enabled = enableTranspose;
-		this.buttonFifthDown.enabled = enableTranspose;
+		this.buttonSharp.setEnabled( enableTranspose );
+		this.buttonFlat.setEnabled( enableTranspose );
+		this.buttonFifthUp.setEnabled( enableTranspose );
+		this.buttonFifthDown.setEnabled( enableTranspose );
 
 		c2d.clearRect( 0, 0, element.width, element.height );
 		this.frets.paint( c2d );
 
 		const keys = this.keys;
-		this.buttonKeysLeft.enabled = keys.canScrollViewport( -1 );
-		this.buttonKeysRight.enabled = keys.canScrollViewport( 1 );
+		this.buttonKeysLeft.setEnabled( keys.canScrollViewport( -1 ) );
+		this.buttonKeysRight.setEnabled( keys.canScrollViewport( 1 ) );
 		keys.paint( c2d );
 
 		cof.paint( c2d );
 
 		const legend = this.legend;
-		this.buttonLegendUp.enabled = legend.canScrollViewport( -1 );
-		this.buttonLegendDown.enabled = legend.canScrollViewport( 1 );
+		this.buttonLegendUp.setEnabled( legend.canScrollViewport( -1 ) );
+		this.buttonLegendDown.setEnabled( legend.canScrollViewport( 1 ) );
 		legend.paint( c2d );
 
 		for ( let button of this.buttons ) button.widget.paint( c2d );
@@ -465,8 +465,8 @@ class App {
 		legend.toggleMode = ! selecting || zoomedIn;
 		legend.unhighlight();
 
-		this.buttonApplyCoF.enabled = selecting;
-		this.buttonCancelCoF.enabled = selecting;
+		this.buttonApplyCoF.setEnabled( selecting );
+		this.buttonCancelCoF.setEnabled( selecting );
 
 		cof.selectedTonality = animation.ifStateChange(
 				cof.selectedTonality, selecting ? tonality : 0 );
@@ -581,8 +581,8 @@ class App {
 			legend.toggleMode = true;
 		}
 
-		this.buttonApplyCoF.enabled = false;
-		this.buttonCancelCoF.enabled = false;
+		this.buttonApplyCoF.setEnabled( false );
+		this.buttonCancelCoF.setEnabled( false );
 
 		animation.requestRefresh();
 	}

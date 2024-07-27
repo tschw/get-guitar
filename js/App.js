@@ -117,7 +117,7 @@ class App {
 				widget:
 					this.buttonMic = new Button( xLastButton,
 							yFretsButtons + ButtonsHeight + ButtonsRowSpacing,
-							ButtonsWidth, ButtonsHeight, '\u{1f399}' ),
+							ButtonsWidth, ButtonsHeight, "\u{1f399}" ),
 
 				action: () => this.toggleListen()
 
@@ -218,39 +218,42 @@ class App {
 
 			this.buttonMic.highlit = true;
 			animation.requestRefresh();
-			const data = this.analyzerData;
+			const a = this.analyzerData;
 
-			if ( audioAnalyzer.getFrame(data) ) {
+			if ( audioAnalyzer.getFrame( a ) ) {
 
-				const candidates = this.diffCandidates.update(data[ 0 ]);
-				const stimuli = this.diffStimuli.update(data[ 0 ] | data[ 1 ]);
+				const candidates = this.diffCandidates.update( a[ 0 ] );
+				const stimuli = this.diffStimuli.update( a[ 0 ] | a[ 1 ] );
 
-				cof.matchTonality = stimuli.apply(this.cof.matchTonality);
+				cof.matchTonality = stimuli.apply( this.cof.matchTonality );
 
 				if (cof.selectedTonality == 0) {
 
-					highlighting.selection = candidates.apply(highlighting.selection);
-					highlighting.highlitTonality =
-							stimuli.apply(highlighting.highlitTonality);
+					highlighting.selection =
+							candidates.apply( highlighting.selection );
 
-					const melody = Math.round( data[ 2 ] );
-					highlighting.highlitNote = !Number.isNaN(melody) ? melody : null;
+					highlighting.highlitTonality =
+							stimuli.apply( highlighting.highlitTonality );
+
+					const melody = Math.round( a[ 2 ] );
+					highlighting.highlitNote =
+							! Number.isNaN( melody ) ? melody : null;
 				}
 
 /*
-				console.log("ui0:", fmtBin12(highlighting.selection));
-				console.log("ui1:", fmtBin12(cof.selectedTonality));
-				console.log("ui2:", fmtBin12(cof.matchTonality));
+				console.log( "ui0:", fmtBin12( highlighting.selection ) );
+				console.log( "ui1:", fmtBin12( cof.selectedTonality ) );
+				console.log( "ui2:", fmtBin12( cof.matchTonality ) );
 
-				console.log("acc:", fmtBin12(data[0]));
-				console.log("now:", fmtBin12(data[1]),
-					"vol:", 1 + 0.5 * Math.log10(data[2] + Number.MIN_VALUE) );
+				console.log( "acc:", fmtBin12( a[ 0 ] ) );
+				console.log( "now:", fmtBin12( a[ 1 ] ),
+					"vol:", 1 + 0.5 * Math.log10( a[ 2 ] + Number.MIN_VALUE ) );
 
-				function fmtBin12(bits) {
+				function fmtBin12( bits ) {
 
-					const binaryString = bits.toString(2);
+					const binaryString = bits.toString( 2 );
 					const paddingZeroes = 12 - binaryString.length;
-					return "0".repeat(paddingZeroes) + binaryString;
+					return "0".repeat( paddingZeroes ) + binaryString;
 				}
 */
 			}

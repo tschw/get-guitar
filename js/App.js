@@ -69,7 +69,8 @@ class App {
 		const cofTop = fretsHeight + FretsCoFSpacing;
 		const cofSize = height - cofTop;
 		const cofLeft = width - cofSize - ButtonsWidth;
-		this.cof = new CircleOfFifths( cofLeft, cofTop, cofSize );
+		const cof = new CircleOfFifths( cofLeft, cofTop, cofSize );
+		this.cof = cof;
 
 		const yFretsButtons = UpperEdgeButtonsSpacing;
 		const yKeysButtons = keysTop + UpperEdgeOfKeysButtonsSpacing;
@@ -185,10 +186,20 @@ class App {
 			}
 		];
 
+		const location = window.location.toString();
+		const sParam = /[?&]s=0b([01]+)(?:&|\/?$)/.exec( location );
+		let initialSelection = 0;
+		if ( sParam != null && sParam.length == 2 ) {
+			initialSelection = parseInt( sParam[ 1 ], 2 );
+		}
+		this.selectionInUrl = initialSelection;
+
+		cof.matchTonality = initialSelection;
+		highlighting.selection = initialSelection;
+
 		if ( audioAnalyzer.getSystemState() == 'unavailable' ) {
 
 			this.buttonMic.enabled = false;
-			const location = window.location.toString();
 			const redirect = location.replace(
 					'//tschw.github.io/get-guitar', '//get-guitar.netlify.app');
 			if ( redirect != location ) window.location = redirect;
@@ -239,7 +250,6 @@ class App {
 					highlighting.highlitNote =
 							! Number.isNaN( melody ) ? melody : null;
 				}
-
 /*
 				console.log( "ui0:", fmtBin12( highlighting.selection ) );
 				console.log( "ui1:", fmtBin12( cof.selectedTonality ) );
@@ -248,13 +258,6 @@ class App {
 				console.log( "acc:", fmtBin12( a[ 0 ] ) );
 				console.log( "now:", fmtBin12( a[ 1 ] ),
 					"vol:", 1 + 0.5 * Math.log10( a[ 2 ] + Number.MIN_VALUE ) );
-
-				function fmtBin12( bits ) {
-
-					const binaryString = bits.toString( 2 );
-					const paddingZeroes = 12 - binaryString.length;
-					return "0".repeat( paddingZeroes ) + binaryString;
-				}
 */
 			}
 
@@ -379,6 +382,7 @@ class App {
 
 			highlighting.selection ^= 1 << note % 12;
 			cof.matchTonality = highlighting.selection;
+			this.#updateUrl( highlighting.selection );
 			animation.requestRefresh();
 			return;
 
@@ -478,10 +482,9 @@ class App {
 
 			cof.highlitTonality = 0;
 
+		const selection = selecting ? tonality : cof.matchTonality;
 		highlighting.selection =
-				animation.ifStateChange(
-					highlighting.selection,
-					selecting ? tonality : cof.matchTonality );
+				animation.ifStateChange( highlighting.selection, selection );
 	}
 
 	unhighlight() {
@@ -500,6 +503,22 @@ class App {
 		cof.highlitScale = animation.ifStateChange( cof.highlitScale, null );
 
 		this.legend.unhighlight();
+	}
+
+	#updateUrl( selection ) {
+
+		if ( this.selectionInUrl != selection ) {
+
+			this.selectionInUrl = selection;
+
+			let queryString = '';
+			if ( selection != 0 )
+				queryString = '?s=0b' + fmtBin12( selection );
+
+			const location = window.location;
+			window.history.replaceState( null, '',
+					location.origin + location.pathname + queryString );
+		}
 	}
 
 	#findNote( x, y ) {
@@ -540,10 +559,13 @@ class App {
 
 			cof.selectedTonality = highlighting.selection;
 			this.selectedKey = ( this.selectedKey + semitones ) % 12;
+
+		} else {
+
+			const selection = highlighting.selection;
+			cof.matchTonality = selection;
+			this.#updateUrl( selection );
 		}
-
-		else cof.matchTonality = highlighting.selection;
-
 		animation.requestRefresh();
 	}
 
@@ -571,7 +593,11 @@ class App {
 
 		const highlighting = this.highlighting, cof = this.cof;
 
-		if ( doApply ) cof.matchTonality = highlighting.selection;
+		if ( doApply ) {
+			const selection = highlighting.selection;
+			cof.matchTonality = selection;
+			this.#updateUrl( selection );
+		}
 		else highlighting.selection = cof.matchTonality;
 
 		this.selectedKey = -1;
@@ -589,6 +615,13 @@ class App {
 
 		animation.requestRefresh();
 	}
+}
+
+function fmtBin12( bits ) {
+
+	const binaryString = bits.toString( 2 );
+	const paddingZeroes = 12 - binaryString.length;
+	return "0".repeat( paddingZeroes ) + binaryString;
 }
 
 const app = new App();

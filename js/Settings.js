@@ -81,6 +81,7 @@ export class Settings {
 		})( () => { this.#getLowestWhiteKey(); this.#stateHasChanged(); } );
 
 		( h => {
+			elem.mirrored.addEventListener( 'change', h );
 			elem.keysScrollButtons.addEventListener( 'change', h );
 			elem.legendScrollButtons.addEventListener( 'change', h );
 			elem.featureChromaticTranspose.addEventListener( 'change', h );
@@ -174,6 +175,8 @@ export class Settings {
 
 		const elem = this.formElements, data = this.state.local;
 
+		data.mirrored = elem.mirrored.checked;
+
 		data.keysScrollButtons = elem.keysScrollButtons.checked;
 		data.legendScrollButtons = elem.legendScrollButtons.checked;
 
@@ -185,6 +188,8 @@ export class Settings {
 	#setToggles() {
 
 		const elem = this.formElements, data = this.state.local;
+
+		elem.mirrored.checked = data.mirrored;
 
 		elem.keysScrollButtons.checked = data.keysScrollButtons;
 		elem.legendScrollButtons.checked = data.legendScrollButtons;
@@ -204,6 +209,9 @@ export class Settings {
 	#resetLocal() {
 
 		const elem = this.formElements;
+
+		elem.mirrored.checked = elem.mirrored.defaultChecked;
+
 		elem.keysLowestKey.value = elem.keysLowestKey.getAttribute( 'value' );
 		elem.keysLowestKeyOctave.value = elem.keysLowestKeyOctave.defaultValue;
 		this.#getLowestWhiteKey();

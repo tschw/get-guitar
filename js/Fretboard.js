@@ -59,12 +59,15 @@ export class Fretboard {
 
 		const tunings = this.settings.tunings;
 		const nTunings = tunings.length;
+		const mirrored = this.settings.local.mirrored;
+
+		const width = this.width;
 
 		const transitionOffset = this.#updatedTransitionOffset();
 		const visibility = Math.abs( transitionOffset * 2 - 1 ) ** 2;
 
 		c2d.save();
-		c2d.rect( 0, 0, this.width, this.height * visibility );
+		c2d.rect( 0, 0, width, this.height * visibility );
 		c2d.clip();
 
 		// Paint frets:
@@ -77,7 +80,7 @@ export class Fretboard {
 
 		for ( let i = 0; i < this.numberOfFrets; ++ i ) {
 
-			const x = this.#fretPosition( i ) * this.width;
+			const x = this.#fretPosition( i ) * width;
 			let marker = null;
 
 			switch (i % 12) {
@@ -112,7 +115,7 @@ export class Fretboard {
 
 			if ( i < 1 || ! marker ) continue;
 
-			const xPrev = this.#fretPosition( i - 1 ) * this.width;
+			const xPrev = this.#fretPosition( i - 1 ) * width;
 			const xMiddle = ( x + xPrev ) / 2;
 			const fretWidth = x - xPrev;
 			const xLeft = xMiddle - fretWidth * FractionalMarkerLeftDisplace;
@@ -157,8 +160,6 @@ export class Fretboard {
 
 			// Paint caption or label:
 
-			c2d.fillStyle = '#cccccc';
-
 			if ( ! haveString ) {
 
 				c2d.font = '24px arial';
@@ -167,7 +168,8 @@ export class Fretboard {
 				const label = ' ' + stringSlot.label;
 				const textMeasure = c2d.measureText( label );
 
-				c2d.clearRect(
+				c2d.fillStyle = 'rgba(17,34,51,0.3)';
+				c2d.fillRect(
 						textMeasure.actualBoundingBoxLeft,
 						yMax - textMeasure.actualBoundingBoxAscent,
 						textMeasure.actualBoundingBoxRight -
@@ -175,6 +177,7 @@ export class Fretboard {
 						textMeasure.actualBoundingBoxDescent +
 							textMeasure.actualBoundingBoxAscent );
 
+				c2d.fillStyle = '#cccccc';
 				c2d.fillText( label, 0, yMax );
 			} else {
 
@@ -187,8 +190,7 @@ export class Fretboard {
 
 			if ( ! haveString ) continue;
 
-			const xAfterText = c2d.measureText(
-					stringSlot.label + ' ' ).width;
+			const xAfterText = c2d.measureText( stringSlot.label + ' ' ).width;
 			c2d.beginPath();
 			c2d.moveTo( xAfterText, y );
 			c2d.lineTo( this.width, y );
@@ -252,21 +254,24 @@ export class Fretboard {
 		const lastFretBefore = fretStringPosition( this.numberOfFrets - 1 );
 		const openStringOffset = lastFret - lastFretBefore;
 		const visibleStringLength = lastFret;
-
-		return (fretStringPosition(i) + openStringOffset) /
+		let x = (fretStringPosition(i) + openStringOffset) /
 				(visibleStringLength + openStringOffset);
+		return ! this.settings.local.mirrored ? x : 1 - x;
 	}
 
 	#forEachBoundingBox( f ) {
 
 		const tunings = this.settings.tunings;
 		const tuning = tunings[ this.#actualTuningIndex() ];
+		const mirrored = this.settings.local.mirrored;
 
-		let xMin = 0, xMax = 0;
+		const width = this.width;
+
+		let xA = 0, xB = mirrored ? width : 0;
 		for ( let i = 0; i < this.numberOfFrets + 1; ++ i ) {
 
-			xMin = xMax;
-			xMax = this.#fretPosition( i ) * this.width;
+			xA = xB;
+			xB = this.#fretPosition( i ) * width;
 
 			let yMin = 0, yMax = 0;
 			const nSlots = tuning.length;
@@ -279,7 +284,9 @@ export class Fretboard {
 				if ( stringSlot.tuning == null ) continue;
 
 				const actualNote = stringSlot.tuning + i;
-				const result = f( actualNote, xMin, yMin, xMax, yMax );
+				const result = ! mirrored ?
+						f( actualNote, xA, yMin, xB, yMax ):
+						f( actualNote, xB, yMin, xA, yMax );
 				if ( result != null ) return result;
 			}
 		}

@@ -1,0 +1,90 @@
+dialog {
+	background-color: inherit;
+	position: absolute;
+	left: 4%; width: 88%;
+	top: 6.5%; height: 78%;
+	opacity: 86%;
+	padding: 2%;
+	margin: 0;
+	border: 0;
+	color: white;
+	font-size: 16pt;
+	overflow: hidden;
+	text-align: center;
+}
+
+dialog h3 { margin: 0; }
+dialog button:first-child { float: right; }
+
+fieldset p {
+	margin: 0.25em 0 0.5em 0;
+	text-align: justify;
+	text-justify: inter-word;
+}
+
+a, a:link, a:active, a:visited {
+	color: darkgray!important;
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+button, label[for=import], a.button,
+		a.button:link, a.button:active, a.button:visited {
+
+	background-color: inherit;
+	color: lightgray!important;
+	border: 2px solid darkgray;
+	border-radius: 8px;
+	font-weight: bold;
+	text-decoration: none!important;
+	margin: 0 2px;
+	padding: 0 6px;
+	font-size: 24px;
+}
+
+a:hover, a.button:hover, button:hover, label[for=import]:hover {
+	color: inherit!important;
+	border-color: inherit!important;
+	cursor: pointer;
+}
+
+form {
+	display: block;
+	margin: 1% 0 0 0;
+	clear: right;
+	text-align: left;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	position: relative;
+	height: 94%;
+}
+
+.block { display: block; }
+
+label.error:not([for=import]), textarea.error { color: red; }
+label.error[for=import], a.button.error { border-color: red; }
+
+textarea {
+	width: 99%;
+	height: 4em;
+	font-size: 12pt;
+	font-weight: bold;
+	background-color: white;
+	opacity: 60%;
+	border: 0;
+	color: black;
+}
+label { white-space: pre-line; margin: 4px; }
+input:hover, select:hover {
+	background-color: lightgray;
+}
+select { height: 1.5em; }
+input[type=number] { width: 3em; }
+input, select { font-size: 11pt; vertical-align: text-top; }
+input[type=checkbox] { vertical-align: middle; }
+input[type=file] {
+	position: absolute!important;
+	width: 1px; height: 1px;
+}
+
+

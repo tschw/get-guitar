@@ -17,15 +17,15 @@ export class PianoKeyboard {
 	#scrollTarget;
 
 	constructor( yTop, width, height,
-			lowestNote, numberOfWhiteKeys, highlighting ) {
+			numberOfWhiteKeys, settings, highlighting ) {
 
 		this.yTop = yTop;
 		this.width = width;
 		this.height = height;
 
+		this.settings = settings.local;
 		this.highlighting = highlighting;
 
-		this.lowestNote = lowestNote;
 		this.numberOfWhiteKeys = numberOfWhiteKeys;
 
 		this.#scrollOffset = 0;
@@ -34,7 +34,7 @@ export class PianoKeyboard {
 
 	canScrollViewport( direction ) {
 
-		const lowest = this.lowestNote + direction;
+		const lowest = this.settings.lowestWhiteKey + direction;
 		const highest = lowest + this.#numberOfKeys();
 		return lowest >= 0 && highest <= HighestNoteLimit;
 	}
@@ -47,7 +47,8 @@ export class PianoKeyboard {
 		const o = ( this.#scrollOffset = 1 - (
 				this.#scrollTarget = direction * 0.5 + 0.5 ) );
 
-		if ( o == 1 ) this.lowestNote = this.#nextLowestWhiteKey( -1 );
+		if ( o == 1 )
+			this.settings.lowestWhiteKey = this.#nextLowestWhiteKey( -1 );
 
 		animation.requestRefresh();
 	}
@@ -82,7 +83,7 @@ export class PianoKeyboard {
 		let iW = 0;
 		for ( let i = 0; i < n; ++ i ) {
 
-			const note = this.lowestNote + i;
+			const note = this.settings.lowestWhiteKey + i;
 			if ( isBlackKey( note ) ) continue;
 
 			const xMin = w * ( iW - o ) / nW;
@@ -112,7 +113,7 @@ export class PianoKeyboard {
 
 		for ( let i = -1; i <= n; ++ i ) {
 
-			const note = this.lowestNote + i;
+			const note = this.settings.lowestWhiteKey + i;
 
 			if ( ! isBlackKey( note + 12 ) ) {
 
@@ -158,7 +159,7 @@ export class PianoKeyboard {
 		let iW = 0;
 		for ( let i = 0; i < n; ++ i ) {
 
-			const note = this.lowestNote + i;
+			const note = this.settings.lowestWhiteKey + i;
 			if ( ! isBlackKey( note ) ) { ++ iW; continue; }
 
 			const xCenter = w * ( iW - o ) / nW;
@@ -175,7 +176,7 @@ export class PianoKeyboard {
 		iW = 0;
 		for ( let i = 0; i < n; ++ i ) {
 
-			const note = this.lowestNote + i;
+			const note = this.settings.lowestWhiteKey + i;
 			if ( isBlackKey( note ) ) continue;
 
 			const xMin = w * ( iW - o ) / nW;
@@ -191,7 +192,7 @@ export class PianoKeyboard {
 
 	#nextLowestWhiteKey( direction ) {
 
-		let result = this.lowestNote;
+		let result = this.settings.lowestWhiteKey;
 		do { result += direction; } while ( isBlackKey( result ) );
 		return result;
 	}
@@ -207,7 +208,7 @@ export class PianoKeyboard {
 
 		for ( let iW = 0, nW = this.#numberOfVisibleWhiteKeys(); iW < nW; ++ n )
 
-			if ( ! isBlackKey( n + this.lowestNote ) ) ++ iW;
+			if ( ! isBlackKey( n + this.settings.lowestWhiteKey ) ) ++ iW;
 
 		return n;
 	}
@@ -227,7 +228,7 @@ export class PianoKeyboard {
 			if ( scrollOffset == 1 ) {
 
 				scrollOffset = 0;
-				this.lowestNote = this.#nextLowestWhiteKey( 1 );
+				this.settings.lowestWhiteKey = this.#nextLowestWhiteKey( 1 );
 			}
 
 			this.#scrollTarget = -1;

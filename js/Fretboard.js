@@ -29,7 +29,7 @@ export class Fretboard {
 	#transitionOffset;
 	#transitionTarget;
 
-	constructor( width, height, tunings, numberOfFrets, highlighting ) {
+	constructor( width, height, numberOfFrets, settings, highlighting ) {
 
 		this.width = width;
 		this.height = height;
@@ -43,35 +43,7 @@ export class Fretboard {
 		this.#transitionOffset = 0;
 		this.#transitionTarget = -1;
 
-		this.tunings = Fretboard.parseTunings( tunings );
-	}
-
-	static parseTunings( tuning ) {
-
-		const result = [];
-
-		const splitParts =
-				/\s*([^:]*):\s*((?:[A-G][#b\u{1d130}\u{1d12c}]?\d\s*)+)/gu;
-		const eachString = /(([A-G][#b\u{1d130}\u{1d12c}]?)\d)\s*/gu;
-
-		const fail = tuning.replaceAll(
-				splitParts, function( _, label, strings ) {
-
-			const parsed = [];
-			strings.replaceAll(eachString,
-					function( _, noteWithOctave, note ) {
-
-				parsed.push( { label: note, tuning:
-					noteNameToNumber( noteWithOctave ) } );
-			});
-
-			parsed.push( { label, tuning: null } );
-
-			result.push( parsed.reverse() );
-
-			return "";
-		});
-		return ! fail ? result : null;
+		this.settings = settings;
 	}
 
 	transitionToNextTuning() {
@@ -85,7 +57,7 @@ export class Fretboard {
 
 	paint( c2d ) {
 
-		const tunings = this.tunings;
+		const tunings = this.settings.tunings;
 		const nTunings = tunings.length;
 
 		const transitionOffset = this.#updatedTransitionOffset();
@@ -97,7 +69,7 @@ export class Fretboard {
 
 		// Paint frets:
 
-		const tuning = this.tunings[ this.#actualTuningIndex() ];
+		const tuning = tunings[ this.#actualTuningIndex() ];
 		const nSlots = tuning.length;
 		const stringSlotHeight = this.height / nSlots;
 		const markerRadius = stringSlotHeight * FractionalMarkerRadius;
@@ -247,7 +219,8 @@ export class Fretboard {
 
 	#actualTuningIndex() {
 
-		return ( this.tuningIndex + Math.round( this.#transitionOffset ) ) % this.tunings.length;
+		const n = this.settings.tunings.length;
+		return ( this.tuningIndex + Math.round( this.#transitionOffset ) ) % n;
 	}
 
 	#updatedTransitionOffset() {
@@ -263,7 +236,8 @@ export class Fretboard {
 		if ( transitionOffset == 1 ) {
 
 			transitionOffset = 0;
-			this.tuningIndex = ( this.tuningIndex + 1 ) % this.tunings.length;
+			this.tuningIndex =
+					( this.tuningIndex + 1 ) % this.settings.tunings.length;
 
 			this.#transitionTarget = -1;
 		}
@@ -285,7 +259,7 @@ export class Fretboard {
 
 	#forEachBoundingBox( f ) {
 
-		const tunings = this.tunings;
+		const tunings = this.settings.tunings;
 		const tuning = tunings[ this.#actualTuningIndex() ];
 
 		let xMin = 0, xMax = 0;

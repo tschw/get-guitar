@@ -1,3 +1,4 @@
+import { Settings } from './Settings.js'
 import { Fretboard } from './Fretboard.js'
 import { Highlighting } from './Highlighting.js'
 import { PianoKeyboard } from './PianoKeyboard.js'
@@ -9,15 +10,8 @@ import { animation } from './Animation.js'
 import * as audioAnalyzer from './audio-analyzer/api.js'
 import { BitMaskDelta } from './BitMaskDelta.js'
 
-const DefaultTunings = `${''
-		} Guitar - standard tuning: E2 A2 D3 G3 B3 E4 ${''
-		} Ukulele - GCEA: G4 C4 E4 A4 ${''
-		} Mandola | Violin: C3 G3 D4 A4 E5 ${''
-		}`;
-
 const NumberOfFrets = 16;
 const NumberOfPianoWhiteKeys = 8;
-const LowestPianoKey = noteNameToNumber( 'C2' );
 
 const FretsFractionalHeight = 0.62;
 const FretsKeysSpacing = 8;
@@ -41,15 +35,17 @@ class App {
 
 	constructor() {
 
-		this.element = document.getElementById( 'canvas' );
+		this.element = document.getElementsByTagName( 'canvas' )[ 0 ];
 		this.c2d = this.element.getContext( '2d' );
 		this.pointerPosition = { x: 0, y: 0 };
-		this.tunings = DefaultTunings;
 		this.selectedKey = -1;
 		this.analyzerData = audioAnalyzer.createDataVector();
 		this.diffCandidates = new BitMaskDelta();
 		this.diffStimuli = new BitMaskDelta();
 
+		const settingsObject = new Settings();
+		const settings = settingsObject.state;
+		this.settings = settings;
 		const highlighting = new Highlighting();
 		this.highlighting = highlighting;
 
@@ -58,13 +54,13 @@ class App {
 
 		const fretsHeight = height * FretsFractionalHeight;
 		this.frets = new Fretboard(
-				width, fretsHeight, this.tunings, NumberOfFrets, highlighting );
+				width, fretsHeight, NumberOfFrets, settings, highlighting );
 
 		const keysTop = fretsHeight + FretsKeysSpacing;
 		const keysWidth = width * 0.42;
 		this.keys = new PianoKeyboard(
 				keysTop, keysWidth, height - keysTop,
-				LowestPianoKey, NumberOfPianoWhiteKeys, highlighting );
+				NumberOfPianoWhiteKeys, settings, highlighting );
 
 		const cofTop = fretsHeight + FretsCoFSpacing;
 		const cofSize = height - cofTop;
@@ -89,6 +85,8 @@ class App {
 				keysWidth - ButtonsWidth - HorizEdgeButtonsSpacing;
 		const xLegendScrollButtons = xCoFButtonsLeft - ButtonsRowDistance;
 
+		const localSettings = settings.local;
+
 		this.buttons = [
 
 			{
@@ -96,7 +94,8 @@ class App {
 					new Button( xLastButton, yFretsButtons,
 							ButtonsWidth, ButtonsHeight, "\u2261" ),
 
-				action: () => this.configure()
+				action: () => settingsObject.openModalDialog(),
+				existsIf: () => true
 
 			}, {
 				widget:
@@ -104,7 +103,8 @@ class App {
 							xLastButton - ButtonsRowDistance, yFretsButtons,
 							ButtonsWidth, ButtonsHeight, Sharp ),
 
-				action: () => this.transpose( 1 )
+				action: () => this.transpose( 1 ),
+				existsIf: () => localSettings.featureChromaticTranspose
 
 			}, {
 				widget:
@@ -112,7 +112,8 @@ class App {
 							xLastButton - ButtonsRowDistance * 2, yFretsButtons,
 							ButtonsWidth, ButtonsHeight, Flat ),
 
-				action: () => this.transpose( -1 )
+				action: () => this.transpose( -1 ),
+				existsIf: () => localSettings.featureChromaticTranspose
 
 			}, {
 				widget:
@@ -120,7 +121,8 @@ class App {
 							yFretsButtons + ButtonsHeight + ButtonsRowSpacing,
 							ButtonsWidth, ButtonsHeight, "\u{1f399}" ),
 
-				action: () => this.toggleListen()
+				action: () => this.toggleListen(),
+				existsIf: () => localSettings.featureAudioAnalysis
 
 			}, {
 				widget:
@@ -128,7 +130,8 @@ class App {
 							xFirstButton, yKeysButtons,
 							ButtonsWidth, ButtonsHeight, "\u25c5" ),
 
-				action: () => this.keys.scrollViewport( -1 )
+				action: () => this.keys.scrollViewport( -1 ),
+				existsIf: () => localSettings.keysScrollButtons
 
 			}, {
 				widget:
@@ -136,7 +139,8 @@ class App {
 							xKeysButtonsRight, yKeysButtons,
 							ButtonsWidth, ButtonsHeight, "\u25bb" ),
 
-				action: () => this.keys.scrollViewport( 1 )
+				action: () => this.keys.scrollViewport( 1 ),
+				existsIf: () => localSettings.keysScrollButtons
 
 			}, {
 				widget:
@@ -144,7 +148,8 @@ class App {
 							xLegendScrollButtons, yKeysButtons,
 							ButtonsWidth, ButtonsHeight, "\u25b5" ),
 
-				action: () => this.legend.scrollViewport( -1 )
+				action: () => this.legend.scrollViewport( -1 ),
+				existsIf: () => localSettings.legendScrollButtons
 
 			}, {
 				widget:
@@ -152,28 +157,33 @@ class App {
 							xLegendScrollButtons, yButtonsBottom,
 							ButtonsWidth, ButtonsHeight, "\u25bf" ),
 
-				action: () => this.legend.scrollViewport( 1 )
+				action: () => this.legend.scrollViewport( 1 ),
+				existsIf: () => localSettings.legendScrollButtons
 
 			}, {
 				widget:
 					this.buttonFifthUp = new Button( xLastButton, yKeysButtons,
 							ButtonsWidth, ButtonsHeight, "\u21bb" ),
 
-				action: () => this.transpose( 7 )
+				action: () => this.transpose( 7 ),
+				existsIf: () => localSettings.featureTransposeByFifth
 
 			}, {
 				widget:
 					this.buttonFifthDown = new Button( xCoFButtonsLeft, yKeysButtons,
 							ButtonsWidth, ButtonsHeight, "\u21ba" ),
 
-				action: () => this.transpose( -7 )
+				action: () => this.transpose( -7 ),
+				existsIf: () => localSettings.featureTransposeByFifth
+
 			}, {
 				widget:
 					this.buttonApplyCoF = new Button(
 							xLastButton, yButtonsBottom,
 							ButtonsWidth, ButtonsHeight, "\u2713" ),
 
-				action: () => this.applyOrCancelCoF( true )
+				action: () => this.applyOrCancelCoF( true ),
+				existsIf: () => true
 
 			}, {
 				widget:
@@ -181,7 +191,8 @@ class App {
 							xCoFButtonsLeft, yButtonsBottom,
 							ButtonsWidth, ButtonsHeight, "\u2717" ),
 
-				action: () => this.applyOrCancelCoF( false )
+				action: () => this.applyOrCancelCoF( false ),
+				existsIf: () => true
 
 			}
 		];
@@ -284,7 +295,8 @@ class App {
 		this.buttonLegendDown.setEnabled( legend.canScrollViewport( 1 ) );
 		legend.paint( c2d );
 
-		for ( let button of this.buttons ) button.widget.paint( c2d );
+		for ( let button of this.buttons )
+			if ( button.existsIf() ) button.widget.paint( c2d );
 
 		highlighting.attenuate();
 	}
@@ -308,7 +320,8 @@ class App {
 		const isListening = audioAnalyzer.getSystemState() == 'running';
 
 		for ( let button of this.buttons )
-			if ( button.widget.highlightIfContained( p.x, p.y ) ) {
+			if ( button.existsIf() &&
+					button.widget.highlightIfContained( p.x, p.y ) ) {
 
 				if ( ! isListening )
 					highlighting.highlitNote =
@@ -364,7 +377,8 @@ class App {
 		const p = this.#getPointerCoordinates( event );
 
 		for ( let button of this.buttons )
-			if ( button.widget.isContained( p.x, p.y ) ) {
+			if ( button.existsIf() &&
+					button.widget.isContained( p.x, p.y ) ) {
 
 				if ( button.widget.enabled ) {
 
@@ -528,25 +542,6 @@ class App {
 		if ( note != null ) return note;
 		note = this.keys.noteAtCoordinates( x, y );
 		return note;
-	}
-
-	configure() {
-
-		let tunings = prompt( "Edit tunings:", this.tunings );
-		if ( tunings == null ) return; // cancel
-		if ( tunings == "" ) tunings = DefaultTunings;
-
-		const parsed = Fretboard.parseTunings( tunings );
-		if ( ! parsed ) {
-			alert( "Something in your tunings did not quite add up." );
-			return;
-		}
-
-		this.tunings = tunings;
-
-		const frets = this.frets;
-		this.frets.tunings = parsed;
-		this.frets.tuningIndex %= parsed.length;
 	}
 
 	transpose( semitones ) {

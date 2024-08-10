@@ -13,7 +13,7 @@
 				margin: 0; border: 0; padding: 0;
 			}
 
-			#canvas { width: 100%; }
+			canvas { width: 100%; }
 
 			@media screen and (orientation: portrait) {
 
@@ -24,16 +24,78 @@
 					bottom: 0;
 					content: "";
 					background: #525252
-							url(./turn-device.png) center center no-repeat;
+							url(./style/turn-device.png) center center no-repeat;
 					background-size: 100% auto;
 				}
 
-				#canvas { display: none; }
+				canvas, dialog { display: none; }
 			}
+
 		</style>
+		<link href="./style/settings.css" rel="stylesheet" />
 	</head>
 	<body>
-		<canvas id="canvas" width="1000" height="495"></canvas>
+		<canvas width="1000" height="495"></canvas>
+		<dialog>
+			<button form="form">✖</button>
+			<h3>Settings</h3>
+			<form id="form" method="dialog">
+
+				<fieldset><legend>About</legend>
+					<p>
+						Provided as-is. Please consider sending a <a href="https://portal.tipjar.tips/t3s/themusic" target="_blank">donation</a> in case this software proves useful to you.
+						Also, there's a &copy; <a href="https://github.com/tschw/get-guitar/blob/gh-pages/LICENSE" target="_blank">copy left</a> of <a href="https://github.com/tschw/get-guitar" target="_blank">the source</a>.
+					</p>
+				</fieldset>
+				<fieldset>
+					<legend>Persistency</legend>
+					<p>
+						The settings here are stored locally on the device, more
+						precisely in your browser's local storage.
+						The app runs entirely on the client, so in order to move
+						settings to another device or share them with another user,
+						they can be exported to a file and then imported elsewhere.
+					</p>
+					<p>
+						<input type="file" name="import" id="import" accept="text/json"></input>
+						<label for="import">Import</label>
+						<a class="button" name="export" href="#">Export</a>
+						<a class="button" name="reset" href="#">Reset</a>
+					</p>
+					<label class="block"><input name="imexTunings" type="checkbox" checked="true"></input> String Instruments / Tunings</label>
+					<label class="block"><input name="imexLocal" type="checkbox" checked="true"></input> Local User Preferences</label>
+				</fieldset>
+				<fieldset><legend>Strings View</legend>
+					<label class="block">Instruments &amp; Tunings
+						<textarea name="tunings">
+Guitar - standard tuning: E2 A2 D3 G3 B3 E4
+Mandola | Violin: C3 G3 D4 A4 E5
+Ukulele - GCEA: G4 C4 E4 A4</textarea>
+					</label>
+				</fieldset>
+				<fieldset>
+					<legend>Keyboard View</legend>
+					The lowest visible white key is
+					<select name="keysLowestKey" value="C" required="true">
+						<option>C</option><option>D</option><option>E</option>
+						<option>F</option><option>G</option><option>A</option>
+						<option>B</option></select>
+					<input name="keysLowestKeyOctave" required="true" value="2" min="0" max="7" type="number"></input>
+					<label class="block"><input name="keysScrollButtons" type="checkbox" checked="true"></input> Scroll Buttons are Visible</label>
+				</fieldset>
+				<fieldset>
+					<legend>Tonality Legend</legend>
+					<label class="block"><input name="legendScrollButtons" type="checkbox" checked="true"></input> Scroll Buttons are Visible</label>
+				</fieldset>
+				<fieldset>
+					<legend>Feature Preferences</legend>
+					<label class="block"><input name="featureChromaticTranspose" type="checkbox" checked="true"></input> Chromatic Transpose, Flat/Sharp Buttons</label>
+					<label class="block"><input name="featureTransposeByFifth" type="checkbox" checked="true"></input> Transpose by Fifth, Circle of Fifths Rotate Buttons</label>
+					<label class="block"><input name="featureAudioAnalysis" type="checkbox" checked="true"></input> Audio Perception and Analysis (experimental), Microphone Button</label>
+				</fieldset>
+
+			</form>
+		</dialog>
 		<script src="js/App.js" type="module"></script>
 	</body>
 </html>

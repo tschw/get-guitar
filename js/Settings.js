@@ -325,6 +325,8 @@ export class Settings {
 
 			this.#stateHasChanged();
 		}
+
+		event.preventDefault();
 	}
 
 	#imexOkSelectionApproves( event ) {

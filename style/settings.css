@@ -30,21 +30,26 @@ a, a:link, a:active, a:visited {
 
 button, label[for=import], a.button,
 		a.button:link, a.button:active, a.button:visited {
-
 	background-color: inherit;
 	color: lightgray!important;
 	border: 2px solid darkgray;
 	border-radius: 8px;
 	font-weight: bold;
-	text-decoration: none!important;
+	text-decoration: none;
 	margin: 0 2px;
 	padding: 0 6px;
 	font-size: 24px;
 }
 
-a:hover, a.button:hover, button:hover, label[for=import]:hover {
+label {
+	white-space: pre-line; margin: 4px;
+	color: lightgray;
+}
+
+a:hover, a.button:hover, button:hover, label:hover {
+
 	color: inherit!important;
-	border-color: inherit!important;
+	border-color: inherit;
 	cursor: pointer;
 }
 
@@ -74,7 +79,6 @@ textarea {
 	border: 0;
 	color: black;
 }
-label { white-space: pre-line; margin: 4px; }
 input:hover, select:hover {
 	background-color: lightgray;
 }

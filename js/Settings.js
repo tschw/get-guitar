@@ -93,8 +93,12 @@ export class Settings {
 				checkbox => checkbox.addEventListener(
 					'change', () => this.#imexClearError() ) );
 
+		form.querySelector(
+				'label[for=import]' ).addEventListener(
+					'click',e => this.#imexOkSelectionApproves( e ) );
+
 		form.querySelector( 'input#import[type=file]' ).
-				addEventListener( 'change', e => this.#importClick( e ) );
+				addEventListener( 'change', e => this.#importFile( e ) );
 
 		form.querySelector( 'a.button[name=export]' ).
 				addEventListener( 'click', e => this.#exportClick( e ) );
@@ -225,7 +229,7 @@ export class Settings {
 		this.#getToggles();
 	}
 
-	#importClick( event ) {
+	#importFile( event ) {
 
 		const button = event.target.labels[ 0 ];
 		if ( ! this.#imexCheckSelection( button ) ) return false;
@@ -293,14 +297,7 @@ export class Settings {
 
 	#exportClick( event ) {
 
-		const target = event.target;
-		if ( ! this.#imexCheckSelection( event.target ) ) {
-
-			target.href = '#';
-			target.target = '';
-			event.preventDefault();
-			return false;
-		}
+		if ( ! this.#imexOkSelectionApproves( event ) ) return false;
 
 		const elem = this.formElements, root = { version: 1 }, s = this.state;
 		if ( elem.imexTunings.checked ) root.tunings = s.tunings;
@@ -312,6 +309,7 @@ export class Settings {
 		const url = jsonDownload( root );
 		this.#cachedExportUrl = url;
 
+		const target = event.target;
 		target.href = url;
 		target.target = '_blank';
 		target.download = 'get-guitar-export.json';
@@ -327,6 +325,19 @@ export class Settings {
 
 			this.#stateHasChanged();
 		}
+	}
+
+	#imexOkSelectionApproves( event ) {
+
+		const target = event.target;
+		const ok = this.#imexCheckSelection( event.target );
+		if ( ! ok ) {
+
+			target.href = '#';
+			target.target = '';
+			event.preventDefault();
+		}
+		return ok;
 	}
 
 	#imexCheckSelection( button ) {

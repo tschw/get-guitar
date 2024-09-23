@@ -1,8 +1,8 @@
 
 const BasePitch = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
 
-export const Sharp = '\u{1d130}';
-export const Flat = '\u{1d12c}';
+export const Sharp = '\u{266f}';
+export const Flat = '\u{266d}';
 
 export const NoteNameInOctave = Object.freeze( [
 		'C', 'C' + Sharp, 'D', 'D' + Sharp, 'E', 'F',

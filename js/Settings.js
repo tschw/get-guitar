@@ -112,8 +112,8 @@ export class Settings {
 		const result = [], element = this.formElements.tunings;
 
 		const splitParts =
-				/\s*([^:]*):\s*((?:[A-G][#b\u{1d130}\u{1d12c}]?\d\s*)+)/gu;
-		const eachString = /(([A-G][#b\u{1d130}\u{1d12c}]?)\d)\s*/gu;
+				/\s*([^:]*):\s*((?:[A-G][#b\u266f\u266d\u{1d130}\u{1d12c}]?\d\s*)+)/gu;
+		const eachString = /(([A-G][#b\u266f\u266d\u{1d130}\u{1d12c}]?)\d)\s*/gu;
 
 		const fail = element.value.replaceAll(
 				splitParts, ( _, label, strings ) => {

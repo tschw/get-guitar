@@ -34,8 +34,8 @@ export function noteNameToNumber( s ) {
 	let note = BasePitch[ s[ 0 ].toUpperCase() ];
 	let octavePos = 1;
 	switch ( s[ 1 ] ) {
-		case '#': ++ note; ++ octavePos; break;
-		case 'b': -- note; ++ octavePos; break;
+		case '#': case Sharp: ++ note; ++ octavePos; break;
+		case 'b': case Flat: -- note; ++ octavePos; break;
 
 		case '\ud834':
 			switch ( s[ 2 ] ) {

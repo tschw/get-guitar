@@ -60,7 +60,7 @@ class App {
 		const keysWidth = width * 0.42;
 		this.keys = new PianoKeyboard(
 				keysTop, keysWidth, height - keysTop,
-				NumberOfPianoWhiteKeys, settings, highlighting );
+				NumberOfPianoWhiteKeys, settingsObject, highlighting );
 
 		const cofTop = fretsHeight + FretsCoFSpacing;
 		const cofSize = height - cofTop;

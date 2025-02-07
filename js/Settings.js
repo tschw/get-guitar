@@ -60,7 +60,7 @@ export class Settings {
 		this.#setToggles();
 	}
 
-	#stateHasChanged() {
+	persist() {
 
 		storage?.setItem( StorageKey, JSON.stringify( this.state ) );
 		animation.requestRefresh();
@@ -73,12 +73,12 @@ export class Settings {
 		( h => {
 			elem.tunings.addEventListener( 'input', h );
 			elem.tunings.addEventListener( 'change', h );
-		})( () => { this.#getTunings() && this.#stateHasChanged(); } );
+		})( () => { if ( this.#getTunings() ) this.persist(); } );
 
 		( h => {
 			elem.keysLowestKey.addEventListener( 'change', h );
 			elem.keysLowestKeyOctave.addEventListener( 'change', h );
-		})( () => { this.#getLowestWhiteKey(); this.#stateHasChanged(); } );
+		})( () => { this.#getLowestWhiteKey(); this.persist(); } );
 
 		( h => {
 			elem.mirrored.addEventListener( 'change', h );
@@ -87,7 +87,7 @@ export class Settings {
 			elem.featureChromaticTranspose.addEventListener( 'change', h );
 			elem.featureTransposeByFifth.addEventListener( 'change', h );
 			elem.featureAudioAnalysis.addEventListener( 'change', h );
-		})( () => { this.#getToggles(); this.#stateHasChanged(); } );
+		})( () => { this.#getToggles(); this.persist(); } );
 
 		this.partToggles.forEach(
 				checkbox => checkbox.addEventListener(
@@ -278,7 +278,7 @@ export class Settings {
 				if ( ok ) {
 
 					this.#updateUi();
-					this.#stateHasChanged();
+					this.persist();
 				}
 				setError( ! ok );
 
@@ -323,7 +323,7 @@ export class Settings {
 			if ( elem.imexTunings.checked ) this.#resetTunings();
 			if ( elem.imexLocal.checked ) this.#resetLocal();
 
-			this.#stateHasChanged();
+			this.persist();
 		}
 
 		event.preventDefault();

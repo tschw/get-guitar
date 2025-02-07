@@ -53,7 +53,7 @@ a:hover, a.button:hover, button:hover, label:hover {
 	cursor: pointer;
 }
 
-form {
+form#settings {
 	display: block;
 	margin: 1% 0 0 0;
 	clear: right;

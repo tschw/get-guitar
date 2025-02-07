@@ -32,7 +32,7 @@ export class PianoKeyboard {
 
 	canScrollViewport( direction ) {
 
-		const lowest = this.confState.lowestWhiteKey + direction;
+		const lowest = this.confState.keysLowestWhite + direction;
 		const highest = lowest + this.#numberOfKeys();
 		return lowest >= 0 && highest <= HighestNoteLimit;
 	}
@@ -46,7 +46,7 @@ export class PianoKeyboard {
 				this.#scrollTarget = direction * 0.5 + 0.5 ) );
 
 		if ( o == 1 ) {
-			this.confState.lowestWhiteKey = this.#nextLowestWhiteKey( -1 );
+			this.confState.keysLowestWhite = this.#nextLowestWhiteKey( -1 );
 			this.settings.persist();
 		}
 
@@ -80,10 +80,12 @@ export class PianoKeyboard {
 		c2d.rect( 0, yMin, w, h );
 		c2d.clip();
 
+		const confState = this.confState;
+
 		let iW = 0;
 		for ( let i = 0; i < n; ++ i ) {
 
-			const note = this.confState.lowestWhiteKey + i;
+			const note = confState.keysLowestWhite + i;
 			if ( isBlackKey( note ) ) continue;
 
 			const xMin = w * ( iW - o ) / nW;
@@ -113,7 +115,7 @@ export class PianoKeyboard {
 
 		for ( let i = -1; i <= n; ++ i ) {
 
-			const note = this.confState.lowestWhiteKey + i;
+			const note = confState.keysLowestWhite + i;
 
 			if ( ! isBlackKey( note + 12 ) ) {
 
@@ -159,7 +161,7 @@ export class PianoKeyboard {
 		let iW = 0;
 		for ( let i = 0; i < n; ++ i ) {
 
-			const note = this.confState.lowestWhiteKey + i;
+			const note = this.confState.keysLowestWhite + i;
 			if ( ! isBlackKey( note ) ) { ++ iW; continue; }
 
 			const xCenter = w * ( iW - o ) / nW;
@@ -176,7 +178,7 @@ export class PianoKeyboard {
 		iW = 0;
 		for ( let i = 0; i < n; ++ i ) {
 
-			const note = this.confState.lowestWhiteKey + i;
+			const note = this.confState.keysLowestWhite + i;
 			if ( isBlackKey( note ) ) continue;
 
 			const xMin = w * ( iW - o ) / nW;
@@ -192,7 +194,7 @@ export class PianoKeyboard {
 
 	#nextLowestWhiteKey( direction ) {
 
-		let result = this.confState.lowestWhiteKey;
+		let result = this.confState.keysLowestWhite;
 		do { result += direction; } while ( isBlackKey( result ) );
 		return result;
 	}
@@ -208,7 +210,7 @@ export class PianoKeyboard {
 
 		for ( let iW = 0, nW = this.#numberOfVisibleWhiteKeys(); iW < nW; ++ n )
 
-			if ( ! isBlackKey( n + this.confState.lowestWhiteKey ) ) ++ iW;
+			if ( ! isBlackKey( n + this.confState.keysLowestWhite ) ) ++ iW;
 
 		return n;
 	}
@@ -228,7 +230,7 @@ export class PianoKeyboard {
 			if ( scrollOffset == 1 ) {
 
 				scrollOffset = 0;
-				this.confState.lowestWhiteKey = this.#nextLowestWhiteKey( 1 );
+				this.confState.keysLowestWhite = this.#nextLowestWhiteKey( 1 );
 				this.settings.persist();
 			}
 

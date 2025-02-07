@@ -1,228 +1,120 @@
-import { noteNameToNumber, numberToNoteName, NoteNameInOctave } from './Music.js'
 import { animation } from './Animation.js'
+import { CheckBox, Tunings, NoteOctaveCombo } from './SettingsHtmlUi.js'
 
 const StorageKey = 'settings';
+const PersistTimeout = 500;
 
 export class Settings {
 
-	#uiInitialized = false;
+	#uiHandlers = [];
+	#imexToggles = [];
+	#persistTimer = 0;
 	#cachedExportUrl = '';
 	#imexButtonLastFailed = null;
 
+	#dialog = document.querySelector( 'dialog' );
+
 	constructor() {
-
-		const dialog = document.getElementsByTagName( 'dialog' )[ 0 ];
-		const form = dialog.getElementsByTagName( 'form' )[ 0 ];
-		const elem = form.elements;
-
-		this.form = form;
-		this.formElements = elem;
-		const partToggles = [
-
-			elem.imexTunings,
-			elem.imexLocal
-		];
-		this.partToggles = partToggles;
 
 		let state = JSON.parse( storage?.getItem( StorageKey ) || 'null' );
 		if ( ! state ) {
 
 			state = { tunings: [], local: {} };
 			this.state = state;
-
-			if ( ! this.#getTunings() )
-				this.#resetTunings();
-			this.#getLowestWhiteKey();
-			this.#getToggles();
+			this.#initializeUi();
+			this.#getState();
 
 		} else this.state = state;
 	}
 
 	openModalDialog() {
 
-		if ( ! this.#uiInitialized ) {
-			this.#attachEventListeners();
-			this.#uiInitialized = true;
-		}
-
+		this.#initializeUi();
 		this.#updateUi();
-		this.formElements[ 0 ].form.parentElement.showModal();
+		this.#dialog.showModal();
+	}
+
+	#getState() {
+
+		for ( const ui of this.#uiHandlers ) ui.saveToModel();
 	}
 
 	#updateUi() {
 
-		this.#setTunings();
-		this.#setLowestWhiteKey();
-		this.#setToggles();
+		for ( const ui of this.#uiHandlers ) ui.loadFromModel();
 	}
 
 	persist() {
 
+		if ( this.#persistTimer == 0 ) {
+			this.#persistTimer = window.setTimeout(
+					() => this.#doPersist(), PersistTimeout );
+		}
+		animation.requestRefresh();
+	}
+
+	#doPersist() {
+
+		this.#persistTimer = 0;
 		storage?.setItem( StorageKey, JSON.stringify( this.state ) );
 		animation.requestRefresh();
 	}
 
-	#attachEventListeners() {
+	#initializeUi() {
 
-		const elem = this.formElements;
+		if ( this.#uiHandlers.length > 0 ) return;
 
-		( h => {
-			elem.tunings.addEventListener( 'input', h );
-			elem.tunings.addEventListener( 'change', h );
-		})( () => { if ( this.#getTunings() ) this.persist(); } );
+		const store = event => this.persist();
 
-		( h => {
-			elem.keysLowestKey.addEventListener( 'change', h );
-			elem.keysLowestKeyOctave.addEventListener( 'change', h );
-		})( () => { this.#getLowestWhiteKey(); this.persist(); } );
+		{
+			const data = this.state, dom = document.forms.tunings.elements
+			this.#uiHandlers.push(
+					new Tunings( dom, data, store, 'tunings' )
+			);
+		}
+		{
+			const data = this.state.local, dom = document.forms.local.elements;
 
-		( h => {
-			elem.mirrored.addEventListener( 'change', h );
-			elem.keysScrollButtons.addEventListener( 'change', h );
-			elem.legendScrollButtons.addEventListener( 'change', h );
-			elem.featureChromaticTranspose.addEventListener( 'change', h );
-			elem.featureTransposeByFifth.addEventListener( 'change', h );
-			elem.featureAudioAnalysis.addEventListener( 'change', h );
-		})( () => { this.#getToggles(); this.persist(); } );
+			this.#uiHandlers.push(
+					new CheckBox( dom, data, store, 'mirrored' ),
 
-		this.partToggles.forEach(
+					new NoteOctaveCombo( dom, data, store, 'keysLowestWhite' ),
+					new CheckBox( dom, data, store, 'keysScrollButtons' ),
+
+					new CheckBox( dom, data, store, 'legendScrollButtons' ),
+
+					new CheckBox( dom, data, store, 'featureChromaticTranspose' ),
+					new CheckBox( dom, data, store, 'featureTransposeByFifth' ),
+					new CheckBox( dom, data, store, 'featureAudioAnalysis' )
+			);
+		}
+
+		const imex = document.forms.imex.elements;
+		const imexToggles = this.#imexToggles;
+
+		imexToggles.push(
+				imex.imexTunings,
+				imex.imexLocal
+		);
+
+		imexToggles.forEach(
 				checkbox => checkbox.addEventListener(
 					'change', () => this.#imexClearError() ) );
 
-		form.querySelector(
+		const dialog = this.#dialog;
+
+		dialog.querySelector(
 				'label[for=import]' ).addEventListener(
 					'click',e => this.#imexOkSelectionApproves( e ) );
 
-		form.querySelector( 'input#import[type=file]' ).
+		dialog.querySelector( 'input#import[type=file]' ).
 				addEventListener( 'change', e => this.#importFile( e ) );
 
-		form.querySelector( 'a.button[name=export]' ).
+		dialog.querySelector( 'a.button[name=export]' ).
 				addEventListener( 'click', e => this.#exportClick( e ) );
 
-		form.querySelector( 'a.button[name=reset]' ).
+		dialog.querySelector( 'a.button[name=reset]' ).
 				addEventListener( 'click', e => this.#resetClick( e ) );
-	}
-
-	#getTunings() {
-
-		const result = [], element = this.formElements.tunings;
-
-		const splitParts =
-				/\s*([^:]*):\s*((?:[A-G][#b\u266f\u266d\u{1d130}\u{1d12c}]?\d\s*)+)/gu;
-		const eachString = /(([A-G][#b\u266f\u266d\u{1d130}\u{1d12c}]?)\d)\s*/gu;
-
-		const fail = element.value.replaceAll(
-				splitParts, ( _, label, strings ) => {
-
-			const parsed = [];
-			strings.replaceAll(
-					eachString, ( _, noteWithOctave, note ) => {
-
-				parsed.push( { label: note, tuning:
-					noteNameToNumber( noteWithOctave ) } );
-			});
-
-			parsed.push( { label, tuning: null } );
-			result.push( parsed.reverse() );
-			return "";
-		});
-
-		const ok = ! fail && result.length > 0;
-
-		if ( ok ) {
-
-			this.state.tunings = result;
-
-			removeErrorIndication( element );
-		} else addErrorIndication( element );
-
-		return ok;
-	}
-
-	#setTunings() {
-
-		const result = [];
-
-		for ( const instrument of this.state.tunings ) {
-			for ( const string of instrument ) {
-
-				if ( string.tuning == null ) result.push( string.label, ':' );
-				else result.push( ' ', numberToNoteName( string.tuning ) );
-			}
-			result.push( '\n' );
-		}
-		this.formElements.tunings.value = result.join( '' );
-	}
-
-	#getLowestWhiteKey() {
-
-		const elem = this.formElements, data = this.state.local;
-
-		data.lowestWhiteKey = noteNameToNumber(
-				elem.keysLowestKey.value + elem.keysLowestKeyOctave.value );
-	}
-
-	#setLowestWhiteKey() {
-
-		const elem = this.formElements;
-		const note = this.state.local.lowestWhiteKey;
-
-		elem.keysLowestKey.value = NoteNameInOctave[ note % 12 ];
-		elem.keysLowestKeyOctave.value = note / 12 | 0;
-	}
-
-	#getToggles() {
-
-		const elem = this.formElements, data = this.state.local;
-
-		data.mirrored = elem.mirrored.checked;
-
-		data.keysScrollButtons = elem.keysScrollButtons.checked;
-		data.legendScrollButtons = elem.legendScrollButtons.checked;
-
-		data.featureChromaticTranspose = elem.featureChromaticTranspose.checked;
-		data.featureTransposeByFifth = elem.featureTransposeByFifth.checked;
-		data.featureAudioAnalysis = elem.featureAudioAnalysis.checked;
-	}
-
-	#setToggles() {
-
-		const elem = this.formElements, data = this.state.local;
-
-		elem.mirrored.checked = data.mirrored;
-
-		elem.keysScrollButtons.checked = data.keysScrollButtons;
-		elem.legendScrollButtons.checked = data.legendScrollButtons;
-
-		elem.featureChromaticTranspose.checked = data.featureChromaticTranspose;
-		elem.featureTransposeByFifth.checked = data.featureTransposeByFifth;
-		elem.featureAudioAnalysis.checked = data.featureAudioAnalysis;
-	}
-
-	#resetTunings() {
-
-		const elem = this.formElements;
-		elem.tunings.value = elem.tunings.defaultValue;
-		this.#getTunings();
-	}
-
-	#resetLocal() {
-
-		const elem = this.formElements;
-
-		elem.mirrored.checked = elem.mirrored.defaultChecked;
-
-		elem.keysLowestKey.value = elem.keysLowestKey.getAttribute( 'value' );
-		elem.keysLowestKeyOctave.value = elem.keysLowestKeyOctave.defaultValue;
-		this.#getLowestWhiteKey();
-		elem.keysScrollButtons.checked = elem.keysScrollButtons.defaultChecked;
-
-		elem.legendScrollButtons.checked = elem.legendScrollButtons.defaultChecked;
-
-		elem.featureChromaticTranspose.checked = elem.featureChromaticTranspose.defaultChecked;
-		elem.featureTransposeByFifth.checked = elem.featureTransposeByFifth.defaultChecked;
-		elem.featureAudioAnalysis.checked = elem.featureAudioAnalysis.defaultChecked;
-		this.#getToggles();
 	}
 
 	#importFile( event ) {
@@ -253,7 +145,7 @@ export class Settings {
 
 				const jsonString = event2.target.result;
 				const root = JSON.parse( jsonString );
-				const elem = this.formElements;
+				const elem = document.forms.imex;
 				const data = this.state;
 
 				if ( elem.imexTunings.checked &&
@@ -295,7 +187,7 @@ export class Settings {
 
 		if ( ! this.#imexOkSelectionApproves( event ) ) return false;
 
-		const elem = this.formElements, root = { version: 1 }, s = this.state;
+		const elem = document.forms.imex, root = { version: 1 }, s = this.state;
 		if ( elem.imexTunings.checked ) root.tunings = s.tunings;
 		if ( elem.imexLocal.checked) root.local = s.local;
 
@@ -315,10 +207,11 @@ export class Settings {
 
 		if ( this.#imexCheckSelection( event.target ) ) {
 
-			const elem = this.formElements;
-			if ( elem.imexTunings.checked ) this.#resetTunings();
-			if ( elem.imexLocal.checked ) this.#resetLocal();
+			const elem = document.forms.imex.elements;
+			if ( elem.imexTunings.checked ) document.forms.tunings.reset();
+			if ( elem.imexLocal.checked ) document.forms.local.reset();
 
+			this.#getState();
 			this.persist();
 		}
 
@@ -340,7 +233,7 @@ export class Settings {
 
 	#imexCheckSelection( button ) {
 
-		const toggles = this.partToggles;
+		const toggles = this.#imexToggles;
 		const ok = toggles.reduce( ( a, x ) => a || x.checked, false );
 
 		if ( ok ) {

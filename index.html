@@ -39,9 +39,9 @@
 	<body>
 		<canvas width="1000" height="495"></canvas>
 		<dialog>
-			<button form="form">✖</button>
+			<button form="settings">✖</button>
 			<h3>The Boiler Room Backstage</h3>
-			<form id="form" method="dialog">
+			<form name="local" id="settings" method="dialog">
 
 				<fieldset><legend>About</legend>
 					<p>
@@ -59,17 +59,17 @@
 						they can be exported to a file and then imported elsewhere.
 					</p>
 					<p>
-						<input type="file" name="import" id="import" accept="text/json"></input>
+						<input form="imex" type="file" name="import" id="import" accept="text/json"></input>
 						<label for="import">Import</label>
 						<a class="button" name="export" href="#">Export</a>
 						<a class="button" name="reset" href="#">Reset</a>
 					</p>
-					<label class="block"><input name="imexTunings" type="checkbox" checked="true"></input> String Instruments / Tunings</label>
-					<label class="block"><input name="imexLocal" type="checkbox" checked="true"></input> Local User Preferences</label>
+					<label class="block"><input form="imex" name="imexTunings" type="checkbox" checked="true"></input> String Instruments / Tunings</label>
+					<label class="block"><input form="imex" name="imexLocal" type="checkbox" checked="true"></input> Local User Preferences</label>
 				</fieldset>
 				<fieldset><legend>Strings View</legend>
 					<label class="block">Instruments &amp; Tunings
-						<textarea name="tunings">
+						<textarea form="tunings" name="tunings">
 Guitar - EADGBE: E2 A2 D3 G3 B3 E4
 Mandola | Violin - CGDAE: C3 G3 D4 A4 E5
 Ukulele - GCEA: G4 C4 E4 A4</textarea>
@@ -78,13 +78,13 @@ Ukulele - GCEA: G4 C4 E4 A4</textarea>
 				</fieldset>
 				<fieldset>
 					<legend>Keyboard View</legend>
-					<label for="keysLowestKey">The lowest visible white key is</label>
-					<select name="keysLowestKey" id="keysLowestKey" value="C">
+					<label for="keysLowestWhite">The lowest visible white key is</label>
+					<select name="keysLowestWhiteNote" id="keysLowestWhite" value="C">
 						<option>C</option><option>D</option><option>E</option>
 						<option>F</option><option>G</option><option>A</option>
 						<option>B</option>
 					</select>
-					<input name="keysLowestKeyOctave" value="2" min="0" max="7" type="number"></input>
+					<input name="keysLowestWhiteOctave" value="2" min="0" max="7" type="number"></input>
 					<label class="block"><input name="keysScrollButtons" type="checkbox" checked="true"></input> Scroll Buttons are Visible</label>
 				</fieldset>
 				<fieldset>
@@ -99,6 +99,8 @@ Ukulele - GCEA: G4 C4 E4 A4</textarea>
 				</fieldset>
 
 			</form>
+			<form id="imex"></form>
+			<form id="tunings"></form>
 		</dialog>
 		<script src="js/App.js" type="module"></script>
 	</body>

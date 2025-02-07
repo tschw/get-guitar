@@ -9,7 +9,7 @@ export const NoteNameInOctave = Object.freeze( [
 		'F' + Sharp, 'G', 'G' + Sharp, 'A', 'A' + Sharp, 'B' ] );
 
 const equivs = new Object();
-for ( name of NoteNameInOctave ) {
+for ( const name of NoteNameInOctave ) {
 
 	if ( name.length == 1 ) {
 

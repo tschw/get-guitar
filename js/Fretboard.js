@@ -88,24 +88,24 @@ export class Fretboard {
 				case 0:
 					marker = 'double';
 					c2d.lineWidth = 3;
-					c2d.strokeStyle = '#ffffff';
+					c2d.strokeStyle = '#aaa';
 					break;
 				case 7:
 					marker = 'double';
 				case 5:
 					marker ||= 'single';
 					c2d.lineWidth = 3;
-					c2d.strokeStyle = '#cccccc';
+					c2d.strokeStyle = '#888';
 					break;
 				case 9:
 					marker = 'single';
 				case 3:
 					c2d.lineWidth = 2;
-					c2d.strokestyle = '#888888';
+					c2d.strokestyle = '#444';
 					break;
 				default:
 					c2d.lineWidth = 1;
-					c2d.strokeStyle = '#aaaaaa';
+					c2d.strokeStyle = '#666';
 			}
 
 			c2d.beginPath();
@@ -121,7 +121,7 @@ export class Fretboard {
 			const xLeft = xMiddle - fretWidth * FractionalMarkerLeftDisplace;
 			const xRight = xMiddle + fretWidth * FractionalMarkerRightDisplace;
 
-			c2d.fillStyle = '#dddddd';
+			c2d.fillStyle = '#ddd';
 
 			for ( let j = 0; j < nSlots; ++ j ) {
 
@@ -177,7 +177,7 @@ export class Fretboard {
 						textMeasure.actualBoundingBoxDescent +
 							textMeasure.actualBoundingBoxAscent );
 
-				c2d.fillStyle = '#cccccc';
+				c2d.fillStyle = '#fff';
 				c2d.fillText( label, 0, yMax );
 			} else {
 

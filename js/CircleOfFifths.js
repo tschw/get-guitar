@@ -209,7 +209,7 @@ export class CircleOfFifths {
 
 			c2d.fillStyle = '#fff';
 			c2d.fillText( label, xCenter + x1 * rText -
-					c2d.measureText( name ).width / 2, yCenter - y1 * rText );
+					c2d.measureText( label ).width / 2, yCenter - y1 * rText );
 			c2d.stroke();
 		}
 	}

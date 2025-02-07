@@ -1,24 +1,18 @@
 class Animation {
 
-	#privateState;
+	render = () => undefined;
+	unhighlight = () => undefined;
 
-	constructor() {
+	unhighlightTimeout = 2000;
 
-		this.render = () => undefined;
-		this.unhighlight = () => undefined;
-
-		this.unhighlightTimeout = 2000;
-
-		this.#privateState = { };
-		this.#onFrame();
-	}
+	#frameId = 0;
+	#highlightTimeoutId = 0;
 
 	requestRefresh() {
 
-		const _ = this.#privateState;
-
-		if ( _.frameId == null )
-			_.frameId = window.requestAnimationFrame( () => this.#onFrame() );
+		if ( ! this.#frameId )
+			this.#frameId =
+					window.requestAnimationFrame( () => this.#onFrame() );
 	}
 
 	ifStateChange( now, target ) {
@@ -42,14 +36,13 @@ class Animation {
 
 	#onFrame() {
 
-		const _ = this.#privateState;
-		_.frameId = null;
+		this.#frameId = 0;
 
 		this.render();
 
-		window.clearTimeout( _.highlightTimeoutId );
+		window.clearTimeout( this.#highlightTimeoutId );
 
-		_.highlightTimeoutId = window.setTimeout(
+		this.#highlightTimeoutId = window.setTimeout(
 				this.unhighlight, this.unhighlightTimeout );
 	}
 }

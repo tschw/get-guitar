@@ -5,9 +5,9 @@ const StorageKey = 'settings';
 
 export class Settings {
 
-	#uiInitialized;
-	#cachedExportUrl;
-	#imexButtonLastFailed;
+	#uiInitialized = false;
+	#cachedExportUrl = '';
+	#imexButtonLastFailed = null;
 
 	constructor() {
 
@@ -23,10 +23,6 @@ export class Settings {
 			elem.imexLocal
 		];
 		this.partToggles = partToggles;
-
-		this.#uiInitialized = false;
-		this.#cachedExportUrl = '';
-		this.#imexButtonLastFailed = null;
 
 		let state = JSON.parse( storage?.getItem( StorageKey ) || 'null' );
 		if ( ! state ) {

@@ -13,8 +13,8 @@ const MotionSmoothing = 0.4;
 
 export class PianoKeyboard {
 
-	#scrollOffset;
-	#scrollTarget;
+	#scrollOffset = 0;
+	#scrollTarget = -1;
 
 	constructor( yTop, width, height,
 			numberOfWhiteKeys, settings, highlighting ) {
@@ -28,9 +28,6 @@ export class PianoKeyboard {
 		this.highlighting = highlighting;
 
 		this.numberOfWhiteKeys = numberOfWhiteKeys;
-
-		this.#scrollOffset = 0;
-		this.#scrollTarget = -1;
 	}
 
 	canScrollViewport( direction ) {

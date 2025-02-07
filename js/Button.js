@@ -15,6 +15,14 @@ export class Button {
 
 	#animationState;
 
+	visible = true;
+	enabled = true;
+	highlit = false;
+
+	fillColor = DefaultFillColor;
+	textColor = DefaultStrokeColor;
+	strokeColor = DefaultStrokeColor;
+
 	constructor( xLeft, yTop, width, height, label ) {
 
 		this.xLeft = xLeft;
@@ -23,18 +31,11 @@ export class Button {
 		this.height = height;
 		this.label = label;
 
-		this.enabled = true;
-		this.highlit = false;
-
 		this.#animationState = {
 
 			opacity: this.enabled ? 1 : 0,
 			lightness: this.highlit ? 1 : 0
 		};
-
-		this.fillColor = DefaultFillColor;
-		this.textColor = DefaultStrokeColor;
-		this.strokeColor = DefaultStrokeColor;
 	}
 
 	paint( c2d ) {

@@ -19,34 +19,32 @@ const scaleColor = ( hue ) => new VariableColor( hue,
 export class CircleOfFifths {
 
 	#animationState;
-	#cachedPickingResult;
+	#cachedPickingResult = { tonality: 0, key: 0, scaleIndex: -1 };
+
+	scales = [
+
+		{ color: scaleColor( 80 ), label: `Natural: Major / minor`, tonality: Tonality.Natural },
+		{ color: scaleColor( 50 ), label: `Ionian ${Sharp}5 / harmonic`, tonality: Tonality.MinorHarmonic },
+		{ color: scaleColor( 30 ), label: `Lydian ${Sharp}5 / melodic`, tonality: Tonality.MinorMelodic },
+		{ color: scaleColor( 6 ), label: `Harmonic / ${Flat} lydian ${Sharp}2 ${Sharp}5`, tonality: Tonality.Harmonic },
+		{ color: scaleColor( 290 ), label: `Dbl. harmonic / ${Flat} ionian ${Sharp}2 ${Sharp}5`, tonality: Tonality.DoubleHarmonic },
+		{ color: scaleColor( 205 ), label: "Pentatonic + blue note", tonality: Tonality.Blues6 },
+		{ color: scaleColor( 170 ), label: "Natural + two blue notes", tonality: Tonality.Blues9 }
+	];
+
+	matchTonality = 0;
+
+	highlitTonality = 0;
+	selectedTonality = 0;
+
+	highlitScale = null;
+	selectedScale = null;
 
 	constructor( xLeft, yTop, size ) {
 
 		this.xLeft = xLeft;
 		this.yTop = yTop;
 		this.size = size;
-
-		this.scales = [
-
-			{ color: scaleColor( 80 ), label: `Natural: Major / minor`, tonality: Tonality.Natural },
-			{ color: scaleColor( 50 ), label: `Ionian ${Sharp}5 / harmonic`, tonality: Tonality.MinorHarmonic },
-			{ color: scaleColor( 30 ), label: `Lydian ${Sharp}5 / melodic`, tonality: Tonality.MinorMelodic },
-			{ color: scaleColor( 6 ), label: `Harmonic / ${Flat} lydian ${Sharp}2 ${Sharp}5`, tonality: Tonality.Harmonic },
-			{ color: scaleColor( 290 ), label: `Dbl. harmonic / ${Flat} ionian ${Sharp}2 ${Sharp}5`, tonality: Tonality.DoubleHarmonic },
-			{ color: scaleColor( 205 ), label: "Pentatonic + blue note", tonality: Tonality.Blues6 },
-			{ color: scaleColor( 170 ), label: "Natural + two blue notes", tonality: Tonality.Blues9 }
-		];
-
-		this.matchTonality = 0;
-
-		this.highlitTonality = 0;
-		this.selectedTonality = 0;
-
-		this.highlitScale = null;
-		this.selectedScale = null;
-
-		this.#cachedPickingResult = { tonality: 0, key: 0, scaleIndex: -1 };
 
 		this.#animationState = this.#createAnimationState();
 	}

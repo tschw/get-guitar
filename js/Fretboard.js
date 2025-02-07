@@ -26,8 +26,10 @@ const fretStringPosition = ( i ) => 1 - 2 ** ( -i / 12 );
 
 export class Fretboard {
 
-	#transitionOffset;
-	#transitionTarget;
+	#transitionOffset = 0;
+	#transitionTarget = -1;
+
+	tuningIndex = 0;
 
 	constructor( width, height, numberOfFrets, settings, highlighting ) {
 
@@ -35,13 +37,7 @@ export class Fretboard {
 		this.height = height;
 
 		this.highlighting = highlighting;
-
 		this.numberOfFrets = numberOfFrets;
-
-		this.tuningIndex = 0;
-
-		this.#transitionOffset = 0;
-		this.#transitionTarget = -1;
 
 		this.settings = settings;
 	}

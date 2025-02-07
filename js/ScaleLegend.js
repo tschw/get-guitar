@@ -18,9 +18,11 @@ export class ScaleLegend {
 
 	#buttons;
 	#labels;
+	#actualScrollOffset = 0;
+	#targetScrollOffset = 0;
 
-	#actualScrollOffset;
-	#targetScrollOffset;
+	selectedScaleIndex = -1;
+	toggleMode = true;
 
 	constructor( xLeft, yTop, width, height, scales ) {
 
@@ -28,9 +30,6 @@ export class ScaleLegend {
 		this.yTop = yTop;
 		this.width = width;
 		this.height = height;
-
-		this.selectedScaleIndex = -1;
-		this.toggleMode = true;
 
 		const nScales = scales.length;
 		const buttons = new Array( nScales );
@@ -50,9 +49,6 @@ export class ScaleLegend {
 
 		this.#buttons = buttons;
 		this.#labels = labels;
-
-		this.#targetScrollOffset = 0;
-		this.#actualScrollOffset = 0;
 	}
 
 	paint( c2d ) {

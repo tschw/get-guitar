@@ -1,0 +1,22 @@
+body {
+	background-color: #112233;
+	margin: 0; border: 0; padding: 0;
+}
+
+canvas { width: 100%; }
+
+@media screen and (orientation: portrait) {
+
+	body:after {
+		position: absolute;
+		width: 100%;
+		top: 0;
+		bottom: 0;
+		content: "";
+		background: #525252
+				url(./turn-device.png) center center no-repeat;
+		background-size: 100% auto;
+	}
+
+	canvas, dialog { display: none; }
+}

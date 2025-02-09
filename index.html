@@ -8,32 +8,7 @@
 		<title>Get Guitar!</title>
 		<link rel="icon" href="favicon.ico" />
 
-		<style type="text/css">
-
-			body {
-				background-color: #112233;
-				margin: 0; border: 0; padding: 0;
-			}
-
-			canvas { width: 100%; }
-
-			@media screen and (orientation: portrait) {
-
-				body:after {
-					position: absolute;
-					width: 100%;
-					top: 0;
-					bottom: 0;
-					content: "";
-					background: #525252
-							url(style/turn-device.png) center center no-repeat;
-					background-size: 100% auto;
-				}
-
-				canvas, dialog { display: none; }
-			}
-
-		</style>
+		<link href="style/skeleton.css" rel="stylesheet" />
 		<link href="style/settings.css" rel="stylesheet" />
 	</head>
 	<body>
@@ -97,7 +72,6 @@ Ukulele - GCEA: G4 C4 E4 A4</textarea>
 					<label class="block"><input name="featureTransposeByFifth" type="checkbox" checked="true"></input> Transpose by Fifth, Circle of Fifths Rotate Buttons</label>
 					<label class="block"><input name="featureAudioAnalysis" type="checkbox"></input> Audio Perception and Analysis (experimental), Microphone Button</label>
 				</fieldset>
-
 			</form>
 			<form id="imex"></form>
 			<form id="tunings"></form>

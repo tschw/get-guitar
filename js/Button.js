@@ -9,6 +9,7 @@ const DefaultFillColor = new VariableColor(
 const DefaultStrokeColor = new VariableColor( 0, 0, 0.7, Opacity );
 
 const Smoothing = 0.75;
+const SmoothingPulse = 0.88;
 
 
 export class Button {
@@ -33,20 +34,20 @@ export class Button {
 
 		this.#animationState = {
 
-			opacity: this.enabled ? 1 : 0,
-			lightness: this.highlit ? 1 : 0
+			opacity: 1, lightness: 0,
+			pulse: 0, pulseTarget: 0
 		};
 	}
 
 	paint( c2d ) {
 
 		const state = this.#animationState;
+		const opacity = state.opacity, lightness = state.lightness;
 
 		c2d.lineWidth = 2;
 		c2d.setLineDash( [] );
-		c2d.strokeStyle = this.strokeColor.toString( state.opacity );
-		c2d.fillStyle =
-				this.fillColor.toString( state.lightness, state.opacity );
+		c2d.strokeStyle = this.strokeColor.toString( opacity );
+		c2d.fillStyle = this.fillColor.toString( lightness, opacity );
 
 		c2d.beginPath();
 		c2d.rect( this.xLeft, this.yTop, this.width, this.height );
@@ -54,7 +55,7 @@ export class Button {
 		c2d.fill();
 		c2d.stroke();
 
-		c2d.fillStyle = this.textColor.toString( state.opacity );
+		c2d.fillStyle = this.textColor.toString( opacity );
 		c2d.font = '18px arial';
 		c2d.textBaseline = 'middle';
 
@@ -71,11 +72,27 @@ export class Button {
 				this.xLeft + ( this.width - textWidth ) / 2,
 				this.yTop + this.height / 2 );
 
-		state.opacity += animation.delta(
-				state.opacity, this.enabled ? 1 : 0, Smoothing );
 
-		state.lightness += animation.delta(
-				state.lightness, this.highlit ? 1 : 0, Smoothing );
+		const enabled = this.enabled, highlit = this.highlit;
+		const pulsing = enabled && this.pulsing, pulse = state.pulse;
+
+		if ( pulsing ) {
+
+			const pulseTarget = state.pulseTarget;
+			if ( pulse == pulseTarget ) state.pulseTarget = 1 - pulse;
+
+			state.pulse += animation.delta(
+					pulse, state.pulseTarget, SmoothingPulse );
+
+		} else {
+
+			state.pulse = 0;
+			state.pulseTarget = 0;
+		}
+
+		state.opacity += animation.delta( opacity, enabled ? 1 : 0, Smoothing );
+		state.lightness += animation.delta( lightness,
+				highlit ? 1 : pulsing ? pulse : 0, Smoothing );
 	}
 
 	isContained( x, y ) {

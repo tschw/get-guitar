@@ -216,8 +216,11 @@ class App {
 			if ( redirect != location ) window.location = redirect;
 		}
 
-		this.buttonApplyCoF.enabled = false;
-		this.buttonCancelCoF.enabled = false;
+		for ( let button of [ this.buttonApplyCoF, this.buttonCancelCoF ] ) {
+
+			button.enabled = false;
+			button.pulsing = true;
+		}
 
 		this.element.addEventListener( 'mousemove', (e) => this.mouseMove(e) );
 		this.element.addEventListener( 'mousedown', (e) => this.mouseDown(e) );

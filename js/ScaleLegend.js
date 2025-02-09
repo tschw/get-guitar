@@ -111,7 +111,7 @@ export class ScaleLegend {
 		if ( ! this.#isClipped( x, y ) ) {
 
 			let i = 0;
-			for ( let button of buttons ) {
+			for ( const button of buttons ) {
 
 				if ( button.highlightIfContained( x, y ) ) index = i;
 
@@ -136,7 +136,7 @@ export class ScaleLegend {
 
 		if ( ! this.#isClipped( x, y ) ) {
 
-			for ( let button of buttons ) {
+			for ( const button of buttons ) {
 
 				if ( button.isContained( x, y ) ) found = i;
 
@@ -184,7 +184,7 @@ export class ScaleLegend {
 		const i = this.selectedScaleIndex;
 		const selectedButton = i == -1 ? null : this.#buttons[ i ];
 
-		for ( let button of this.#buttons )
+		for ( const button of this.#buttons )
 			if ( button != selectedButton )
 				button.highlit = 
 						animation.ifStateChange( button.highlight, false );

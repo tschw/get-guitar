@@ -216,7 +216,7 @@ class App {
 			if ( redirect != location ) window.location = redirect;
 		}
 
-		for ( let button of [ this.buttonApplyCoF, this.buttonCancelCoF ] ) {
+		for ( const button of [ this.buttonApplyCoF, this.buttonCancelCoF ] ) {
 
 			button.enabled = false;
 			button.pulsing = true;
@@ -298,7 +298,7 @@ class App {
 		this.buttonLegendDown.setEnabled( legend.canScrollViewport( 1 ) );
 		legend.paint( c2d );
 
-		for ( let button of this.buttons )
+		for ( const button of this.buttons )
 			if ( button.existsIf() ) button.widget.paint( c2d );
 
 		highlighting.attenuate();
@@ -322,7 +322,7 @@ class App {
 
 		const isListening = audioAnalyzer.getSystemState() == 'running';
 
-		for ( let button of this.buttons )
+		for ( const button of this.buttons )
 			if ( button.existsIf() &&
 					button.widget.highlightIfContained( p.x, p.y ) ) {
 
@@ -379,7 +379,7 @@ class App {
 
 		const p = this.#getPointerCoordinates( event );
 
-		for ( let button of this.buttons )
+		for ( const button of this.buttons )
 			if ( button.existsIf() &&
 					button.widget.isContained( p.x, p.y ) ) {
 
@@ -506,7 +506,7 @@ class App {
 
 	unhighlight() {
 
-		for ( let button of this.buttons ) button.widget.unhighlight();
+		for ( const button of this.buttons ) button.widget.unhighlight();
 
 		const highlighting = this.highlighting, cof = this.cof;
 

@@ -85,116 +85,56 @@ class App {
 				keysWidth - ButtonsWidth - HorizEdgeButtonsSpacing;
 		const xLegendScrollButtons = xCoFButtonsLeft - ButtonsRowDistance;
 
-		const localSettings = settings.local;
-
 		this.buttons = [
 
-			{
-				widget:
-					new Button( xLastButton, yFretsButtons,
-							ButtonsWidth, ButtonsHeight, "\u2261" ),
+			createButton(
+					xLastButton, yFretsButtons,
+					"\u2261", () => settingsObject.openModalDialog() ),
 
-				action: () => settingsObject.openModalDialog(),
-				existsIf: () => true
+			this.buttonSharp = createButton(
+					xLastButton - ButtonsRowDistance, yFretsButtons,
+					Sharp, () => this.transpose( 1 ) ),
 
-			}, {
-				widget:
-					this.buttonSharp = new Button(
-							xLastButton - ButtonsRowDistance, yFretsButtons,
-							ButtonsWidth, ButtonsHeight, Sharp ),
+			this.buttonFlat = createButton(
+					xLastButton - ButtonsRowDistance * 2, yFretsButtons,
+					Flat, () => this.transpose( -1 ) ),
 
-				action: () => this.transpose( 1 ),
-				existsIf: () => localSettings.featureChromaticTranspose
+			this.buttonMic = createButton(
+					xLastButton,
+					yFretsButtons + ButtonsHeight + ButtonsRowSpacing,
+					"\u{1f399}", () => this.toggleListen() ),
 
-			}, {
-				widget:
-					this.buttonFlat = new Button(
-							xLastButton - ButtonsRowDistance * 2, yFretsButtons,
-							ButtonsWidth, ButtonsHeight, Flat ),
+			this.buttonKeysLeft = createButton(
+					xFirstButton, yKeysButtons,
+					"\u25c5", () => this.keys.scrollViewport( -1 ) ),
 
-				action: () => this.transpose( -1 ),
-				existsIf: () => localSettings.featureChromaticTranspose
+			this.buttonKeysRight = createButton(
+					xKeysButtonsRight, yKeysButtons,
+					"\u25bb", () => this.keys.scrollViewport( 1 ) ),
 
-			}, {
-				widget:
-					this.buttonMic = new Button( xLastButton,
-							yFretsButtons + ButtonsHeight + ButtonsRowSpacing,
-							ButtonsWidth, ButtonsHeight, "\u{1f399}" ),
+			this.buttonLegendUp = createButton(
+					xLegendScrollButtons, yKeysButtons,
+					"\u25b5", () => this.legend.scrollViewport( -1 ) ),
 
-				action: () => this.toggleListen(),
-				existsIf: () => localSettings.featureAudioAnalysis
+			this.buttonLegendDown = createButton(
+					xLegendScrollButtons, yButtonsBottom,
+					"\u25bf", () => this.legend.scrollViewport( 1 ) ),
 
-			}, {
-				widget:
-					this.buttonKeysLeft = new Button(
-							xFirstButton, yKeysButtons,
-							ButtonsWidth, ButtonsHeight, "\u25c5" ),
+			this.buttonFifthUp = createButton(
+					xLastButton, yKeysButtons,
+					"\u21bb", () => this.transpose( 7 ) ),
 
-				action: () => this.keys.scrollViewport( -1 ),
-				existsIf: () => localSettings.keysScrollButtons
+			this.buttonFifthDown = createButton(
+					xCoFButtonsLeft, yKeysButtons,
+					"\u21ba", () => this.transpose( -7 ) ),
 
-			}, {
-				widget:
-					this.buttonKeysRight = new Button(
-							xKeysButtonsRight, yKeysButtons,
-							ButtonsWidth, ButtonsHeight, "\u25bb" ),
+			this.buttonApplyCoF = createButton(
+					xLastButton, yButtonsBottom,
+					"\u2713", () => this.applyOrCancelCoF( true ) ),
 
-				action: () => this.keys.scrollViewport( 1 ),
-				existsIf: () => localSettings.keysScrollButtons
-
-			}, {
-				widget:
-					this.buttonLegendUp = new Button(
-							xLegendScrollButtons, yKeysButtons,
-							ButtonsWidth, ButtonsHeight, "\u25b5" ),
-
-				action: () => this.legend.scrollViewport( -1 ),
-				existsIf: () => localSettings.legendScrollButtons
-
-			}, {
-				widget:
-					this.buttonLegendDown = new Button(
-							xLegendScrollButtons, yButtonsBottom,
-							ButtonsWidth, ButtonsHeight, "\u25bf" ),
-
-				action: () => this.legend.scrollViewport( 1 ),
-				existsIf: () => localSettings.legendScrollButtons
-
-			}, {
-				widget:
-					this.buttonFifthUp = new Button( xLastButton, yKeysButtons,
-							ButtonsWidth, ButtonsHeight, "\u21bb" ),
-
-				action: () => this.transpose( 7 ),
-				existsIf: () => localSettings.featureTransposeByFifth
-
-			}, {
-				widget:
-					this.buttonFifthDown = new Button( xCoFButtonsLeft, yKeysButtons,
-							ButtonsWidth, ButtonsHeight, "\u21ba" ),
-
-				action: () => this.transpose( -7 ),
-				existsIf: () => localSettings.featureTransposeByFifth
-
-			}, {
-				widget:
-					this.buttonApplyCoF = new Button(
-							xLastButton, yButtonsBottom,
-							ButtonsWidth, ButtonsHeight, "\u2713" ),
-
-				action: () => this.applyOrCancelCoF( true ),
-				existsIf: () => true
-
-			}, {
-				widget:
-					this.buttonCancelCoF = new Button(
-							xCoFButtonsLeft, yButtonsBottom,
-							ButtonsWidth, ButtonsHeight, "\u2717" ),
-
-				action: () => this.applyOrCancelCoF( false ),
-				existsIf: () => true
-
-			}
+			this.buttonCancelCoF = createButton(
+					xCoFButtonsLeft, yButtonsBottom,
+					"\u2717", () => this.applyOrCancelCoF( false ) ),
 		];
 
 		const location = window.location.toString();
@@ -234,6 +174,8 @@ class App {
 
 	paint() {
 
+		this.#setButtonsState();
+
 		const c2d = this.c2d, element = this.element;
 		const highlighting = this.highlighting, cof = this.cof;
 
@@ -243,6 +185,7 @@ class App {
 
 			this.buttonMic.highlit = true;
 			animation.requestRefresh();
+
 			const a = this.analyzerData;
 
 			if ( audioAnalyzer.getFrame( a ) ) {
@@ -274,33 +217,14 @@ class App {
 					"vol:", 1 + 0.5 * Math.log10( a[ 2 ] + Number.MIN_VALUE ) );
 */
 			}
-
 		}
-
-		const enableTranspose = !isListening || cof.selectedTonality;
-		this.buttonSharp.setEnabled( enableTranspose );
-		this.buttonFlat.setEnabled( enableTranspose );
-		this.buttonFifthUp.setEnabled( enableTranspose );
-		this.buttonFifthDown.setEnabled( enableTranspose );
 
 		c2d.clearRect( 0, 0, element.width, element.height );
 		this.frets.paint( c2d );
-
-		const keys = this.keys;
-		this.buttonKeysLeft.setEnabled( keys.canScrollViewport( -1 ) );
-		this.buttonKeysRight.setEnabled( keys.canScrollViewport( 1 ) );
-		keys.paint( c2d );
-
+		this.keys.paint( c2d );
 		cof.paint( c2d );
-
-		const legend = this.legend;
-		this.buttonLegendUp.setEnabled( legend.canScrollViewport( -1 ) );
-		this.buttonLegendDown.setEnabled( legend.canScrollViewport( 1 ) );
-		legend.paint( c2d );
-
-		for ( const button of this.buttons )
-			if ( button.existsIf() ) button.widget.paint( c2d );
-
+		this.legend.paint( c2d );
+		for ( const button of this.buttons ) button.paint( c2d );
 		highlighting.attenuate();
 	}
 
@@ -323,8 +247,7 @@ class App {
 		const isListening = audioAnalyzer.getSystemState() == 'running';
 
 		for ( const button of this.buttons )
-			if ( button.existsIf() &&
-					button.widget.highlightIfContained( p.x, p.y ) ) {
+			if ( button.highlightIfContained( p.x, p.y ) ) {
 
 				if ( ! isListening )
 					highlighting.highlitNote =
@@ -336,7 +259,6 @@ class App {
 		const note = this.#findNote( p.x, p.y );
 
 		if ( ! isListening )
-
 			highlighting.highlitNote =
 					animation.ifStateChange( highlighting.highlitNote, note );
 
@@ -380,16 +302,8 @@ class App {
 		const p = this.#getPointerCoordinates( event );
 
 		for ( const button of this.buttons )
-			if ( button.existsIf() &&
-					button.widget.isContained( p.x, p.y ) ) {
-
-				if ( button.widget.enabled ) {
-
-					button.action();
-					animation.requestRefresh();
-				}
+			if ( button.actionIfContained( p.x, p.y ) )
 				return;
-			}
 
 		const highlighting = this.highlighting,
 				frets = this.frets, cof = this.cof;
@@ -489,8 +403,8 @@ class App {
 		legend.toggleMode = ! selecting || zoomedIn;
 		legend.unhighlight();
 
-		this.buttonApplyCoF.setEnabled( selecting );
-		this.buttonCancelCoF.setEnabled( selecting );
+		setButtonState( this.buttonApplyCoF, true, selecting );
+		setButtonState( this.buttonCancelCoF, true, selecting );
 
 		cof.selectedTonality = animation.ifStateChange(
 				cof.selectedTonality, selecting ? tonality : 0 );
@@ -506,7 +420,7 @@ class App {
 
 	unhighlight() {
 
-		for ( const button of this.buttons ) button.widget.unhighlight();
+		for ( const button of this.buttons ) button.unhighlight();
 
 		const highlighting = this.highlighting, cof = this.cof;
 
@@ -608,10 +522,63 @@ class App {
 			legend.toggleMode = true;
 		}
 
-		this.buttonApplyCoF.setEnabled( false );
-		this.buttonCancelCoF.setEnabled( false );
+		setButtonState( this.buttonApplyCoF, true, false );
+		setButtonState( this.buttonCancelCoF, true, false );
 
 		animation.requestRefresh();
+	}
+
+	#setButtonsState() {
+
+		const localSettings = this.settings.local,
+				allowTranspose = this.cof.selectedTonality ||
+						audioAnalyzer.getSystemState() != 'running';
+
+		this.buttonMic.visible = localSettings.featureAudioAnalysis;
+
+		const sharpFlatButtons = localSettings.featureChromaticTranspose;
+
+		setButtonState( this.buttonSharp, sharpFlatButtons, allowTranspose );
+		setButtonState( this.buttonFlat, sharpFlatButtons, allowTranspose );
+
+		const cofRotateButtons = localSettings.featureTransposeByFifth;
+
+		setButtonState( this.buttonFifthUp, cofRotateButtons, allowTranspose );
+		setButtonState( this.buttonFifthDown, cofRotateButtons, allowTranspose );
+
+		const keys = this.keys,
+				scrollKeysButtons = localSettings.keysScrollButtons;
+		setButtonState( this.buttonKeysLeft,
+				scrollKeysButtons, keys.canScrollViewport( -1 ) );
+		setButtonState( this.buttonKeysRight,
+				scrollKeysButtons, keys.canScrollViewport( 1 ) );
+
+		const legend = this.legend,
+				legendScrollButtons = localSettings.legendScrollButtons;
+		setButtonState( this.buttonLegendUp,
+				legendScrollButtons, legend.canScrollViewport( -1 ) );
+		setButtonState( this.buttonLegendDown,
+				legendScrollButtons, legend.canScrollViewport( 1 ) );
+	}
+}
+
+function createButton( x, y, label, action ) {
+
+	const b = new Button( x, y, ButtonsWidth, ButtonsHeight, label );
+	b.action = action;
+	return b;
+}
+
+function setButtonState( button, visible, enabled ) {
+
+	button.visible = visible;
+	if ( visible ) {
+		if ( button.enabled != enabled ) {
+
+			button.enabled = enabled;
+			if ( ! enabled ) button.highlit = false;
+			animation.requestRefresh();
+		}
 	}
 }
 

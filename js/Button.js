@@ -13,10 +13,13 @@ const DefaultTextPaddingX = 4, DefaultTextPaddingY = 4;
 const Smoothing = 0.75;
 const SmoothingPulse = 0.88;
 
+const DoNothing = function() { };
 
 export class Button {
 
 	#visualState;
+
+	action = DoNothing;
 
 	visible = true;
 	enabled = true;
@@ -44,6 +47,8 @@ export class Button {
 	}
 
 	paint( c2d ) {
+
+		if ( ! this.visible ) return;
 
 		const state = this.#visualState;
 		const opacity = state.opacity, lightness = state.lightness;
@@ -109,8 +114,16 @@ export class Button {
 
 		const state = this.#visualState;
 
-		return x >= this.xLeft && x <= this.xLeft + state.width &&
+		return this.visible &&
+				x >= this.xLeft && x <= this.xLeft + state.width &&
 				y >= this.yTop && y <= this.yTop + state.height;
+	}
+
+	actionIfContained( x, y ) {
+
+		const contained = this.isContained( x, y );
+		if ( this.enabled && contained ) this.action();
+		return contained;
 	}
 
 	highlightIfContained( x, y ) {
@@ -119,12 +132,6 @@ export class Button {
 		if ( this.enabled )
 			this.highlit = animation.ifStateChange( this.highlit, contained );
 		return contained;
-	}
-
-	setEnabled( enable ) {
-
-		if ( this.enabled && ! enable ) this.highlit = false;
-		this.enabled = animation.ifStateChange( this.enabled, enable );
 	}
 
 	unhighlight() {

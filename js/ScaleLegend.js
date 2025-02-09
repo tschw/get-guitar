@@ -41,6 +41,7 @@ export class ScaleLegend {
 			const button = new Button( 0, 0,
 					ButtonsWidth, ButtonsHeight, '' );
 
+			button.action = () => this.#selectByIndex( i );
 			button.strokeColor = button.fillColor = scale.color;
 
 			labels[ i ] = scale.label;
@@ -107,16 +108,10 @@ export class ScaleLegend {
 		const buttons = this.#buttons;
 
 		let index = -1;
-
 		if ( ! this.#isClipped( x, y ) ) {
 
-			let i = 0;
-			for ( const button of buttons ) {
-
-				if ( button.highlightIfContained( x, y ) ) index = i;
-
-				++ i;
-			}
+			buttons.forEach( ( b, i ) => {
+				if ( b.highlightIfContained( x, y ) ) index = i; } );
 
 		} else this.unhighlight();
 
@@ -130,42 +125,36 @@ export class ScaleLegend {
 
 	select( x, y ) {
 
+		if ( ! this.#isClipped( x, y ) )
+			for ( const button of this.#buttons )
+				if ( button.actionIfContained( x, y ) ) return true;
+
+		return false;
+	}
+
+	#selectByIndex( index ) {
+
 		const buttons = this.#buttons;
+		const button = buttons[ index ];
 
-		let i = 0, found = -1;
-
-		if ( ! this.#isClipped( x, y ) ) {
-
-			for ( const button of buttons ) {
-
-				if ( button.isContained( x, y ) ) found = i;
-
-				++ i;
-			}
-		}
-
-		if ( found == -1 ) return false;
-
-		const button = buttons[ found ];
-
-		if ( found != this.selectedScaleIndex ) {
+		if ( index != this.selectedScaleIndex ) {
 
 			const visibleButtons = this.#visibleButtons();
 			const firstVisible = this.#actualScrollOffset;
 			const lastVisible = firstVisible + visibleButtons - 1;
 
-			if ( found == firstVisible && this.#targetScrollOffset > 0 ) {
+			if ( index == firstVisible && this.#targetScrollOffset > 0 ) {
 
 				-- this.#targetScrollOffset;
 				animation.requestRefresh();
 
-			} else if ( found == lastVisible && found != buttons.length - 1 ) {
+			} else if ( index == lastVisible && index != buttons.length - 1 ) {
 
 				++ this.#targetScrollOffset;
 				animation.requestRefresh();
 			}
 
-			this.selectedScaleIndex = found;
+			this.selectedScaleIndex = index;
 			button.highlit = animation.ifStateChange( button.highlight, true );
 
 		} else if ( this.toggleMode ) {  
@@ -175,8 +164,6 @@ export class ScaleLegend {
 		}
 
 		this.unhighlight();
-
-		return true;
 	}
 
 	unhighlight() {

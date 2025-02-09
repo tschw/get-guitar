@@ -5,7 +5,8 @@ import { PianoKeyboard } from './PianoKeyboard.js'
 import { CircleOfFifths } from './CircleOfFifths.js'
 import { ScaleLegend } from './ScaleLegend.js'
 import { Button } from './Button.js'
-import { Sharp, Flat, transpose, noteNameToNumber } from './Music.js'
+import { transpose, noteNameToNumber } from './Music.js'
+import * as symbol from './UnicodeSymbols.js'
 import { animation } from './Animation.js'
 import * as audioAnalyzer from './audio-analyzer/api.js'
 import { BitMaskDelta } from './BitMaskDelta.js'
@@ -89,52 +90,52 @@ class App {
 
 			createButton(
 					xLastButton, yFretsButtons,
-					"\u2261", () => settingsObject.openModalDialog() ),
+					symbol.Settings, () => settingsObject.openModalDialog() ),
 
 			this.buttonSharp = createButton(
 					xLastButton - ButtonsRowDistance, yFretsButtons,
-					Sharp, () => this.transpose( 1 ) ),
+					symbol.Sharp, () => this.transpose( 1 ) ),
 
 			this.buttonFlat = createButton(
 					xLastButton - ButtonsRowDistance * 2, yFretsButtons,
-					Flat, () => this.transpose( -1 ) ),
+					symbol.Flat, () => this.transpose( -1 ) ),
 
 			this.buttonMic = createButton(
 					xLastButton,
 					yFretsButtons + ButtonsHeight + ButtonsRowSpacing,
-					"\u{1f399}", () => this.toggleListen() ),
+					symbol.Microphone, () => this.toggleListen() ),
 
 			this.buttonKeysLeft = createButton(
 					xFirstButton, yKeysButtons,
-					"\u25c5", () => this.keys.scrollViewport( -1 ) ),
+					symbol.ScrollLeft, () => this.keys.scrollViewport( -1 ) ),
 
 			this.buttonKeysRight = createButton(
 					xKeysButtonsRight, yKeysButtons,
-					"\u25bb", () => this.keys.scrollViewport( 1 ) ),
+					symbol.ScrollRight, () => this.keys.scrollViewport( 1 ) ),
 
 			this.buttonLegendUp = createButton(
 					xLegendScrollButtons, yKeysButtons,
-					"\u25b5", () => this.legend.scrollViewport( -1 ) ),
+					symbol.ScrollUp, () => this.legend.scrollViewport( -1 ) ),
 
 			this.buttonLegendDown = createButton(
 					xLegendScrollButtons, yButtonsBottom,
-					"\u25bf", () => this.legend.scrollViewport( 1 ) ),
+					symbol.ScrollDown, () => this.legend.scrollViewport( 1 ) ),
 
 			this.buttonFifthUp = createButton(
 					xLastButton, yKeysButtons,
-					"\u21bb", () => this.transpose( 7 ) ),
+					symbol.RotateRight, () => this.transpose( 7 ) ),
 
 			this.buttonFifthDown = createButton(
 					xCoFButtonsLeft, yKeysButtons,
-					"\u21ba", () => this.transpose( -7 ) ),
+					symbol.RotateLeft, () => this.transpose( -7 ) ),
 
 			this.buttonApplyCoF = createButton(
 					xLastButton, yButtonsBottom,
-					"\u2713", () => this.applyOrCancelCoF( true ) ),
+					symbol.Apply, () => this.applyOrCancelCoF( true ) ),
 
 			this.buttonCancelCoF = createButton(
 					xCoFButtonsLeft, yButtonsBottom,
-					"\u2717", () => this.applyOrCancelCoF( false ) ),
+					symbol.Cancel, () => this.applyOrCancelCoF( false ) ),
 		];
 
 		const location = window.location.toString();

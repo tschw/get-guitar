@@ -1,4 +1,5 @@
-import { transpose, Tonality, NoteNameInOctave, Sharp, Flat, EnharmonicEquivalent } from './Music.js'
+import { Sharp, Flat } from './UnicodeSymbols.js'
+import { transpose, Tonality, NoteNameInOctave, EnharmonicEquivalent } from './Music.js'
 import { VariableColor } from './VariableColor.js'
 import { animation } from './Animation.js'
 

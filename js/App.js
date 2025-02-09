@@ -5,6 +5,7 @@ import { PianoKeyboard } from './PianoKeyboard.js'
 import { CircleOfFifths } from './CircleOfFifths.js'
 import { ScaleLegend } from './ScaleLegend.js'
 import { Button } from './Button.js'
+import { formatBinary } from './Utility.js'
 import { transpose, noteNameToNumber } from './Music.js'
 import * as symbol from './UnicodeSymbols.js'
 import { animation } from './Animation.js'
@@ -585,11 +586,6 @@ function setButtonState( button, visible, enabled ) {
 	}
 }
 
-function fmtBin12( bits ) {
-
-	const binaryString = bits.toString( 2 );
-	const paddingZeroes = 12 - binaryString.length;
-	return "0".repeat( paddingZeroes ) + binaryString;
-}
+const fmtBin12 = ( bits ) => formatBinary( bits, 12 );
 
 const app = new App();

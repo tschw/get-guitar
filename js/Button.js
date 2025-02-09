@@ -1,5 +1,6 @@
 import { VariableColor } from './VariableColor.js'
 import { animation } from './Animation.js'
+import { noOp } from './Utility.js'
 
 const Opacity = { a: 0.2, b: 0.9 };
 
@@ -19,7 +20,7 @@ export class Button {
 
 	#visualState;
 
-	action = DoNothing;
+	action = noOp;
 
 	visible = true;
 	enabled = true;

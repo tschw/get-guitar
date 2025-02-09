@@ -1,5 +1,6 @@
 import { Sharp, Flat } from './UnicodeSymbols.js'
 import { transpose, Tonality, NoteNameInOctave, EnharmonicEquivalent } from './Music.js'
+import { lerp, bitCount, clockwise } from './Utility.js'
 import { VariableColor } from './VariableColor.js'
 import { animation } from './Animation.js'
 
@@ -250,7 +251,7 @@ export class CircleOfFifths {
 		const rMin = rMax * FractionalBullsEyeRadius;
 
 		if ( clockwise( rx, ry,
-				rMin * x0, rMin * y0,  rMin * x2, rMin * y2 ) )
+				rMin * x2, rMin * y2,  rMin * x0, rMin * y0 ) )
 
 			return null;
 
@@ -310,7 +311,7 @@ export class CircleOfFifths {
 			}
 
 			if ( clockwise( rx, ry,
-					rOuter * x0, rOuter * y0,  rOuter * x2, rOuter * y2 ) ) {
+					rOuter * x2, rOuter * y2,  rOuter * x0, rOuter * y0 ) ) {
 				const result = this.#cachedPickingResult;
 
 				result.key = ( 12 + 3 - k ) * 7 % 12;
@@ -325,27 +326,7 @@ export class CircleOfFifths {
 	}
 }
 
-function lerp( a, b, t ) {
 
-	return a + ( b - a ) * t;
+
 }
 
-function bitCount( x ) {
-
-	let result = 0;
-	let bits = x;
-	while ( bits !== 0 ) {
-
-		bits &= bits - 1;
-		result += 1;
-	}
-	return result;
-}
-
-function clockwise( x0,y0, x1,y1, x2,y2 ) {
-
-	const x01 = x1 - x0, y01 = y1 - y0;
-	const x02 = x2 - x0, y02 = y2 - y0;
-
-	return x01 * y02 - x02 * y01 < 0;
-}

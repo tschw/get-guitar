@@ -1,7 +1,9 @@
+import { noOp } from './Utility.js'
+
 class Animation {
 
-	render = () => undefined;
-	unhighlight = () => undefined;
+	render = () => noOp;
+	unhighlight = () => noOp;
 
 	unhighlightTimeout = 2000;
 

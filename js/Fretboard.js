@@ -79,7 +79,7 @@ export class Fretboard {
 			const x = this.#fretPosition( i ) * width;
 			let marker = null;
 
-			switch (i % 12) {
+			switch ( i % 12 ) {
 
 				case 0:
 					marker = 'double';

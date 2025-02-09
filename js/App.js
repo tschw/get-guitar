@@ -252,7 +252,7 @@ class App {
 
 				cof.matchTonality = stimuli.apply( this.cof.matchTonality );
 
-				if (cof.selectedTonality == 0) {
+				if ( cof.selectedTonality == 0 ) {
 
 					highlighting.selection =
 							candidates.apply( highlighting.selection );

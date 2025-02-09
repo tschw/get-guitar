@@ -8,17 +8,20 @@ const DefaultFillColor = new VariableColor(
 
 const DefaultStrokeColor = new VariableColor( 0, 0, 0.7, Opacity );
 
+const DefaultTextPaddingX = 4, DefaultTextPaddingY = 4;
+
 const Smoothing = 0.75;
 const SmoothingPulse = 0.88;
 
 
 export class Button {
 
-	#animationState;
+	#visualState;
 
 	visible = true;
 	enabled = true;
 	highlit = false;
+	pulsing = false;
 
 	fillColor = DefaultFillColor;
 	textColor = DefaultStrokeColor;
@@ -32,8 +35,9 @@ export class Button {
 		this.height = height;
 		this.label = label;
 
-		this.#animationState = {
+		this.#visualState = {
 
+			width, height,
 			opacity: 1, lightness: 0,
 			pulse: 0, pulseTarget: 0
 		};
@@ -41,21 +45,9 @@ export class Button {
 
 	paint( c2d ) {
 
-		const state = this.#animationState;
+		const state = this.#visualState;
 		const opacity = state.opacity, lightness = state.lightness;
 
-		c2d.lineWidth = 2;
-		c2d.setLineDash( [] );
-		c2d.strokeStyle = this.strokeColor.toString( opacity );
-		c2d.fillStyle = this.fillColor.toString( lightness, opacity );
-
-		c2d.beginPath();
-		c2d.rect( this.xLeft, this.yTop, this.width, this.height );
-
-		c2d.fill();
-		c2d.stroke();
-
-		c2d.fillStyle = this.textColor.toString( opacity );
 		c2d.font = '18px arial';
 		c2d.textBaseline = 'middle';
 
@@ -68,9 +60,27 @@ export class Button {
 				textMeasure.actualBoundingBoxAscent +
 				textMeasure.actualBoundingBoxDescent;
 
+		const width = this.width || textWidth + DefaultTextPaddingX;
+		const height = this.height || textHeight + DefaultTextPaddingY;
+
+		state.width = width;
+		state.height = height;
+
+		c2d.lineWidth = 2;
+		c2d.setLineDash( [] );
+		c2d.strokeStyle = this.strokeColor.toString( opacity );
+		c2d.fillStyle = this.fillColor.toString( lightness, opacity );
+
+		c2d.beginPath();
+		c2d.rect( this.xLeft, this.yTop, width, height );
+		c2d.fill();
+		c2d.stroke();
+
+		c2d.fillStyle = this.textColor.toString( opacity );
+
 		c2d.fillText( this.label,
-				this.xLeft + ( this.width - textWidth ) / 2,
-				this.yTop + this.height / 2 );
+				this.xLeft + ( width - textWidth ) / 2,
+				this.yTop + height / 2 );
 
 
 		const enabled = this.enabled, highlit = this.highlit;
@@ -97,8 +107,10 @@ export class Button {
 
 	isContained( x, y ) {
 
-		return x >= this.xLeft && x <= this.xLeft + this.width &&
-				y >= this.yTop && y <= this.yTop + this.height;
+		const state = this.#visualState;
+
+		return x >= this.xLeft && x <= this.xLeft + state.width &&
+				y >= this.yTop && y <= this.yTop + state.height;
 	}
 
 	highlightIfContained( x, y ) {

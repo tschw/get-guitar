@@ -1,5 +1,9 @@
 import { numberToNoteName, Tonality } from './Music.js'
+import { VariableColor } from './VariableColor.js'
+import { litStrokes } from './PolygonOutliners.js'
 import { animation } from './Animation.js'
+
+const ColorBlackKeys = new VariableColor( 0, 0, { a: 0, b: 0.3 }, 1 );
 
 const isBlackKey = ( i ) => ( Tonality.Natural & ( 1 << ( i % 12 ) ) ) == 0;
 
@@ -133,7 +137,16 @@ export class PianoKeyboard {
 			c2d.beginPath();
 			c2d.rect( xMin, yMin, xMax - xMin, hB );
 			c2d.fill();
-			c2d.stroke();
+			litStrokes.c2d = c2d;
+			c2d.lineWidth = 4;
+			ColorBlackKeys.toRgba( 1.0, null, null, null, litStrokes.colorLit );
+			ColorBlackKeys.toRgba( 0.0, null, null, null, litStrokes.color );
+			litStrokes.begin();
+			litStrokes.vertex( xMax, yMin );
+			litStrokes.vertex( xMax, yMin + hB );
+			litStrokes.vertex( xMin, yMin + hB );
+			litStrokes.vertex( xMin, yMin );
+			c2d.lineWidth = 1;
 
 			this.highlighting.paint( c2d, note, xMin, yMinH, xMax, yMaxB );
 		}

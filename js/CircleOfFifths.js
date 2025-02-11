@@ -2,6 +2,7 @@ import { Sharp, Flat } from './UnicodeSymbols.js'
 import { transpose, Tonality, NoteNameInOctave, EnharmonicEquivalent } from './Music.js'
 import { lerp, bitCount, clockwise } from './Utility.js'
 import { VariableColor } from './VariableColor.js'
+import { canvasPath, litStrokes } from './PolygonOutliners.js'
 import { animation } from './Animation.js'
 
 const Deg2Rad = Math.PI / 180;
@@ -9,14 +10,14 @@ const TwoPi = Math.PI * 2;
 
 const FractionalBullsEyeRadius = 0.25;
 
-const StrokeColor = new VariableColor( 0, 0, 1, {} );
+const StrokeColor = new VariableColor( 0.2, 0.1, { a: 0.5, b: 0.9 }, {} );
 const FillSmoothing = 0.9;
 const StrokeSmoothing = 0.85;
 const MotionSmoothing = 0.75;
 
 
 const scaleColor = ( hue ) => new VariableColor( hue,
-			{ i: 0, a: 0.6, b: 0.8 }, { i: 0, a: 0.05, b: 0.35 }, { i: 1 } );
+			{ i: 0, a: 0.6, b: 0.8 }, { i: 0, a: 0.06, b: 0.35 }, { i: 1 } );
 
 export class CircleOfFifths {
 
@@ -54,7 +55,6 @@ export class CircleOfFifths {
 	#createAnimationState() {
 
 		const nScales = this.scales.length, n = nScales * 12;
-
 		const perTonality = new Array( n );
 
 		for ( let i = 0; i != n; ++ i )
@@ -171,6 +171,8 @@ export class CircleOfFifths {
 					}
 				}
 
+				if ( rInner == rOuter ) continue;
+
 				const isHighlit = this.highlitTonality == currentTonality ||
 						this.highlitScale == scale &&
 						this.selectedTonality == 0 &&
@@ -190,17 +192,17 @@ export class CircleOfFifths {
 				state.stroke += animation.delta( state.stroke,
 						isHighlit || isSelected ? 1 : 0, StrokeSmoothing );
 
-				c2d.strokeStyle = StrokeColor.toString( state.stroke );
 				c2d.fillStyle = scale.color.toString( state.fill );
-
-				c2d.beginPath();
-				c2d.moveTo( xCenter + rInner * x0, yCenter - rInner * y0 );
-				c2d.lineTo( xCenter + rInner * x2, yCenter - rInner * y2 );
-				c2d.lineTo( xCenter + rOuter * x2, yCenter - rOuter * y2 );
-				c2d.lineTo( xCenter + rOuter * x0, yCenter - rOuter * y0 );
-				c2d.closePath();
+				canvasPath.c2d = c2d;
+				geometry( canvasPath,
+						xCenter, yCenter, rInner, rOuter, x0, y0, x2, y2 );
 				c2d.fill();
-				c2d.stroke();
+
+				litStrokes.c2d = c2d;
+				StrokeColor.toRgba( -0, state.stroke, null, null, litStrokes.color );
+				StrokeColor.toRgba( 1.0, state.stroke, null, null, litStrokes.colorLit );
+				geometry( litStrokes,
+						xCenter, yCenter, rInner, rOuter, x0, y0, x2, y2 );
 			}
 
 			let majorKeyName = NoteNameInOctave[ key ];
@@ -209,10 +211,9 @@ export class CircleOfFifths {
 			if ( x0 < 0 ) minorKeyName = EnharmonicEquivalent[ minorKeyName ];
 			const label = `${ majorKeyName } ${ minorKeyName.toLowerCase() }`;
 
-			c2d.fillStyle = '#fff';
+			c2d.fillStyle = '#eee';
 			c2d.fillText( label, xCenter + x1 * rText -
 					c2d.measureText( label ).width / 2, yCenter - y1 * rText );
-			c2d.stroke();
 		}
 	}
 
@@ -327,6 +328,14 @@ export class CircleOfFifths {
 }
 
 
+function geometry( polygon,
+		xCenter, yCenter, rInner, rOuter, x0, y0, x2, y2 ) {
 
+	polygon.begin();
+	polygon.vertex( xCenter + rInner * x0, yCenter - rInner * y0 );
+	polygon.vertex( xCenter + rOuter * x0, yCenter - rOuter * y0 );
+	polygon.vertex( xCenter + rOuter * x2, yCenter - rOuter * y2 );
+	polygon.vertex( xCenter + rInner * x2, yCenter - rInner * y2 );
+	polygon.close();
 }
 

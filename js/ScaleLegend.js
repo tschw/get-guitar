@@ -1,4 +1,5 @@
-import { Button } from './Button.js'
+import { Button, DefaultStrokeColor } from './Button.js'
+import { checkStyle } from './Utility.js'
 import { animation } from './Animation.js'
 
 const ButtonsLeft = 4;
@@ -89,6 +90,8 @@ export class ScaleLegend {
 
 			const yText = buttonTop + button.height * FractionalTextMiddle;
 			c2d.font = '16px arial';
+			c2d.fillStyle = checkStyle( DefaultStrokeColor.toString( 0.5, 1.0 ) );
+//			c2d.fillStyle = button.strokeColor.toString( 2.2, 0.7 );
 			c2d.fillText( this.#labels[ i ], xText, yText );
 		}
 

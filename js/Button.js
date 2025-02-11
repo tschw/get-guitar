@@ -1,13 +1,15 @@
 import { VariableColor } from './VariableColor.js'
+import { canvasPath, litStrokes, pointContainment } from './PolygonOutliners.js'
+import { checkStyle } from './Utility.js'
 import { animation } from './Animation.js'
 import { noOp } from './Utility.js'
 
-const Opacity = { a: 0.2, b: 0.9 };
+const Opacity = { a: 0.5, b: 0.8 };
 
 const DefaultFillColor = new VariableColor(
-		120, 0.5, { a: 0.15, b: 0.38 }, Opacity );
+		120, { a: 0.27, b: 0.62 }, { i: 0, a: 0.15, b: 0.23 }, Opacity );
 
-const DefaultStrokeColor = new VariableColor( 0, 0, 0.7, Opacity );
+export const DefaultStrokeColor = new VariableColor( 0.2, 0.1, { a: 0.5, b: 0.9 }, Opacity );
 
 const DefaultTextPaddingX = 4, DefaultTextPaddingY = 4;
 
@@ -17,8 +19,6 @@ const SmoothingPulse = 0.88;
 const DoNothing = function() { };
 
 export class Button {
-
-	#visualState;
 
 	action = noOp;
 
@@ -31,6 +31,12 @@ export class Button {
 	textColor = DefaultStrokeColor;
 	strokeColor = DefaultStrokeColor;
 
+	#visualState = {
+		width: 0, height: 0,
+		opacity: 1, lightness: 0,
+		pulse: 0, pulseTarget: 0
+	};
+
 	constructor( xLeft, yTop, width, height, label ) {
 
 		this.xLeft = xLeft;
@@ -38,13 +44,6 @@ export class Button {
 		this.width = width;
 		this.height = height;
 		this.label = label;
-
-		this.#visualState = {
-
-			width, height,
-			opacity: 1, lightness: 0,
-			pulse: 0, pulseTarget: 0
-		};
 	}
 
 	paint( c2d ) {
@@ -74,19 +73,21 @@ export class Button {
 
 		c2d.lineWidth = 2;
 		c2d.setLineDash( [] );
-		c2d.strokeStyle = this.strokeColor.toString( opacity );
-		c2d.fillStyle = this.fillColor.toString( lightness, opacity );
+		c2d.strokeStyle = checkStyle( this.strokeColor.toString( 0, opacity ) );
+		c2d.fillStyle = checkStyle( this.fillColor.toString( lightness, opacity ) );
 
-		c2d.beginPath();
-		c2d.rect( this.xLeft, this.yTop, width, height );
+		canvasPath.c2d = c2d;
+		this.#outline( canvasPath );
 		c2d.fill();
-		c2d.stroke();
 
-		c2d.fillStyle = this.textColor.toString( opacity );
+		litStrokes.c2d = c2d;
+		this.strokeColor.toRgba( 1.0, opacity, null, null, litStrokes.colorLit );
+		this.strokeColor.toRgba( 0.0, opacity, null, null, litStrokes.color );
+		this.#outline( litStrokes );
 
+		c2d.fillStyle = checkStyle( this.textColor.toString( 0.75, opacity ) );
 		c2d.fillText( this.label,
-				this.xLeft + ( width - textWidth ) / 2,
-				this.yTop + height / 2 );
+				this.xLeft + ( width - textWidth ) / 2, this.yTop + height / 2 );
 
 
 		const enabled = this.enabled, highlit = this.highlit;
@@ -111,13 +112,28 @@ export class Button {
 				highlit ? 1 : pulsing ? pulse : 0, Smoothing );
 	}
 
-	isContained( x, y ) {
+	#outline( p ) {
 
 		const state = this.#visualState;
 
-		return this.visible &&
-				x >= this.xLeft && x <= this.xLeft + state.width &&
-				y >= this.yTop && y <= this.yTop + state.height;
+		p.begin();
+		p.vertex( this.xLeft, this.yTop );
+		p.vertex( this.xLeft + state.width, this.yTop );
+		p.vertex( this.xLeft + state.width, this.yTop + state.height );
+		p.vertex( this.xLeft, this.yTop + state.height );
+		p.close();
+	}
+
+	isContained( x, y ) {
+
+		pointContainment.x = x;
+		pointContainment.y = y;
+		pointContainment.result = false;
+
+		if ( this.visible )
+			this.#outline( pointContainment );
+
+		return pointContainment.result;
 	}
 
 	actionIfContained( x, y ) {

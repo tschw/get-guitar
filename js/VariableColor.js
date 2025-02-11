@@ -48,10 +48,12 @@ export class VariableColor {
 
 		flags |= a == 1 ? FlagOpaque : 0;
 
-		this.#privateState = { h, s, l, a, flags, cachedString: null };
+		this.#privateState = { h, s, l, a, flags,
+				cachedString: null, rgba: new Float32Array( 4 ) };
 	}
 
-	toString( valueVar0, valueVar1, valueVar2, valueVar3 ) {
+	toRgba( valueVar0, valueVar1, valueVar2, valueVar3,
+			result = new Float32Array( 4 ) ) {
 
 		const _ = this.#privateState;
 
@@ -73,20 +75,6 @@ export class VariableColor {
 			return v == null ? x.b : x.a + v * ( x.b - x.a );
 		}
 
-		if ( _.cachedString != null ) {
-
-			if ( ! ( _.flags & FlagsVariable ) )
-
-				return _.cachedString;
-
-			else if ( _.flags & FlagVariableAlpha ) {
-
-				flag = FlagVariableAlpha;
-				return `${ _.cachedString }${ paramValue( _.a ) }\)`;
-			}
-		}
-
-
 		const h = paramValue( _.h ),
 				s = paramValue( _.s ), l = paramValue( _.l );
 
@@ -94,7 +82,23 @@ export class VariableColor {
 		const a = s * Math.min( l , 1 - l );
 		const f = ( n, k = ( n + h / 30 ) % 12 ) => Math.ceil(
 				( l - a * Math.max( Math.min( k - 3, 9 - k, 1 ), -1 ) ) * 255 );
-		const rgb = `${ f( 0 ) },${ f( 8 ) },${ f( 4 ) }`;
+		result[ 0 ] = f( 0 ); result[ 1 ] = f( 8 ); result[ 2 ] = f( 4 );
+
+		result[ 3 ] = paramValue( _.a );
+		return result;
+	}
+
+	toString( valueVar0, valueVar1, valueVar2, valueVar3 ) {
+
+		const _ = this.#privateState;
+		const c = this.toRgba(
+				valueVar0, valueVar1, valueVar2, valueVar3, _.rgba ).map( x => {
+
+					if ( ! Number.isFinite( x ) ) throw "ouch";
+					return x.toPrecision( 3 );
+				} );
+
+		const rgb = `${ c[ 0 ] },${ c[ 1 ] },${ c[ 2 ] }`;
 
 		if ( ! ( _.flags & FlagsVariableColor ) ) {
 
@@ -104,17 +108,18 @@ export class VariableColor {
 
 			else if ( ! ( _.flags & FlagVariableAlpha ) )
 
-				return ( _.cachedString = `rgba(${ rgb },${ _.a })` );
+				return ( _.cachedString =
+							`rgba(${ rgb },${ _.a.toPrecision( 3 ) })` );
 
 			else {
 
 				_.cachedString = `rgba\(${ rgb },`;
-				return `${ _.cachedString }${ paramValue( _.a ) }\)`;
+				return `${ _.cachedString }${ c[ 3 ] }\)`;
 			}
 		}
 
 		return ( _.flags & FlagOpaque ) ?
-				`rgb(${ rgb })` : `rgba(${ rgb },${ paramValue( _.a ) })`;
+				`rgb(${ rgb })` : `rgba(${ rgb },${ c[ 3 ] })`;
 	}
 
 	toJSON() {

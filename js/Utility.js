@@ -5,6 +5,14 @@ export function lerp( a, b, t ) {
 	return a + ( b - a ) * t;
 }
 
+export function bulkLerp( r, a, b, t ) {
+
+	for ( let i = 0, n = r.length; i != n; ++ i )
+		r[ i ] = lerp( a[ i ], b[ i ], t );
+
+	return r;
+}
+
 export function bitCount( x ) {
 
 	let result = 0;
@@ -33,3 +41,15 @@ export function formatBinary( bits, maxPaddingZeroes = 32 ) {
 	return "0".repeat( paddingZeroes ) + binaryString;
 }
 
+export function checkStyle( s ) {
+
+	/*
+	if ( typeof s != 'string' ) {
+		throw "non-string argument";
+	}
+
+	if ( s.indexOf( 'NaN' ) != -1 ) {
+		throw "'NaN' substring detected";
+	}*/
+	return s;
+}

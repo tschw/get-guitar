@@ -12,7 +12,7 @@ const BlackKeyFractionalWidth = 0.65;
 
 const HighestNoteLimit = 9 * 12 - 1;
 
-const MotionSmoothing = 0.4;
+const MotionSmoothing = 0.55;
 
 
 export class PianoKeyboard {

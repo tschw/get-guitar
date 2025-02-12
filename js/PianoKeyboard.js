@@ -1,4 +1,4 @@
-import { numberToNoteName, Tonality } from './Music.js'
+import { Tonality, numberToNoteName, numberToFlatNoteName } from './Music.js'
 import { VariableColor } from './VariableColor.js'
 import { litStrokes } from './PolygonOutliners.js'
 import { animation } from './Animation.js'
@@ -105,12 +105,15 @@ export class PianoKeyboard {
 
 			this.highlighting.paint( c2d, note, xMin, yMaxB, xMax, yMaxW );
 
-			const label = numberToNoteName( note );
-			const wC = c2d.measureText( label ).width;
+			if ( confState.keysNoteNamesWhite ) {
 
-			c2d.fillStyle = '#ffffff';
-			c2d.fillText( label,
-					( xMin + xMax - wC ) / 2, ( yMaxB + yMaxW ) / 2 );
+				const label = numberToNoteName( note );
+				const wC = c2d.measureText( label ).width;
+
+				c2d.fillStyle = '#eee';
+				c2d.fillText( label,
+						( xMin + xMax - wC ) / 2, ( yMaxB + yMaxW ) / 2 );
+			}
 		}
 
 		iW = 0;
@@ -149,6 +152,39 @@ export class PianoKeyboard {
 			c2d.lineWidth = 1;
 
 			this.highlighting.paint( c2d, note, xMin, yMinH, xMax, yMaxB );
+
+			const showNamesSharp = confState.keysNoteNamesBlackSharp,
+					showNamesFlat = confState.keysNoteNamesBlackFlat;
+
+			if ( showNamesSharp || showNamesFlat ) {
+
+				c2d.fillStyle = '#eee';
+
+				let label = numberToNoteName( note );
+				const metrics = c2d.measureText( label );
+				let wC = metrics.width;
+				let hL = 1.5 * (
+						metrics.actualBoundingBoxAscent +
+							metrics.actualBoundingBoxDescent );
+
+				if ( showNamesSharp && showNamesFlat ) {
+
+					c2d.fillText(
+							label, ( xMin + xMax - wC ) / 2,
+								( yMin + yMaxB ) / 2 - hL );
+
+					hL = 0;
+				} else hL *= 0.5;
+
+				if ( showNamesFlat ) {
+
+					label = numberToFlatNoteName( note );
+					wC = c2d.measureText( label ).width;
+				}
+
+				c2d.fillText( label,
+						( xMin + xMax - wC ) / 2, ( yMin + yMaxB ) / 2 - hL );
+			}
 		}
 
 		c2d.restore();

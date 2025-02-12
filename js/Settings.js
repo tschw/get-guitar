@@ -80,6 +80,9 @@ export class Settings {
 
 					new NoteOctaveCombo( dom, data, store, 'keysLowestWhite' ),
 					new CheckBox( dom, data, store, 'keysScrollButtons' ),
+					new CheckBox( dom, data, store, 'keysNoteNamesWhite' ),
+					new CheckBox( dom, data, store, 'keysNoteNamesBlackSharp' ),
+					new CheckBox( dom, data, store, 'keysNoteNamesBlackFlat' ),
 
 					new CheckBox( dom, data, store, 'legendScrollButtons' ),
 

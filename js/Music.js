@@ -22,9 +22,18 @@ for ( const name of NoteNameInOctave ) {
 }
 export const EnharmonicEquivalent = Object.freeze( equivs );
 
+export function noteIndexInOctave( i ) { return i % 12; }
+export function octaveIndex( i ) { return i / 12 | 0; }
+
 export function numberToNoteName( i ) {
 
-	return `${ NoteNameInOctave[ i % 12 ] }${ i / 12 | 0 }`
+	return NoteNameInOctave[ noteIndexInOctave( i ) ] + octaveIndex( i );
+}
+
+export function numberToFlatNoteName( i ) {
+
+	return EnharmonicEquivalent[
+			NoteNameInOctave[ noteIndexInOctave( i ) ] ] + octaveIndex( i );
 }
 
 export function noteNameToNumber( s ) {

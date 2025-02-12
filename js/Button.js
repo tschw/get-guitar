@@ -13,6 +13,10 @@ export const DefaultStrokeColor = new VariableColor( 0.2, 0.1, { a: 0.5, b: 0.9 
 
 const DefaultTextPaddingX = 4, DefaultTextPaddingY = 4;
 
+const CornerRadiusX = 6;
+const CornerRadiusY = 6;
+const CornerTesselation = 4;
+
 const Smoothing = 0.75;
 const SmoothingPulse = 0.88;
 
@@ -117,20 +121,44 @@ export class Button {
 		const state = this.#visualState;
 
 		p.begin();
-		p.vertex( this.xLeft, this.yTop );
-		p.vertex( this.xLeft + state.width, this.yTop );
-		p.vertex( this.xLeft + state.width, this.yTop + state.height );
-		p.vertex( this.xLeft, this.yTop + state.height );
+		this.#outlineCorner( p, this.xLeft, this.yTop, CornerRadiusX, CornerRadiusY );
+		this.#outlineCorner( p, this.xLeft + state.width, this.yTop, -CornerRadiusX, CornerRadiusY );
+		this.#outlineCorner( p, this.xLeft + state.width, this.yTop + state.height, -CornerRadiusX, -CornerRadiusY );
+		this.#outlineCorner( p, this.xLeft, this.yTop + state.height, CornerRadiusX, -CornerRadiusY );
 		p.close();
 	}
 
+	#outlineCorner( p, x, y, dx, dy ) {
+
+		if ( CornerTesselation <= 1 ) p.vertex( x, y );
+		else {
+
+			const arcCenterX = x + dx, arcCenterY = y + dy;
+			const n = CornerTesselation;
+			const d = Math.sign( dx * dy );
+			const begin = Math.max( 0, - CornerTesselation * d + d );
+			const until = Math.max( d, CornerTesselation * d );
+			for ( let i = begin; i != until; i += d ) {
+
+				const a = i * 0.5 * Math.PI / ( CornerTesselation - 1 );
+				p.vertex( arcCenterX - dx * Math.cos( a ),
+						arcCenterY - dy * Math.sin( a ) );
+			}
+		}
+
+	}
+
 	isContained( x, y ) {
+
+		const state = this.#visualState;
 
 		pointContainment.x = x;
 		pointContainment.y = y;
 		pointContainment.result = false;
 
-		if ( this.visible )
+		if ( this.visible && x >= this.xLeft && y >= this.yTop &&
+				x < this.xLeft + state.width && y < this.yTop + state.height )
+
 			this.#outline( pointContainment );
 
 		return pointContainment.result;

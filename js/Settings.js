@@ -1,30 +1,36 @@
 import { animation } from './Animation.js'
-import { CheckBox, Tunings, NoteOctaveCombo } from './SettingsHtmlUi.js'
+import { FormElem, Tunings, NoteOctaveCombo,
+		MidiPort, MidiInputResponse } from './SettingsHtmlUi.js'
 
 const StorageKey = 'settings';
 const PersistTimeout = 500;
 
 export class Settings {
 
-	#uiHandlers = [];
-	#imexToggles = [];
+	#uiHandlers = [ ];
+	#imexToggles = [ ];
 	#persistTimer = 0;
 	#cachedExportUrl = '';
 	#imexButtonLastFailed = null;
 
 	#dialog = document.querySelector( 'dialog' );
 
-	constructor() {
+	constructor( webMidi ) {
+
+		this.webMidi = webMidi;
+		this.midiElems = [ ];
 
 		let state = JSON.parse( storage?.getItem( StorageKey ) || 'null' );
 		if ( ! state ) {
 
-			state = { tunings: [], local: {} };
+			state = { tunings: [ ], local: { }, midi: { } };
 			this.state = state;
 			this.#initializeUi();
 			this.#getState();
 
 		} else this.state = state;
+
+		webMidi.addSystemStateListener( event => this.#onMidiStateChange() );
 	}
 
 	openModalDialog() {
@@ -60,37 +66,82 @@ export class Settings {
 		animation.requestRefresh();
 	}
 
+	#onMidiStateChange( event ) {
+
+		const subsystem = this.webMidi;
+
+		if ( event == null && subsystem.access ) {
+
+			const localSettings = this.state.local;
+			subsystem.setInput( localSettings.midiIn );
+			subsystem.setOutput( localSettings.midiOut );
+		}
+
+		this.#updateMidiDiax();
+	}
+
+	#updateMidiDiax() {
+
+		const diax = this.webMidi.diagnostics,
+				diaxElem = document.forms.local.elements[ 'midiDiax' ];
+
+		diaxElem.style.display = diax ? 'block' : 'none';
+		diaxElem.value = diax || '';
+	}
+
 	#initializeUi() {
 
 		if ( this.#uiHandlers.length > 0 ) return;
 
-		const store = event => this.persist();
+		const store = ( event => this.persist() ), midi = this.webMidi;
 
 		{
-			const data = this.state, dom = document.forms.tunings.elements
-			this.#uiHandlers.push(
-					new Tunings( dom, data, store, 'tunings' )
-			);
+			const data = this.state, dom = document.forms.tunings.elements;
+			this.#uiHandlers.push( new Tunings( dom, data, store, 'tunings' ) );
 		}
 		{
-			const data = this.state.local, dom = document.forms.local.elements;
+			const data = this.state.local, dom = document.forms.local.elements,
+					setMidiIn = event => {
+						midi.setInput( event.target.value ); this.persist(); },
+					setMidiOut = event => {
+						midi.setOutput( event.target.value ); this.persist(); };
 
 			this.#uiHandlers.push(
-					new CheckBox( dom, data, store, 'mirrored' ),
-					new CheckBox( dom, data, store, 'swipewipes' ),
+					new FormElem( dom, data, store, 'mirrored' ),
+					new FormElem( dom, data, store, 'swipewipes' ),
+					new MidiPort(
+						dom, data, setMidiIn, 'midiIn', midi, 'input' ),
+					new MidiPort(
+						dom, data, setMidiOut, 'midiOut', midi, 'output' ),
+					new FormElem( dom, data, store, 'logMidiInput' ),
+					new FormElem( dom, data, store, 'logMidiOutput' ) );
 
+			this.#updateMidiDiax();
+		}
+		{
+			const data = this.state.midi, dom = document.forms.midi.elements;
+
+			this.#uiHandlers.push(
+					new MidiInputResponse( dom, data, store, 'inputResponse' ),
+					new FormElem( dom, data, store, 'fwdSysCommon' ),
+					new FormElem( dom, data, store, 'fwdSysRealTime' ),
+					new FormElem( dom, data, store, 'fwdSysExclusive' ) );
+		}
+
+		{
+			const data = this.state.local, dom = document.forms.local.elements;
+			this.#uiHandlers.push(
 					new NoteOctaveCombo( dom, data, store, 'keysLowestWhite' ),
-					new CheckBox( dom, data, store, 'keysScrollButtons' ),
-					new CheckBox( dom, data, store, 'keysNoteNamesWhite' ),
-					new CheckBox( dom, data, store, 'keysNoteNamesBlackSharp' ),
-					new CheckBox( dom, data, store, 'keysNoteNamesBlackFlat' ),
+					new FormElem( dom, data, store, 'keysScrollButtons' ),
+					new FormElem( dom, data, store, 'keysNoteNamesWhite' ),
+					new FormElem( dom, data, store, 'keysNoteNamesBlackSharp' ),
+					new FormElem( dom, data, store, 'keysNoteNamesBlackFlat' ),
 
-					new CheckBox( dom, data, store, 'legendScrollButtons' ),
+					new FormElem( dom, data, store, 'legendScrollButtons' ),
 
-					new CheckBox( dom, data, store, 'featureChromaticTranspose' ),
-					new CheckBox( dom, data, store, 'featureTransposeByFifth' ),
-					new CheckBox( dom, data, store, 'featureAudioAnalysis' )
-			);
+					new FormElem( dom, data, store, 'featureChromaticTranspose' ),
+					new FormElem( dom, data, store, 'featureTransposeByFifth' ),
+					new FormElem( dom, data, store, 'featureAudioAnalysis' ) );
 		}
 
 		const imex = document.forms.imex.elements;
@@ -98,8 +149,8 @@ export class Settings {
 
 		imexToggles.push(
 				imex.imexTunings,
-				imex.imexLocal
-		);
+				imex.imexLocal,
+				imex.imexMidi );
 
 		imexToggles.forEach(
 				checkbox => checkbox.addEventListener(
@@ -120,6 +171,7 @@ export class Settings {
 		dialog.querySelector( 'a.button[name=reset]' ).
 				addEventListener( 'click', e => this.#resetClick( e ) );
 	}
+
 
 	#importFile( event ) {
 
@@ -193,7 +245,8 @@ export class Settings {
 
 		const elem = document.forms.imex, root = { version: 1 }, s = this.state;
 		if ( elem.imexTunings.checked ) root.tunings = s.tunings;
-		if ( elem.imexLocal.checked) root.local = s.local;
+		if ( elem.imexLocal.checked ) root.local = s.local;
+		if ( elem.imexMidi.checked ) root.midi = s.midi;
 
 		if ( this.#cachedExportUrl )
 			window.revokeObjectUrl( this.#cachedExportUrl );
@@ -212,14 +265,32 @@ export class Settings {
 		if ( this.#imexCheckSelection( event.target ) ) {
 
 			const elem = document.forms.imex.elements;
-			if ( elem.imexTunings.checked ) document.forms.tunings.reset();
-			if ( elem.imexLocal.checked ) document.forms.local.reset();
+
+			if ( elem.imexTunings.checked )
+				this.#resetForm( document.forms.tunings );
+
+			if ( elem.imexLocal.checked )
+				this.#resetForm( document.forms.local );
+
+			if ( elem.imexMidi.checked )
+				this.#resetForm( document.forms.midi );
 
 			this.#getState();
 			this.persist();
+
+			this.#updateUi();
 		}
 
 		event.preventDefault();
+	}
+
+	#resetForm( form ) {
+
+		form.reset();
+
+		for ( const ui of this.#uiHandlers )
+			if ( ui.domContext == form.domContext )
+				ui.afterFormReset();
 	}
 
 	#imexOkSelectionApproves( event ) {
@@ -283,26 +354,29 @@ function jsonDownload( object ) {
 			object, null, 2 ) ], { type: "application/json" } ) );
 }
 
-let storageType = 'none';
+function testedStorage( type ) {
 
-const storage = (
-	( get ) => get( 'localStorage' ) || get( 'sessionStorage' ) || null )(
-		( type ) => {
+	let storage;
+	try {
+		storage = window[ type ];
+		const x = '__storage_test__';
+		storage.setItem( x, x );
+		storage.removeItem( x );
 
-			let storage;
-			try {
-				storage = window[ type ];
-				const x = '__storage_test__';
-				storage.setItem( x, x );
-				storage.removeItem( x );
+	} catch ( e ) {
 
-			} catch ( e ) {
+		if ( ! ( e instanceof DOMException &&
+			e.name == "QuotaExceededError" &&
+			storage && storage.length > 0 ) ) return null;
+	}
+	return storage;
+}
 
-				if ( ! ( e instanceof DOMException &&
-					e.name == "QuotaExceededError" &&
-					storage && storage.length > 0 ) ) return null;
-			}
-			storageType = type;
-			return storage;
-		} );
+const [ storage, storageType ] = (
+		get => get( 'localStorage' )
+			|| get( 'sessionStorage' )
+			|| [ null, 'none' ] )( type => {
 
+				const storage = testedStorage( type );
+				return storage && [ storage, type ];
+			} );

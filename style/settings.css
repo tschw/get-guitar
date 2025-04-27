@@ -47,7 +47,6 @@ label {
 }
 
 a:hover, a.button:hover, button:hover, label:hover {
-
 	color: inherit!important;
 	border-color: inherit;
 	cursor: pointer;
@@ -59,13 +58,15 @@ form#settings {
 	clear: right;
 	text-align: left;
 	overflow-y: scroll;
-	overflow-x: hidden;
+	overflow-x: auto;
 	position: relative;
 	height: 94%;
 }
 
 .block { display: block; }
+.table { display: table; }
 
+output.diax { color: yellow; }
 label.error:not([for=import]), textarea.error { color: red; }
 label.error[for=import], a.button.error { border-color: red; }
 
@@ -74,21 +75,50 @@ textarea {
 	height: 4em;
 	font-size: 12pt;
 	font-weight: bold;
-	background-color: white;
+	background-color: lightgray;
 	opacity: 60%;
 	border: 0;
 	color: black;
 }
-input:hover, select:hover {
-	background-color: lightgray;
+input, select {
+	font-size: 11pt;
+	margin: 0px;
+	vertical-align: text-top;
+	background-color: white;
 }
-select { height: 1.5em; }
+input:disabled, select:disabled {
+	background-color: #888;
+}
+input:hover:not(:disabled), select:hover:not(:disabled) {
+	background-color: #ddd;
+}
+textarea:hover:not(:disabled), textarea:focus:not(:disabled) {
+	background-color: #e7e7e7;
+}
+
+input { height: 1.0em; } select { height: 1.4em; }
 input[type=number] { width: 3em; }
-input, select { font-size: 11pt; vertical-align: text-top; }
 input[type=checkbox] { vertical-align: middle; }
 input[type=file] {
 	position: absolute!important;
 	width: 1px; height: 1px;
 }
 
-
+table {
+	text-align: center;
+}
+tr:first-child th {
+	font-weight: bold; font-size: 0.9em;
+	padding: 0 0.2em;
+	border-bottom: 1px solid white;
+}
+th {
+	font-weight: normal; font-size: 0.75em;
+}
+th, td {
+	font-size: 0.9em;
+	padding: 0 0.1em;
+}
+td {
+	border-top: 1px solid white;
+}

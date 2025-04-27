@@ -1,4 +1,5 @@
 import { Settings } from './Settings.js'
+import { WebMidi } from './WebMidi.js'
 import { Fretboard } from './Fretboard.js'
 import { Highlighting } from './Highlighting.js'
 import { PianoKeyboard } from './PianoKeyboard.js'
@@ -45,11 +46,13 @@ class App {
 		this.diffCandidates = new BitMaskDelta();
 		this.diffStimuli = new BitMaskDelta();
 
-		const settingsObject = new Settings();
+		const webMidi = new WebMidi();
+		const settingsObject = new Settings( webMidi );
 		const settings = settingsObject.state;
 		this.settings = settings;
 		const highlighting = new Highlighting();
 		this.highlighting = highlighting;
+		webMidi.attachFriends( settings, highlighting );
 
 		const width = this.element.width;
 		const height = this.element.height;

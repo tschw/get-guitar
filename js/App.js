@@ -164,9 +164,12 @@ class App {
 			button.pulsing = true;
 		}
 
+		this.dragStart = { x: -1, y: -1 };
+
 		this.element.addEventListener( 'mousemove', (e) => this.mouseMove(e) );
 		this.element.addEventListener( 'mousedown', (e) => this.mouseDown(e) );
 		this.element.addEventListener( 'mouseout', (e) => this.unhighlight() );
+		this.element.addEventListener( 'mouseup', (e) => this.mouseUp(e) );
 
 		animation.render = () => this.paint();
 		animation.unhighlight = () => this.unhighlight();
@@ -263,7 +266,8 @@ class App {
 
 	mouseDown( event ) {
 
-		const p = this.#getPointerCoordinates( event );
+		const p = this.#getPointerCoordinates( event ), drag = this.dragStart;
+		drag.x = p.x; drag.y = p.y;
 
 		for ( const button of this.buttons )
 			if ( button.actionIfContained( p.x, p.y ) )
@@ -398,6 +402,28 @@ class App {
 		cof.highlitScale = animation.ifStateChange( cof.highlitScale, null );
 
 		this.legend.unhighlight();
+	}
+
+	mouseUp( event ) {
+
+		const cof = this.cof;
+		if ( cof.selectedTonality != 0 ) return null;
+
+		const p = this.#getPointerCoordinates( event ),
+				d = this.dragStart, frets = this.frets;
+
+		if ( this.settings.local.swipewipes &&
+				p.x - d.x > frets.width / 4 &&
+				p.x < frets.width && p.y < frets.height &&
+				d.x < frets.width && d.y < frets.height ) {
+
+			const highlighting = this.highlighting;
+
+			highlighting.selection = 0;
+			cof.matchTonality = highlighting.selection;
+			this.#updateUrl( highlighting.selection );
+			animation.requestRefresh();
+		}
 	}
 
 	#updateUrl( selection ) {

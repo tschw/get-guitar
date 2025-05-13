@@ -77,6 +77,7 @@ export class Settings {
 
 			this.#uiHandlers.push(
 					new CheckBox( dom, data, store, 'mirrored' ),
+					new CheckBox( dom, data, store, 'swipewipes' ),
 
 					new NoteOctaveCombo( dom, data, store, 'keysLowestWhite' ),
 					new CheckBox( dom, data, store, 'keysScrollButtons' ),

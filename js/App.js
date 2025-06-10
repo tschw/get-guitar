@@ -157,7 +157,8 @@ class App {
 
 			this.buttonMic.enabled = false;
 			const redirect = location.replace(
-					'//tschw.github.io/get-guitar', '//get-guitar.netlify.app');
+					'//tschw.github.io/perfect-harmony',
+					'//perfect-harmony.netlify.app');
 			if ( redirect != location ) window.location = redirect;
 		}
 

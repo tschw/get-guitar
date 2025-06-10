@@ -257,7 +257,7 @@ export class Settings {
 		const target = event.target;
 		target.href = url;
 		target.target = '_blank';
-		target.download = 'get-guitar-export.json';
+		target.download = 'perfect-harmony-export.json';
 	}
 
 	#resetClick( event ) {

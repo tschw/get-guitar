@@ -60,6 +60,14 @@ export class FormElem extends SettingsHtmlUi {
 
 		const name = this.modelName;
 		const value = this.dataContext[ name ], lm = this.domContext[ name ];
+
+		if ( value === undefined ) switch ( lm.type ) {
+			case 'number':		value = + lm.defaultValue;			break;
+			case 'checkbox':	value = lm.defaultChecked;			break;
+			case 'select-one':	value = lm.getAttribute( 'value' );	break;
+			default:			value = lm.defaultValue;
+		}
+
 		switch ( lm.type ) {
 			case 'number':		lm.valueAsNumber = value;	break;
 			case 'checkbox':	lm.checked = value;			break;

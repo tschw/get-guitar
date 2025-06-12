@@ -38,6 +38,7 @@ export class Settings {
 		this.#initializeUi();
 		this.#updateUi();
 		this.#dialog.showModal();
+		this.persist();
 	}
 
 	#getState() {

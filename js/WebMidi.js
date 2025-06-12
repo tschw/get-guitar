@@ -33,6 +33,17 @@ function decodeConfig( channelContext, on ) {
 	return channelContext.configs[ on >>> 14 & 0x3f ]; }
 function decodeVelo( on ) { return on >>> 8 & 0x7f; }
 
+const MatchRatio = {
+
+	'2/5': { n: 2, d: 5 },
+	'1/2': { n: 1, d: 2 },
+	'2/3': { n: 2, d: 3 },
+	'3/4': { n: 3, d: 4 },
+
+	'all': { n: 1, d: 1 },	// logically, without optimization
+	'one': { n: 0, d: 1 }	// product gets clamped to min = 1
+};
+
 export class WebMidi {
 
 	#settings
@@ -463,7 +474,8 @@ export class WebMidi {
 
 		if ( resetContextState ||
 				latestKnown.bendWidth != bendWidth ||
-				latestKnown.bendWidthEvent != bendWidthEvent ) {
+				latestKnown.bendWidthEvent != bendWidthEvent ||
+				latestKnown.bendWidthMatch != current.bendWidthMatch ) {
 
 			cc.rpBendSteps = ! bendWidth ? -1 :
 					bendWidthEvent != 'override' ? bendWidthSteps : -1;
@@ -619,19 +631,32 @@ export class WebMidi {
 		const selection = this.#highlighting.selection;
 		if ( selection != 0 ) {
 
-			const fraction = Math.max( channelContext.rpBendCents, 0 ) / 100.0;
-			const targetSteps = steps + Math.ceil( fraction );
-			let n = 0, nFull = 0, stepCounter = 0;
-			while ( stepCounter != targetSteps ) {
+			const fraction = Math.max( channelContext.rpBendCents, 0 ) / 100.0,
+					matchAt = MatchRatio[ conf.bendWidthMatch ];
+			const targetSteps = steps + Math.ceil( fraction ),
+					minMatch = matchAt.d == 1 ? 0 : Math.max( 1,
+							bitCount( notes ) * matchAt.n / matchAt.d );
+			let n = 0, nFull = 0;
+			for ( let stepCounter = 0; stepCounter != targetSteps; ) {
 
+				let d = 0, ok = false;
 				do {
 					notes = transpose( notes, direction );
-					++ n;
-				} while ( ( notes & selection ) == 0 );
 
+					const bits = notes & selection;
+					ok = matchAt.d != 1 ?
+							bitCount( bits ) >= minMatch :
+							matchAt.n == 0 ? bits != 0 : bits == notes;
+
+				} while ( ++ d < 12 && ! ok );
+
+				if ( ! ok ) break;
+
+				n += d;
 				++ stepCounter;
 				if ( nFull == 0 && stepCounter == steps ) nFull = n;
 			}
+
 			const asFloat = Math.min( Math.max(
 					nFull + ( n - nFull ) * fraction, 0 ), 127.99 );
 

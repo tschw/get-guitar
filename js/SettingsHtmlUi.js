@@ -272,7 +272,8 @@ class MidiInChannelResponse extends SettingsHtmlUiComposite {
 		lmEnABW.disabled = noTransform;
 
 		lm[ 'bendWidthSteps' ].disabled =
-			lm[ 'bendWidthEvent' ].disabled = noTransform || ! lmEnABW.checked;
+			lm[ 'bendWidthEvent' ].disabled =
+			lm[ 'bendWidthMatch' ].disabled = noTransform || ! lmEnABW.checked;
 	}
 
 	loadFromModel() {

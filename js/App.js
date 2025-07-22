@@ -265,7 +265,8 @@ class App {
 				animation.ifStateChange( cof.highlitTonality, tonality );
 
 		highlighting.highlitTonality =
-				animation.ifStateChange( highlighting.highlitTonality, tonality );
+				animation.ifStateChange(
+						highlighting.highlitTonality, tonality );
 	}
 
 	mouseDown( event ) {

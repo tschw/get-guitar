@@ -220,18 +220,13 @@ class App {
 		for ( const button of this.buttons )
 			if ( button.highlightIfContained( p.x, p.y ) ) {
 
-				if ( ! isListening )
-					highlighting.highlitNote =
-							animation.ifStateChange(
-								highlighting.highlitNote, null );
+				if ( ! isListening ) this.highlightNote( null );
 				return;
 			}
 
 		const note = this.#findNote( p.x, p.y );
 
-		if ( ! isListening )
-			highlighting.highlitNote =
-					animation.ifStateChange( highlighting.highlitNote, note );
+		if ( ! isListening ) this.highlightNote( note );
 
 		const cof = this.cof, legend = this.legend;
 		const iHighlitScale = legend.highlight( p.x, p.y );
@@ -284,10 +279,7 @@ class App {
 		const note = this.#findNote( p.x, p.y );
 		if ( note != null ) {
 
-			highlighting.selection ^= 1 << note % 12;
-			cof.matchTonality = highlighting.selection;
-			this.#updateUrl( highlighting.selection );
-			animation.requestRefresh();
+			this.#applySelection( highlighting.selection ^= 1 << note % 12 );
 			return;
 
 		} else if ( p.y < frets.height && p.x < frets.width ) {
@@ -397,8 +389,7 @@ class App {
 
 		const highlighting = this.highlighting, cof = this.cof;
 
-		highlighting.highlitNote =
-				animation.ifStateChange( highlighting.highlitNote, null );
+		this.highlightNote( null );
 
 		highlighting.highlitTonality =
 				animation.ifStateChange( highlighting.highlitTonality, 0 );
@@ -407,6 +398,14 @@ class App {
 		cof.highlitScale = animation.ifStateChange( cof.highlitScale, null );
 
 		this.legend.unhighlight();
+	}
+
+	highlightNote( note ) {
+
+		const highlighting = this.highlighting;
+
+		highlighting.highlitNote =
+				animation.ifStateChange( highlighting.highlitNote, note );
 	}
 
 	mouseUp( event ) {
@@ -420,15 +419,9 @@ class App {
 		if ( this.settings.local.swipewipes &&
 				p.x - d.x > frets.width / 4 &&
 				p.x < frets.width && p.y < frets.height &&
-				d.x < frets.width && d.y < frets.height ) {
+				d.x < frets.width && d.y < frets.height )
 
-			const highlighting = this.highlighting;
-
-			highlighting.selection = 0;
-			cof.matchTonality = highlighting.selection;
-			this.#updateUrl( highlighting.selection );
-			animation.requestRefresh();
-		}
+			this.#applySelection( 0 );
 	}
 
 	#updateUrl( selection ) {
@@ -459,20 +452,17 @@ class App {
 	transpose( semitones ) {
 
 		const highlighting = this.highlighting, cof = this.cof;
+		const selection = transpose( highlighting.selection, semitones );
 
-		highlighting.selection = transpose( highlighting.selection, semitones );
+		highlighting.selection = selection;
 
 		if ( cof.selectedTonality ) {
 
-			cof.selectedTonality = highlighting.selection;
+			cof.selectedTonality = selection;
 			this.selectedKey = ( this.selectedKey + semitones ) % 12;
 
-		} else {
+		} else this.#applySelection( selection );
 
-			const selection = highlighting.selection;
-			cof.matchTonality = selection;
-			this.#updateUrl( selection );
-		}
 		animation.requestRefresh();
 	}
 
@@ -500,11 +490,8 @@ class App {
 
 		const highlighting = this.highlighting, cof = this.cof;
 
-		if ( doApply ) {
-			const selection = highlighting.selection;
-			cof.matchTonality = selection;
-			this.#updateUrl( selection );
-		}
+		if ( doApply )
+			this.#applySelection( highlighting.selection );
 		else highlighting.selection = cof.matchTonality;
 
 		this.selectedKey = -1;
@@ -520,6 +507,15 @@ class App {
 		setButtonState( this.buttonApplyCoF, true, false );
 		setButtonState( this.buttonCancelCoF, true, false );
 
+		animation.requestRefresh();
+	}
+
+	#applySelection( selection ) {
+
+		const highlighting = this.highlighting;
+		highlighting.selection = selection;
+		this.cof.matchTonality = selection;
+		this.#updateUrl( selection );
 		animation.requestRefresh();
 	}
 
@@ -548,8 +544,7 @@ class App {
 						stimuli.apply( highlighting.highlitTonality );
 
 				const melody = Math.round( a[ 2 ] );
-				highlighting.highlitNote =
-						! Number.isNaN( melody ) ? melody : null;
+				this.highlightNote( ! Number.isNaN( melody ) ? melody : null );
 			}
 /*
 			console.log( "ui0:", fmtBin12( highlighting.selection ) );

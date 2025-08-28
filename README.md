@@ -11,7 +11,7 @@ the potentially vibe-killing "math homework", so I can focus more on playing
 and maintain a balanced and foolishly artful mindset, sensitive to emotion,
 much more inspiring to creative processes than when having to think hard, which
 in particularly I am allergic to, since I like to play improvisational music as
-to balance writing Software.
+to balance writing software.
 
 The **[Wiki](https://github.com/tschw/perfect-harmony/wiki/Perfect-Harmony-for-Free)**
 contains articles logging my insights on music and harmony in a from-scratch

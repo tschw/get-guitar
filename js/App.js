@@ -12,6 +12,7 @@ import * as symbol from './UnicodeSymbols.js'
 import { animation } from './Animation.js'
 import * as audioAnalyzer from './audio-analyzer/api.js'
 import { BitMaskDelta } from './BitMaskDelta.js'
+import { tonalityRegistry, tonalityByPrefix } from './TonalityInfo.js'
 
 const NumberOfFrets = 16;
 const NumberOfPianoWhiteKeys = 8;
@@ -142,12 +143,11 @@ class App {
 					symbol.Cancel, () => this.applyOrCancelCoF( false ) ),
 		];
 
-		const location = window.location.toString();
-		const sParam = /[?&]s=0b([01]+)(?:&|\/?$)/.exec( location );
+		const loc = window.location.toString();
+		const sParam = /[?&]s=([01]+@\d+)[^&\/]*(?:&|\/?$)/.exec( loc );
 		let initialSelection = 0;
-		if ( sParam != null && sParam.length == 2 ) {
-			initialSelection = parseInt( sParam[ 1 ], 2 );
-		}
+		if ( sParam != null && sParam.length == 2 )
+			initialSelection = tonalityByPrefix[ sParam[ 1 ] ];
 		this.selectionInUrl = initialSelection;
 
 		cof.matchTonality = initialSelection;
@@ -432,7 +432,7 @@ class App {
 
 			let queryString = '';
 			if ( selection != 0 )
-				queryString = '?s=0b' + fmtBin12( selection );
+				queryString = `?s=${ tonalityRegistry[ selection ] }`;
 
 			const location = window.location;
 			window.history.replaceState( null, '',
@@ -547,6 +547,8 @@ class App {
 				this.highlightNote( ! Number.isNaN( melody ) ? melody : null );
 			}
 /*
+			function fmtBin12( val ) { return formatBinary( val, 12 ); }
+
 			console.log( "ui0:", fmtBin12( highlighting.selection ) );
 			console.log( "ui1:", fmtBin12( cof.selectedTonality ) );
 			console.log( "ui2:", fmtBin12( cof.matchTonality ) );
@@ -611,7 +613,5 @@ function setButtonState( button, visible, enabled ) {
 		}
 	}
 }
-
-const fmtBin12 = ( bits ) => formatBinary( bits, 12 );
 
 const app = new App();

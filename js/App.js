@@ -156,7 +156,7 @@ class App {
 		if ( audioAnalyzer.getSystemState() == 'unavailable' ) {
 
 			this.buttonMic.enabled = false;
-			const redirect = location.replace(
+			const redirect = location.toString().replace(
 					'//tschw.github.io/perfect-harmony',
 					'//perfect-harmony.netlify.app');
 			if ( redirect != location ) window.location = redirect;

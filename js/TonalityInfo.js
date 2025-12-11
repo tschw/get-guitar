@@ -77,11 +77,17 @@ for ( let i = 0; i < 1366; ++ i ) {
 
 	// Subtle: in only two cases, the heptatonic has a lower integer value
 	// than the corresponding pentatonic, which we prefer for symmetry and
-	// simplicity (heptatonic tonalities can be explained by their inverse).
+	// simplicity (heptatonic tonalities are explained by their inverses).
 
 	if ( b > 6 ) continue;
 
-	let transposeToInverse = 0, inv = i ^ 0xfff;
+	// The inverse of a hexatonic is hexatonic, disambiguate by picking the
+	// lower integer value.
+
+	let inv = i ^ 0xfff;
+	if ( b == 6 && inv < i ) continue;
+
+	let transposeToInverse = 0;
 	for ( let k = 1, p = inv; k < 12; ++ k ) {
 
 		p = rol12( p );

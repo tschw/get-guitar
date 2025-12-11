@@ -54,7 +54,7 @@ function rb12( bits ) {
 }
 
 const rol12 = bits => ( bits << 1 | bits >> 11 & 1 ) & 0xfff,
-		asSignedTranspose = pos => pos >= 6 ? 12 - pos : pos,
+		asSignedTranspose = pos => pos >= 6 ? pos - 12 : pos,
 
 		cOffset = [ 0, 1, 2, 8, 27, 70, 136 ],
 		pattern = new Array( 180 ),

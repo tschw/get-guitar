@@ -140,18 +140,15 @@ for ( let i = 0; i < 1366; ++ i ) {
 		const encShiftedPattern = encPatternIndex | k + k;
 
 		// Subtle: for only eight hexatonic patterns, the inverse can be
-		// explained solely by shifting and the explanations compete here.
-		// Let's prefer the explanation closer to the canonical form:
+		// explained solely by shifting and the explanations compete, so
+		// the order in which these assignments are executed matters and
+		// happens to encode the shortest absolute distance between both
+		// mutually inverse views:
 
-		if ( id[ p ] == 0 || Math.abs( asSignedTranspose( k ) ) <
-				Math.abs( asSignedTranspose( chromaticPosition( id[ p ] ) ) ) )
-
+		if ( id[ p ] == 0 )
 			id[ p ] = encShiftedPattern;
 
-
-		if ( id[ q ] == 0 || Math.abs( asSignedTranspose( k ) ) <
-				Math.abs( asSignedTranspose( chromaticPosition( id[ q ] ) ) ) )
-
+		if ( id[ q ] == 0 )
 			id[ q ] = encShiftedPattern | 1;
 	}
 

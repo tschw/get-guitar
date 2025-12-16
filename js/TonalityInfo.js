@@ -241,23 +241,23 @@ for ( let i = 0, n = pattern.length, b = 0; i < n; ++ i ) {
 }
 
 
-export const tonalityRegistry = Object.freeze(
+export const TonalityRegistry = Object.freeze(
 		initializedArray( 4096, bits => new TonalityInfo( bits ) ) );
 
-export const tonalityByString = new Object(),
-		tonalityByPrefix = new Object();
+export const TonalityByString = new Object(),
+		TonalityByPrefix = new Object();
 
 
 for ( let i = 0, b = 0; i < 4096; ++ i ) {
 
-	const obj = tonalityRegistry[ i ];
+	const obj = TonalityRegistry[ i ];
 	const s = obj.asString;
-	tonalityByString[ s ] = i;
+	TonalityByString[ s ] = i;
 
 	const p = s.slice( 0, s.indexOf( ':' ) );
-	tonalityByPrefix[ p ] = i;
+	TonalityByPrefix[ p ] = i;
 }
 
-Object.freeze( tonalityByString );
-Object.freeze( tonalityByPrefix );
+Object.freeze( TonalityByString );
+Object.freeze( TonalityByPrefix );
 

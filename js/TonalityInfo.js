@@ -27,8 +27,10 @@ export class TonalityInfo {
 
 		const pi = v.fifths.islands;
 
-		this.asString = `${ v.reverseBinaryString }@`
+		this.asString = `${ v.cardinality };`
+				+ `${ p.patternIndex - p.cardinalityOffset }@`
 				+ `${ pos }${ p.positionSuffixString },`
+				+ `rb${ v.reverseBinaryString },`
 				+ `${ v.modesOfCardinalityString },${ portability[ pi ] }`;
 
 		Object.freeze( this );
@@ -56,7 +58,7 @@ function rb12( bits ) {
 const rol12 = bits => ( bits << 1 | bits >> 11 & 1 ) & 0xfff,
 		asSignedTranspose = pos => pos >= 6 ? pos - 12 : pos,
 
-		cOffset = [ 0, 1, 2, 8, 27, 70, 136 ],
+		cOffset = [ 0, 1, 2, 8, 27, 70, 136, 0 ],
 		pattern = new Array( 180 ),
 
 		bitLut = initializedArray( 13, i => 1 << i ),
@@ -114,11 +116,11 @@ for ( let i = 0; i < 1366; ++ i ) {
 					Object.assign( stats, statsAccDefault ) ) );
 
 	const j = cOffset[ b ] ++;
-
 	const pat = pattern[ j ] = {
 
 				patternIndex: j, view,
 				positionSuffixString: 'TBD', // <--v-v- detailed below
+				cardinalityOffset: 0,
 				distinctChromaticPositions: 12
 			},
 
@@ -226,6 +228,15 @@ for ( let i = 0; i < 1366; ++ i ) {
 	addPatternStats( view[ 0 ].fifths, fifths, i );
 	addPatternStats( view[ 1 ].fifths, fifths, inv );
 	completePatternStats( i => view[ i ].fifths );
+}
+
+cOffset.copyWithin( 1, 0, cOffset.length );
+cOffset[ 0 ] = 0;
+
+for ( let i = 0, n = pattern.length, b = 0; i < n; ++ i ) {
+	const pat = pattern[ i ];
+	pat.cardinalityOffset =
+			i == cOffset[ b + 1 ] ? cOffset[ ++ b ] : cOffset[ b ];
 	Object.freeze( pat );
 }
 
@@ -236,7 +247,8 @@ export const tonalityRegistry = Object.freeze(
 export const tonalityByString = new Object(),
 		tonalityByPrefix = new Object();
 
-for ( let i = 0; i < 4096; ++ i ) {
+
+for ( let i = 0, b = 0; i < 4096; ++ i ) {
 
 	const obj = tonalityRegistry[ i ];
 	const s = obj.asString;
@@ -245,6 +257,7 @@ for ( let i = 0; i < 4096; ++ i ) {
 	const p = s.slice( 0, s.indexOf( ':' ) );
 	tonalityByPrefix[ p ] = i;
 }
+
 Object.freeze( tonalityByString );
 Object.freeze( tonalityByPrefix );
 

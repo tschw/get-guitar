@@ -144,7 +144,7 @@ class App {
 		];
 
 		const loc = window.location.toString();
-		const sParam = /[?&]s=([01]+@\d+)[^&\/]*(?:&|\/?$)/.exec( loc );
+		const sParam = /[?&]s=(\d;\d+@\d+)[^&\/]*(?:&|\/?$)/.exec( loc );
 		let initialSelection = 0;
 		if ( sParam != null && sParam.length == 2 )
 			initialSelection = tonalityByPrefix[ sParam[ 1 ] ];

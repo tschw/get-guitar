@@ -1,7 +1,7 @@
 Perfect Harmony
 ===============
 
-### - a free harmony calculator app for keyboard and string instruments - ###
+### - online musician's calculator for keyboard and string instruments - ###
 
 **[try it](https://tschw.github.io/perfect-harmony)!**
 

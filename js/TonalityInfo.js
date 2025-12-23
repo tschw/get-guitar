@@ -66,8 +66,8 @@ export class TonalityInfo extends StaticInfo {
 
 		const i = id[ bits ];
 
-		const p = pattern[ patternIndex( i ) ];
-		const v = p.view[ viewIndex( i ) ],
+		const p = pattern[ patternIndex( i ) ], vi = viewIndex( i );
+		const v = p.view[ vi ],
 				pos = chromaticPosition( i ),
 				pi = v.fifths.islands;
 
@@ -75,8 +75,11 @@ export class TonalityInfo extends StaticInfo {
 		this.view = v;
 		this.position = pos;
 
+		let localIndex = p.index - cOffset[ p.view[ 0 ].cardinality ];
+		if ( v.cardinality == 6 && vi == 1 ) localIndex += 45;
+
 		this.asString = `${ v.cardinality };`
-				+ `${ p.index - cOffset[ p.view[ 0 ].cardinality ] }@`
+				+ `${ localIndex }@`
 				+ `${ pos }${ p.positionSuffixString },`
 				+ `rb${ v.reverseBinaryString },`
 				+ `${ v.modesOfCardinalityString },${ portability[ pi ] }`;

@@ -1,34 +1,82 @@
 
 import { bitCount, initializedArray } from './Utility.js'
 
+let initialized = false;
+
+export class StaticInfo {
+
+	constructor() {
+
+		if ( initialized )
+			throw Error( "Instances of this class have static lifetime." );
+	}
+}
+
+export class PackingStats extends StaticInfo {
+
+	islands = 0;
+	minAdjacency = 12;
+	maxAdjacency = 12;
+	minGapSize = 0;
+	maxGapSize = 0;
+}
+
+export class HarmonicStructure extends PackingStats  {
+
+	constructor( bits, popc, tpToInv ) {
+
+		super();
+
+		this.bits = bits;
+		this.cardinality = popc;
+		this.transposeToInverse = tpToInv;
+		this.reverseBinaryString = rb12( bits );
+		this.distinctModes = popc;
+		this.fifths = new PackingStats();
+	}
+}
+
+export class Pattern extends StaticInfo {
+
+	constructor( index, bits, popc, inv, tpToInv ) {
+
+		super();
+
+		this.index = index;
+		this.view = [
+				new HarmonicStructure( bits, popc, tpToInv ),
+				new HarmonicStructure( inv, 12 - popc, - tpToInv ) ];
+	}
+
+	positionSuffixString = '';
+	distinctChromaticPositions = 12;
+}
+
 const id = new Int32Array( 4096 ),
 		chromaticPosition = id => id >> 1 & 15,
 		patternIndex = id => id >>> 5,
 		viewIndex = id => id & 1,
 		portability = '-ABCDEF';
 
-export class TonalityInfo {
-
-	pattern;
-	view;
-
-	position;
+export class TonalityInfo extends StaticInfo {
 
 	constructor( bits ) {
 
-		const i = id[ bits ];
-		const p = pattern[ patternIndex( i ) ];
-		this.pattern = p;
-		const v = p.view[ viewIndex( i ) ];
-		this.view = v;
+		super();
 
-		const pos = chromaticPosition( i );
+		const i = id[ bits ];
+
+		const p = pattern[ patternIndex( i ) ];
+		const v = p.view[ viewIndex( i ) ],
+				pos = chromaticPosition( i ),
+				pi = v.fifths.islands;
+
+		this.pattern = p;
+		this.view = v;
 		this.position = pos;
 
-		const pi = v.fifths.islands;
-
 		this.asString = `${ v.cardinality };`
-				+ `${ p.patternIndex - p.cardinalityOffset }@`
+				+ `${ p.index - cOffset[ p.view[ 0 ].cardinality ] }@`
 				+ `${ pos }${ p.positionSuffixString },`
 				+ `rb${ v.reverseBinaryString },`
 				+ `${ v.modesOfCardinalityString },${ portability[ pi ] }`;
@@ -39,13 +87,13 @@ export class TonalityInfo {
 	toString() { return this.asString; }
 };
 
-const bit12 = 1 << 11,
+const Bit12 = 1 << 11,
 		tmpArrayN = initializedArray( 12, i => new Array( i + 1 ) );
 
 function rb12( bits ) {
 
 	let l = 11;
-	for ( let b = bit12; b != 1 && ( bits & b ) == 0; b >>>= 1, -- l )
+	for ( let b = Bit12; b != 1 && ( bits & b ) == 0; b >>>= 1, -- l )
 
 		;
 
@@ -63,14 +111,7 @@ const rol12 = bits => ( bits << 1 | bits >> 11 & 1 ) & 0xfff,
 
 		bitLut = initializedArray( 13, i => 1 << i ),
 		fifths = [ 0x001, 0x080, 0x004, 0x200, 0x010, 0x800,
-				0x040, 0x002, 0x100, 0x008, 0x400, 0x020 ],
-
-		statsAccDefault = {
-			islands: 0,
-			minAdjacency: 12, maxAdjacency: 0,
-			minGapSize: 0, maxGapSize: 0
-		};
-
+				0x040, 0x002, 0x100, 0x008, 0x400, 0x020 ];
 
 for ( let i = 0; i < 1366; ++ i ) {
 
@@ -83,42 +124,17 @@ for ( let i = 0; i < 1366; ++ i ) {
 
 	if ( b > 6 ) continue;
 
-	let transposeToInverse = 0, inv = i ^ 0xfff;
+	let tpToInv = 0, inv = i ^ 0xfff;
 	for ( let k = 1, p = inv; k < 12; ++ k ) {
 
 		p = rol12( p );
-		if ( p < inv ) inv = p, transposeToInverse = k;
+		if ( p < inv ) inv = p, tpToInv = k;
 	}
-	transposeToInverse = asSignedTranspose( transposeToInverse );
-
-	const view = [ {
-				bits: i,
-				cardinality: b,
-				transposeToInverse,
-				reverseBinaryString: rb12( i ),
-				distinctModes: b, // <--v-v- tentative, set in code below
-				fifths: { }
-			}, {
-				bits: inv,
-				cardinality: 12 - b,
-				transposeToInverse: - transposeToInverse,
-				reverseBinaryString: rb12( inv ),
-				distinctModes: 12 - b, // <--v-v- tentative, set in code below
-				fifths: { }
-			} ].map( stats => (
-					Object.assign( stats.fifths, statsAccDefault ),
-					Object.assign( stats, statsAccDefault ) ) );
+	tpToInv = asSignedTranspose( tpToInv );
 
 	const j = cOffset[ b ] ++;
-	const pat = pattern[ j ] = {
-
-				patternIndex: j, view,
-				positionSuffixString: 'TBD', // <--v-v- detailed below
-				cardinalityOffset: 0,
-				distinctChromaticPositions: 12
-			},
-
-			encPatternIndex = j << 5;
+	const pat = pattern[ j ] = new Pattern( j, i, b, inv, tpToInv );
+	const view = pat.view, encPatternIndex = j << 5;
 
 	for ( let k = 0, p = i, q = inv; k < 12;
 			++ k, p = rol12( p ), q = rol12( q ) ) {
@@ -128,12 +144,10 @@ for ( let i = 0; i < 1366; ++ i ) {
 			pat.distinctChromaticPositions = k;
 
 			const m = ( 1 << k ) - 1;
-			pat.view[ 0 ].distinctModes = bitCount( p & m );
-			pat.view[ 1 ].distinctModes = bitCount( q & m );
+			view[ 0 ].distinctModes = bitCount( p & m );
+			view[ 1 ].distinctModes = bitCount( q & m );
 			break;
 		}
-
-		const encShiftedPattern = encPatternIndex | k + k;
 
 		// Subtle: for only eight hexatonic patterns, the inverse can be
 		// explained solely by shifting and the explanations compete, so
@@ -141,11 +155,13 @@ for ( let i = 0; i < 1366; ++ i ) {
 		// happens to encode the shortest absolute distance between both
 		// mutually inverse views:
 
+		const encShiftedPatternIndex = encPatternIndex | k + k;
+
 		if ( id[ p ] == 0 )
-			id[ p ] = encShiftedPattern;
+			id[ p ] = encShiftedPatternIndex;
 
 		if ( id[ q ] == 0 )
-			id[ q ] = encShiftedPattern | 1;
+			id[ q ] = encShiftedPatternIndex | 1;
 	}
 
 	for ( const vu of view )
@@ -222,18 +238,12 @@ for ( let i = 0; i < 1366; ++ i ) {
 	addPatternStats( view[ 0 ].fifths, fifths, i );
 	addPatternStats( view[ 1 ].fifths, fifths, inv );
 	completePatternStats( i => view[ i ].fifths );
+
+	Object.freeze( pat );
 }
 
 cOffset.copyWithin( 1, 0, cOffset.length );
 cOffset[ 0 ] = 0;
-
-for ( let i = 0, n = pattern.length, b = 0; i < n; ++ i ) {
-	const pat = pattern[ i ];
-	pat.cardinalityOffset =
-			i == cOffset[ b + 1 ] ? cOffset[ ++ b ] : cOffset[ b ];
-	Object.freeze( pat );
-}
-
 
 export const TonalityRegistry = Object.freeze(
 		initializedArray( 4096, bits => new TonalityInfo( bits ) ) );
@@ -255,3 +265,4 @@ for ( let i = 0, b = 0; i < 4096; ++ i ) {
 Object.freeze( TonalityByString );
 Object.freeze( TonalityByPrefix );
 
+initialized = true;

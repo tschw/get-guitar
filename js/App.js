@@ -144,12 +144,17 @@ class App {
 		];
 
 		const loc = window.location.toString();
-		const sParam = /[?&]s=(\d;\d+@\d+)[^&\/]*(?:&|\/?$)/.exec( loc );
+		const sParam = /[?&]s=((\d;\d+@\d+)[^&\/]*)(?:&|\/?$)/.exec( loc );
 		let initialSelection = 0;
-		if ( sParam != null && sParam.length == 2 )
-			initialSelection = TonalityByPrefix[ sParam[ 1 ] ];
-		this.selectionInUrl = initialSelection;
+		if ( sParam != null && sParam.length == 3 ) {
+			initialSelection = TonalityByPrefix[ sParam[ 2 ] ];
 
+			const fullParam = sParam[ 1 ],
+					detailed = TonalityRegistry[ initialSelection ].asString;
+			if ( fullParam != detailed )
+				window.location = loc.replace( fullParam, detailed );
+		}
+		this.selectionInUrl = initialSelection;
 		cof.matchTonality = initialSelection;
 		highlighting.selection = initialSelection;
 

@@ -107,18 +107,18 @@ input[type=file] {
 table {
 	text-align: center;
 }
-tr:first-child th {
+thead tr:first-child th {
 	font-weight: bold; font-size: 0.9em;
 	padding: 0 0.2em;
 	border-bottom: 1px solid white;
 }
-th {
+thead tr th, tbody tr th[scope=row] {
 	font-weight: normal; font-size: 0.75em;
 }
 th, td {
 	font-size: 0.9em;
 	padding: 0 0.1em;
 }
-td {
+tbody th, tbody td {
 	border-top: 1px solid white;
 }

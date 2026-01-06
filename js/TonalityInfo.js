@@ -14,7 +14,7 @@ export class StaticInfo {
 
 export class PackingStats extends StaticInfo {
 
-	islands = 0;
+	gaps = 0;
 	minAdjacency = 12;
 	maxAdjacency = 12;
 	minGapSize = 0;
@@ -69,7 +69,7 @@ export class TonalityInfo extends StaticInfo {
 		const p = pattern[ patternIndex( i ) ], vi = viewIndex( i );
 		const v = p.view[ vi ],
 				pos = chromaticPosition( i ),
-				pi = v.fifths.islands;
+				pi = v.fifths.gaps;
 
 		this.pattern = p;
 		this.view = v;
@@ -193,7 +193,7 @@ for ( let i = 0; i < 1366; ++ i ) {
 			prevPresent = notePresent;
 		}
 
-		vu.islands = edges / 2;
+		vu.gaps = edges / 2;
 
 		let prevEdgePos = -1, firstEdgePos = -1, firstEdgeUp = false;
 

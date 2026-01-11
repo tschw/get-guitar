@@ -16,8 +16,8 @@ export class PackingStats extends StaticInfo {
 
 	gaps = 0;
 	minAdjacency = 12;
-	maxAdjacency = 12;
-	minGapSize = 0;
+	maxAdjacency = 0;
+	minGapSize = 12;
 	maxGapSize = 0;
 }
 

@@ -14,6 +14,7 @@ export class StaticInfo {
 
 export class PackingStats extends StaticInfo {
 
+	bits = 0;
 	gaps = 0;
 	minAdjacency = 12;
 	maxAdjacency = 0;
@@ -112,9 +113,8 @@ const rol12 = bits => ( bits << 1 | bits >> 11 & 1 ) & 0xfff,
 		cOffset = [ 0, 1, 2, 8, 27, 70, 136, 0 ],
 		pattern = new Array( 180 ),
 
-		bitLut = initializedArray( 13, i => 1 << i ),
-		fifths = [ 0x001, 0x080, 0x004, 0x200, 0x010, 0x800,
-				0x040, 0x002, 0x100, 0x008, 0x400, 0x020 ];
+		fifthsLut = [ 0x001, 0x080, 0x004, 0x200, 0x010,
+				0x800, 0x040, 0x002, 0x100, 0x008, 0x400, 0x020 ];
 
 for ( let i = 0; i < 1366; ++ i ) {
 
@@ -179,12 +179,13 @@ for ( let i = 0; i < 1366; ++ i ) {
 		if ( val > vu.maxAdjacency ) vu.maxAdjacency = val;
 	}
 
-	function addPatternStats( vu, lut, pat ) {
+	function addPatternStats( vu, lut ) {
 
-		let edges = 0, prev = lut[ lut.length - 1 ];
+		const pat = vu.bits;
+		let edges = 0, prev = 0x800;
 		let prevPresent = ( pat & prev ) != 0;
 
-		for ( const note of lut ) {
+		for ( let note = 1; note <= 0x800; note <<= 1 ) {
 
 			const notePresent = ( pat & note ) != 0;
 			if ( prevPresent != notePresent ) ++ edges;
@@ -199,7 +200,7 @@ for ( let i = 0; i < 1366; ++ i ) {
 
 		for ( let k = 0, pos = 0; k < edges && pos < 12; ++ pos ) {
 
-			const note = lut[ pos ];
+			const note = 1 << pos;
 			const notePresent = ( pat & note ) != 0;
 			if ( prevPresent != notePresent ) {
 
@@ -235,11 +236,27 @@ for ( let i = 0; i < 1366; ++ i ) {
 		}
 	}
 
-	addPatternStats( view[ 0 ], bitLut, i );
-	addPatternStats( view[ 1 ], bitLut, inv );
+	function fifths( bits ) {
+
+		let projection = 0, bit = 1;
+		for ( const note of fifthsLut ) {
+
+			const notePresent = ( bits & note ) != 0;
+			if ( notePresent)
+				projection |= bit;
+			bit += bit;
+		}
+		return projection;
+	}
+
+	view[ 0 ].fifths.bits = fifths( i );
+	view[ 1 ].fifths.bits = fifths( inv );
+
+	addPatternStats( view[ 0 ] );
+	addPatternStats( view[ 1 ] );
 	completePatternStats( i => view[ i ] );
-	addPatternStats( view[ 0 ].fifths, fifths, i );
-	addPatternStats( view[ 1 ].fifths, fifths, inv );
+	addPatternStats( view[ 0 ].fifths );
+	addPatternStats( view[ 1 ].fifths );
 	completePatternStats( i => view[ i ].fifths );
 
 	Object.freeze( pat );

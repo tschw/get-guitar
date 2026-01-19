@@ -12,7 +12,7 @@ import * as symbol from './UnicodeSymbols.js'
 import { animation } from './Animation.js'
 import * as audioAnalyzer from './audio-analyzer/api.js'
 import { BitMaskDelta } from './BitMaskDelta.js'
-import { TonalityRegistry, TonalityByPrefix } from './TonalityInfo.js'
+import { TonalityInfoByIndex, TonalityInfoByPrefix } from './TonalityInfo.js'
 
 const NumberOfFrets = 16;
 const NumberOfPianoWhiteKeys = 8;
@@ -147,10 +147,10 @@ class App {
 		const sParam = /[?&]s=((\d;\d+@\d+)[^&\/]*)(?:&|\/?$)/.exec( loc );
 		let initialSelection = 0;
 		if ( sParam != null && sParam.length == 3 ) {
-			initialSelection = TonalityByPrefix[ sParam[ 2 ] ];
+			initialSelection = TonalityInfoByPrefix[ sParam[ 2 ] ].index;
 
 			const fullParam = sParam[ 1 ],
-					detailed = TonalityRegistry[ initialSelection ].asString;
+					detailed = TonalityInfoByIndex[ initialSelection ].asString;
 			if ( fullParam != detailed )
 				window.location = loc.replace( fullParam, detailed );
 		}
@@ -437,7 +437,7 @@ class App {
 
 			let queryString = '';
 			if ( selection != 0 )
-				queryString = `?s=${ TonalityRegistry[ selection ] }`;
+				queryString = `?s=${ TonalityInfoByIndex[ selection ] }`;
 
 			const location = window.location;
 			window.history.replaceState( null, '',

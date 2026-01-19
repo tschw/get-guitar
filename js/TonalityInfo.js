@@ -3,6 +3,12 @@ import { bitCount, initializedArray } from './Utility.js'
 
 let initialized = false;
 
+const tonalities = new Array( 4096 ),
+		structures = new Array( 352 ),
+		StructOffs = Object.freeze( [
+				0, 1, 2, 8, 27, 70, 136, 216, 282, 325, 344, 350, 351 ] ),
+		HexatonicComplementBlacklist = [ 0, 8, 17, 32, 33, 39, 42, 43 ];
+
 export class StaticInfo {
 
 	constructor() {
@@ -14,76 +20,125 @@ export class StaticInfo {
 
 export class PackingStats extends StaticInfo {
 
-	bits = 0;
-	gaps = 0;
+	bits;
+	gaps;
 	minAdjacency = 12;
 	maxAdjacency = 0;
 	minGapSize = 12;
 	maxGapSize = 0;
-}
-
-export class HarmonicStructure extends PackingStats  {
-
-	constructor( bits, popc, tpToInv ) {
-
-		super();
-
-		this.bits = bits;
-		this.cardinality = popc;
-		this.transposeToInverse = tpToInv;
-		this.reverseBinaryString = rb12( bits );
-		this.distinctModes = popc;
-		this.fifths = new PackingStats();
-	}
-}
-
-export class Pattern extends StaticInfo {
-
-	constructor( index, bits, popc, inv, tpToInv ) {
-
-		super();
-
-		this.index = index;
-		this.view = [
-				new HarmonicStructure( bits, popc, tpToInv ),
-				new HarmonicStructure( inv, 12 - popc, - tpToInv ) ];
-	}
-
-	positionSuffixString = '';
-	distinctChromaticPositions = 12;
-}
-
-const id = new Int32Array( 4096 ),
-		chromaticPosition = id => id >> 1 & 15,
-		patternIndex = id => id >>> 5,
-		viewIndex = id => id & 1,
-		portability = '-ABCDEF';
-
-export class TonalityInfo extends StaticInfo {
 
 	constructor( bits ) {
 
 		super();
 
-		const i = id[ bits ];
+		this.bits = bits;
 
-		const p = pattern[ patternIndex( i ) ], vi = viewIndex( i );
-		const v = p.view[ vi ],
-				pos = chromaticPosition( i ),
-				pi = v.fifths.gaps;
+		let edges = 0, prev = 0x800;
+		let prevPresent = ( bits & prev ) != 0;
+		for ( let note = 1; note <= 0x800; note <<= 1 ) {
 
-		this.pattern = p;
-		this.view = v;
-		this.position = pos;
+			const notePresent = ( bits & note ) != 0;
+			if ( prevPresent != notePresent ) ++ edges;
 
-		let localIndex = p.index - cOffset[ p.view[ 0 ].cardinality ];
-		if ( v.cardinality == 6 && vi == 1 ) localIndex += 45;
+			prev = note;
+			prevPresent = notePresent;
+		}
+		this.gaps = edges / 2;
 
-		this.asString = `${ v.cardinality };`
-				+ `${ localIndex }@`
-				+ `${ pos }${ p.positionSuffixString },`
-				+ `rb${ v.reverseBinaryString },`
-				+ `${ v.modesOfCardinalityString },${ portability[ pi ] }`;
+		let prevEdgePos = -1, firstEdgePos = -1, firstEdgeUp = false;
+		for ( let k = 0, pos = 0; k < edges && pos < 12; ++ pos ) {
+
+			const note = 1 << pos;
+			const notePresent = ( bits & note ) != 0;
+			if ( prevPresent != notePresent ) {
+
+				if ( prevEdgePos != -1 ) {
+
+					if ( ! notePresent )
+						this.#accMinMaxAdjacency( pos - prevEdgePos );
+
+				} else {
+
+					firstEdgePos = pos;
+					firstEdgeUp = notePresent;
+				}
+				prevEdgePos = pos;
+				++ k;
+			}
+			prev = note;
+			prevPresent = notePresent;
+		}
+		if ( ! firstEdgeUp )
+			this.#accMinMaxAdjacency( ( firstEdgePos + 12 - prevEdgePos ) % 12 );
+	}
+
+	#accMinMaxAdjacency( val ) {
+
+		if ( val < this.minAdjacency ) this.minAdjacency = val;
+		if ( val > this.maxAdjacency ) this.maxAdjacency = val;
+	}
+}
+
+function completePackingStats( s, complement ) {
+
+	s.minGapSize = s.maxAdjacency > 1 ? 0 : complement.minAdjacency;
+	s.maxGapSize = complement.maxAdjacency;
+	Object.freeze( s );
+}
+
+const FifthsLut = [ 0x001, 0x080, 0x004, 0x200, 0x010,
+		0x800, 0x040, 0x002, 0x100, 0x008, 0x400, 0x020 ];
+
+export class HarmonicStructure extends PackingStats  {
+
+	constructor( index, bits, popc, localIndex, tpToInv ) {
+
+		super( bits );
+
+		this.index = index;
+		structures[ index ] = this;
+
+		this.cardinality = popc;
+		this.indexInCardinality = localIndex;
+		this.asString = `${ popc };${ localIndex }`;
+		this.transposeToInverse = tpToInv;
+		this.reverseBinaryString = rb12( bits );
+		this.distinctChromaticPositions = 12;
+		this.distinctModes = popc;
+
+		let fifthsBits = 0, bit = 1;
+		for ( const note of FifthsLut ) {
+
+			const notePresent = ( bits & note ) != 0;
+			if ( notePresent)
+				fifthsBits |= bit;
+			bit += bit;
+		}
+		this.fifths = new PackingStats( fifthsBits );
+	}
+
+	toString() { return this.asString; }
+}
+
+
+const Portability = '-ABCDEF';
+
+export class TonalityInfo extends StaticInfo {
+
+	constructor( index, structure, position ) {
+
+		super();
+
+		this.index = index;
+		this.structure = structure;
+		this.position = position;
+
+		const s = structure;
+		const portability = Portability[ s.fifths.gaps ];
+		this.asString = `${ s.asString }@`
+				+ `${ position }:${ s.distinctChromaticPositions },`
+				+ `rb${ s.reverseBinaryString },`
+				+ `${ s.distinctModes }:${ s.cardinality },${ portability }`;
 
 		Object.freeze( this );
 	}
@@ -107,27 +162,24 @@ function rb12( bits ) {
 	return d.join( '' );
 }
 
+
 const rol12 = bits => ( bits << 1 | bits >> 11 & 1 ) & 0xfff,
 		asSignedTranspose = pos => pos >= 6 ? pos - 12 : pos,
+		writeOffs = StructOffs.slice();
 
-		cOffset = [ 0, 1, 2, 8, 27, 70, 136, 0 ],
-		pattern = new Array( 180 ),
+for ( let bits = 0; bits < 1366; ++ bits ) {
 
-		fifthsLut = [ 0x001, 0x080, 0x004, 0x200, 0x010,
-				0x800, 0x040, 0x002, 0x100, 0x008, 0x400, 0x020 ];
-
-for ( let i = 0; i < 1366; ++ i ) {
-
-	if ( id[ i ] != 0 ) continue;
-	const b = bitCount( i );
+	if ( tonalities[ bits ] ) continue;
+	const bc = bitCount( bits );
 
 	// Subtle: in only two cases, the heptatonic has a lower integer value
-	// than the corresponding pentatonic, which we prefer for symmetry and
-	// simplicity (heptatonic tonalities can be explained by their inverse).
+	// than its complmenting pentatonic, which we prefer for symmetry and
+	// simplicity (heptatonics are explained by their complement).
 
-	if ( b > 6 ) continue;
+	if ( bc > 6 ) continue;
 
-	let tpToInv = 0, inv = i ^ 0xfff;
+	const bcInv = 12 - bc;
+	let tpToInv = 0, inv = bits ^ 0xfff;
 	for ( let k = 1, p = inv; k < 12; ++ k ) {
 
 		p = rol12( p );
@@ -135,154 +187,92 @@ for ( let i = 0; i < 1366; ++ i ) {
 	}
 	tpToInv = asSignedTranspose( tpToInv );
 
-	const j = cOffset[ b ] ++;
-	const pat = pattern[ j ] = new Pattern( j, i, b, inv, tpToInv );
-	const view = pat.view, encPatternIndex = j << 5;
+	const structIndex = writeOffs[ bc ] ++;
+	const localIndex = structIndex - StructOffs[ bc ];
 
-	for ( let k = 0, p = i, q = inv; k < 12;
+	const s0 = new HarmonicStructure(
+			structIndex, bits, bc, localIndex, tpToInv );
+
+	let s1 = null;
+	if ( bc != 6 )
+		s1 = new HarmonicStructure(
+				writeOffs[ bcInv ] ++, inv, bcInv, localIndex, - tpToInv );
+	else {
+		const i = localIndex;
+		const bi = HexatonicComplementBlacklist.findLastIndex( x => ( i >= x ) );
+		if ( bi == -1 || i > HexatonicComplementBlacklist[ bi ] ) {
+
+			const skipped = 1 + bi;
+			const offset = 44 - skipped;
+			s1 = new HarmonicStructure(
+					structIndex + offset, inv, bcInv, i + offset, - tpToInv );
+		}
+	}
+
+	for ( let k = 0, p = bits, q = inv; k < 12;
 			++ k, p = rol12( p ), q = rol12( q ) ) {
 
-		if ( k > 0 && p == i ) {
-
-			pat.distinctChromaticPositions = k;
+		if ( k > 0 && p == bits ) {
 
 			const m = ( 1 << k ) - 1;
-			view[ 0 ].distinctModes = bitCount( p & m );
-			view[ 1 ].distinctModes = bitCount( q & m );
+			s0.distinctChromaticPositions = k;
+			s0.distinctModes = bitCount( p & m );
+			if ( s1 != null ) {
+				s1.distinctChromaticPositions = k;
+				s1.distinctModes = bitCount( q & m );
+			}
 			break;
 		}
 
-		// Subtle: for only eight hexatonic patterns, the inverse can be
-		// explained solely by shifting and the explanations compete, so
-		// the order in which these assignments are executed matters and
-		// happens to encode the shortest absolute distance between both
-		// mutually inverse views:
+		if ( ! tonalities[ p ] )
+			tonalities[ p ] = new TonalityInfo( p, s0, k );
 
-		const encShiftedPatternIndex = encPatternIndex | k + k;
-
-		if ( id[ p ] == 0 )
-			id[ p ] = encShiftedPatternIndex;
-
-		if ( id[ q ] == 0 )
-			id[ q ] = encShiftedPatternIndex | 1;
+		if ( ! tonalities[ q ] )
+			tonalities[ q ] = new TonalityInfo( q, s1, k );
 	}
 
-	for ( const vu of view )
-			vu.modesOfCardinalityString =
-					`${ vu.distinctModes }:${ vu.cardinality }`;
-
-	pat.positionSuffixString = `:${ pat.distinctChromaticPositions }`;
-
-	function accMinMaxAdjacency( vu, val ) {
-
-		if ( val < vu.minAdjacency ) vu.minAdjacency = val;
-		if ( val > vu.maxAdjacency ) vu.maxAdjacency = val;
+	if ( s1 != null ) {
+		completePackingStats( s0, s1 );
+		completePackingStats( s1, s0 );
+		completePackingStats( s0.fifths, s1.fifths );
+		completePackingStats( s1.fifths, s0.fifths );
+	} else {
+		completePackingStats( s0, s0 );
+		completePackingStats( s0.fifths, s0.fifths );
 	}
-
-	function addPatternStats( vu, lut ) {
-
-		const pat = vu.bits;
-		let edges = 0, prev = 0x800;
-		let prevPresent = ( pat & prev ) != 0;
-
-		for ( let note = 1; note <= 0x800; note <<= 1 ) {
-
-			const notePresent = ( pat & note ) != 0;
-			if ( prevPresent != notePresent ) ++ edges;
-
-			prev = note;
-			prevPresent = notePresent;
-		}
-
-		vu.gaps = edges / 2;
-
-		let prevEdgePos = -1, firstEdgePos = -1, firstEdgeUp = false;
-
-		for ( let k = 0, pos = 0; k < edges && pos < 12; ++ pos ) {
-
-			const note = 1 << pos;
-			const notePresent = ( pat & note ) != 0;
-			if ( prevPresent != notePresent ) {
-
-				if ( prevEdgePos != -1 ) {
-
-					if ( ! notePresent )
-						accMinMaxAdjacency( vu, pos - prevEdgePos );
-
-				} else {
-
-					firstEdgePos = pos;
-					firstEdgeUp = notePresent;
-				}
-				prevEdgePos = pos;
-				++ k;
-			}
-			prev = note;
-			prevPresent = notePresent;
-		}
-		if ( ! firstEdgeUp )
-
-			accMinMaxAdjacency(
-					vu, ( firstEdgePos + 12 - prevEdgePos ) % 12 );
-	}
-
-	function completePatternStats( getVU ) {
-
-		for ( let l = 0; l < 2; ++ l ) {
-			const vu = getVU( l ), other = getVU( l ^ 1 );
-			vu.minGapSize = vu.maxAdjacency > 1 ? 0 : other.minAdjacency;
-			vu.maxGapSize = other.maxAdjacency;
-			Object.freeze( vu );
-		}
-	}
-
-	function fifths( bits ) {
-
-		let projection = 0, bit = 1;
-		for ( const note of fifthsLut ) {
-
-			const notePresent = ( bits & note ) != 0;
-			if ( notePresent)
-				projection |= bit;
-			bit += bit;
-		}
-		return projection;
-	}
-
-	view[ 0 ].fifths.bits = fifths( i );
-	view[ 1 ].fifths.bits = fifths( inv );
-
-	addPatternStats( view[ 0 ] );
-	addPatternStats( view[ 1 ] );
-	completePatternStats( i => view[ i ] );
-	addPatternStats( view[ 0 ].fifths );
-	addPatternStats( view[ 1 ].fifths );
-	completePatternStats( i => view[ i ].fifths );
-
-	Object.freeze( pat );
 }
 
-cOffset.copyWithin( 1, 0, cOffset.length );
-cOffset[ 0 ] = 0;
+export const TonalityInfoByIndex = Object.freeze( tonalities );
+export const HarmonicStructureByIndex = Object.freeze( structures );
+export const HarmonicStructureIndexOffsetByCardinality = StructOffs;
 
-export const TonalityRegistry = Object.freeze(
-		initializedArray( 4096, bits => new TonalityInfo( bits ) ) );
+const tnltyByString = { },
+		tnltyByPrefix = { },
+		structByString = { },
+		tnltiesOfStruct = new Array( 352 * 12 );
 
-export const TonalityByString = new Object(),
-		TonalityByPrefix = new Object();
+for ( let i = 0; i < 4096; ++ i ) {
 
-
-for ( let i = 0, b = 0; i < 4096; ++ i ) {
-
-	const obj = TonalityRegistry[ i ];
-	const s = obj.asString;
-	TonalityByString[ s ] = i;
+	const inf = tonalities[ i ];
+	const s = inf.asString;
+	tnltyByString[ s ] = inf;
 
 	const p = s.slice( 0, s.indexOf( ':' ) );
-	TonalityByPrefix[ p ] = i;
+	tnltyByPrefix[ p ] = inf;
+}
+for ( let i = 0; i < 352; ++ i ) {
+
+	const s = structures[ i ];
+	structByString[ s.asString ] = s;
+
+	for ( let j = 0, bits = s.bits; j < 12; ++ j, bits = rol12( bits ) )
+
+		tnltiesOfStruct[ i * 12 + j ] = tonalities[ bits ];
 }
 
-Object.freeze( TonalityByString );
-Object.freeze( TonalityByPrefix );
+export const TonalityInfoByString = Object.freeze( tnltyByString );
+export const TonalityInfoByPrefix = Object.freeze( tnltyByPrefix );
+export const HarmonicStructureByString = Object.freeze( structByString );
+export const TonalityInfosOfStructures = Object.freeze( tnltiesOfStruct );
 
 initialized = true;

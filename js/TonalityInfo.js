@@ -91,7 +91,7 @@ const FifthsLut = [ 0x001, 0x080, 0x004, 0x200, 0x010,
 
 export class HarmonicStructure extends PackingStats  {
 
-	constructor( index, bits, popc, localIndex, tpToInv ) {
+	constructor( index, bits, popc, localIndex, positions, tpToInv ) {
 
 		super( bits );
 
@@ -103,8 +103,10 @@ export class HarmonicStructure extends PackingStats  {
 		this.asString = `${ popc };${ localIndex }`;
 		this.transposeToInverse = tpToInv;
 		this.reverseBinaryString = rb12( bits );
-		this.distinctChromaticPositions = 12;
-		this.distinctModes = popc;
+		this.distinctChromaticPositions = positions;
+
+		const m = ( 1 << positions ) - 1;
+		this.distinctModes = bitCount( bits & m );
 
 		let fifthsBits = 0, bit = 1;
 		for ( const note of FifthsLut ) {
@@ -178,6 +180,14 @@ for ( let bits = 0; bits < 1366; ++ bits ) {
 
 	if ( bc > 6 ) continue;
 
+	let positions = 12;
+	for ( let k = 1, p = rol12( bits ); k < 12; ++ k, p = rol12( p ) )
+
+		if ( p == bits ) {
+			positions = k;
+			break;
+		}
+
 	const bcInv = 12 - bc;
 	let tpToInv = 0, inv = bits ^ 0xfff;
 	for ( let k = 1, p = inv; k < 12; ++ k ) {
@@ -191,12 +201,12 @@ for ( let bits = 0; bits < 1366; ++ bits ) {
 	const localIndex = structIndex - StructOffs[ bc ];
 
 	const s0 = new HarmonicStructure(
-			structIndex, bits, bc, localIndex, tpToInv );
+			structIndex, bits, bc, localIndex, positions, tpToInv );
 
 	let s1 = null;
 	if ( bc != 6 )
-		s1 = new HarmonicStructure(
-				writeOffs[ bcInv ] ++, inv, bcInv, localIndex, - tpToInv );
+		s1 = new HarmonicStructure( writeOffs[ bcInv ] ++,
+				inv, bcInv, localIndex, positions, - tpToInv );
 	else {
 		const i = localIndex;
 		const bi = HexatonicComplementBlacklist.findLastIndex( x => ( i >= x ) );
@@ -204,25 +214,13 @@ for ( let bits = 0; bits < 1366; ++ bits ) {
 
 			const skipped = 1 + bi;
 			const offset = 44 - skipped;
-			s1 = new HarmonicStructure(
-					structIndex + offset, inv, bcInv, i + offset, - tpToInv );
+			s1 = new HarmonicStructure( structIndex + offset,
+					inv, bcInv, i + offset, positions, - tpToInv );
 		}
 	}
 
-	for ( let k = 0, p = bits, q = inv; k < 12;
+	for ( let k = 0, p = bits, q = inv; k < positions;
 			++ k, p = rol12( p ), q = rol12( q ) ) {
-
-		if ( k > 0 && p == bits ) {
-
-			const m = ( 1 << k ) - 1;
-			s0.distinctChromaticPositions = k;
-			s0.distinctModes = bitCount( p & m );
-			if ( s1 != null ) {
-				s1.distinctChromaticPositions = k;
-				s1.distinctModes = bitCount( q & m );
-			}
-			break;
-		}
 
 		if ( ! tonalities[ p ] )
 			tonalities[ p ] = new TonalityInfo( p, s0, k );

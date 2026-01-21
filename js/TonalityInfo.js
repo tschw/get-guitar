@@ -101,6 +101,7 @@ export class HarmonicStructure extends PackingStats  {
 		this.cardinality = popc;
 		this.indexInCardinality = localIndex;
 		this.asString = `${ popc };${ localIndex }`;
+		this.complement = this;
 		this.transposeToInverse = tpToInv;
 		this.reverseBinaryString = rb12( bits );
 		this.distinctChromaticPositions = positions;
@@ -230,6 +231,8 @@ for ( let bits = 0; bits < 1366; ++ bits ) {
 	}
 
 	if ( s1 != null ) {
+		s0.complement = s1;
+		s1.complement = s0;
 		completePackingStats( s0, s1 );
 		completePackingStats( s1, s0 );
 		completePackingStats( s0.fifths, s1.fifths );

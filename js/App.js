@@ -143,17 +143,30 @@ class App {
 					symbol.Cancel, () => this.applyOrCancelCoF( false ) ),
 		];
 
-		const loc = window.location.toString();
-		const sParam = /[?&]s=((\d;\d+@\d+)[^&\/]*)(?:&|\/?$)/.exec( loc );
 		let initialSelection = 0;
-		if ( sParam != null && sParam.length == 3 ) {
-			initialSelection = TonalityInfoByPrefix[ sParam[ 2 ] ].index;
 
-			const fullParam = sParam[ 1 ],
-					detailed = TonalityInfoByIndex[ initialSelection ].asString;
-			if ( fullParam != detailed )
-				window.location = loc.replace( fullParam, detailed );
+		const loc = window.location.toString(),
+				FindSParam = /(([?&]s=)([^&\/]*))(?:&|\/?$)/,
+				ParseSParam =
+					/(([?&]s=)((\d{1,2};\d{1,2}@\d{1,2})[^&\/]*))(?:&|\/?$)/;
+		const sParam = ParseSParam.exec( loc ) || FindSParam.exec( loc );
+		if ( sParam != null ) {
+			if ( sParam.length == 5 )
+
+				initialSelection =
+						TonalityInfoByPrefix[ sParam[ 4 ] ]?.index || 0;
+
+			const paramValue = sParam[ 3 ], detailed =
+					TonalityInfoByIndex[ initialSelection ].asString;
+
+			if ( paramValue != detailed ) {
+
+				const completeParam = sParam[ 1 ], valuePrefix = sParam[ 2 ];
+				window.location = loc.replace(
+						completeParam, valuePrefix + detailed );
+			}
 		}
+
 		this.selectionInUrl = initialSelection;
 		cof.matchTonality = initialSelection;
 		highlighting.selection = initialSelection;

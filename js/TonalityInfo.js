@@ -3,11 +3,13 @@ import { bitCount, initializedArray } from './Utility.js'
 
 let initialized = false;
 
-const tonalities = new Array( 4096 ),
-		structures = new Array( 352 ),
+const structures = new Array( 352 ),
+		tonalities = new Array( 4096 );
+
+const Portability = '-ABCDEF',
+		HexatonicComplementBlacklist = [ 0, 8, 17, 32, 33, 39, 42, 43 ],
 		StructOffs = Object.freeze( [
-				0, 1, 2, 8, 27, 70, 136, 216, 282, 325, 344, 350, 351 ] ),
-		HexatonicComplementBlacklist = [ 0, 8, 17, 32, 33, 39, 42, 43 ];
+				0, 1, 2, 8, 27, 70, 136, 216, 282, 325, 344, 350, 351 ] );
 
 export class StaticInfo {
 
@@ -16,6 +18,29 @@ export class StaticInfo {
 		if ( initialized )
 			throw Error( "Instances of this class have static lifetime." );
 	}
+}
+
+export class TonalityInfo extends StaticInfo {
+
+	constructor( index, structure, position ) {
+
+		super();
+
+		this.index = index;
+		this.structure = structure;
+		this.position = position;
+
+		const s = structure;
+		const portability = Portability[ s.fifths.gaps ];
+		this.asString = `${ s.asString }@`
+				+ `${ position }:${ s.distinctChromaticPositions },`
+				+ `rb${ s.reverseBinaryString },`
+				+ `${ s.distinctModes }:${ s.cardinality },${ portability }`;
+
+		Object.freeze( this );
+	}
+
+	toString() { return this.asString; }
 }
 
 export class PackingStats extends StaticInfo {
@@ -124,31 +149,6 @@ export class HarmonicStructure extends PackingStats  {
 }
 
 
-const Portability = '-ABCDEF';
-
-export class TonalityInfo extends StaticInfo {
-
-	constructor( index, structure, position ) {
-
-		super();
-
-		this.index = index;
-		this.structure = structure;
-		this.position = position;
-
-		const s = structure;
-		const portability = Portability[ s.fifths.gaps ];
-		this.asString = `${ s.asString }@`
-				+ `${ position }:${ s.distinctChromaticPositions },`
-				+ `rb${ s.reverseBinaryString },`
-				+ `${ s.distinctModes }:${ s.cardinality },${ portability }`;
-
-		Object.freeze( this );
-	}
-
-	toString() { return this.asString; }
-};
-
 const Bit12 = 1 << 11,
 		tmpArrayN = initializedArray( 12, i => new Array( i + 1 ) );
 
@@ -165,6 +165,9 @@ function rb12( bits ) {
 	return d.join( '' );
 }
 
+// Calculate all data exported from this module using a sieve-type algorithm
+// marking off all chromatic transpositions of prime harmonic structures and
+// their bitwise inverses, deriving statistics and mappings:
 
 const rol12 = bits => ( bits << 1 | bits >> 11 & 1 ) & 0xfff,
 		asSignedTranspose = pos => pos >= 6 ? pos - 12 : pos,
@@ -174,10 +177,6 @@ for ( let bits = 0; bits < 1366; ++ bits ) {
 
 	if ( tonalities[ bits ] ) continue;
 	const bc = bitCount( bits );
-
-	// Subtle: in only two cases, the heptatonic has a lower integer value
-	// than its complmenting pentatonic, which we prefer for symmetry and
-	// simplicity (heptatonics are explained by their complement).
 
 	if ( bc > 6 ) continue;
 

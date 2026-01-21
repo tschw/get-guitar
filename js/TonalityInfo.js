@@ -169,9 +169,10 @@ function rb12( bits ) {
 // marking off all chromatic transpositions of prime harmonic structures and
 // their bitwise inverses, deriving statistics and mappings:
 
-const rol12 = bits => ( bits << 1 | bits >> 11 & 1 ) & 0xfff,
-		asSignedTranspose = pos => pos >= 6 ? pos - 12 : pos,
-		writeOffs = StructOffs.slice();
+const writeOffs = StructOffs.slice(),
+		ror12 = bits => ( bits >> 1 | bits << 11 ) & 0xfff,
+		rol12 = bits => ( bits << 1 | bits >> 11 & 1 ) & 0xfff;
+
 
 for ( let bits = 0; bits < 1366; ++ bits ) {
 
@@ -190,12 +191,14 @@ for ( let bits = 0; bits < 1366; ++ bits ) {
 
 	const bcInv = 12 - bc;
 	let tpToInv = 0, inv = bits ^ 0xfff;
-	for ( let k = 1, p = inv; k < 12; ++ k ) {
+	for ( let k = 1, p = inv, q = inv; k <= 6; ++ k ) {
 
+		q = ror12( q );
 		p = rol12( p );
+		if ( q < inv ) inv = q, tpToInv = - k;
 		if ( p < inv ) inv = p, tpToInv = k;
 	}
-	tpToInv = asSignedTranspose( tpToInv );
+	tpToInv = tpToInv;
 
 	const structIndex = writeOffs[ bc ] ++;
 	const localIndex = structIndex - StructOffs[ bc ];

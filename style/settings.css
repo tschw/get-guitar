@@ -8,12 +8,12 @@ dialog {
 	margin: 0;
 	border: 0;
 	color: white;
-	font-size: 16pt;
+	font-size: 14pt;
 	overflow: hidden;
 	text-align: center;
 }
 
-dialog h3 { margin: 0; }
+dialog h3 { margin: 0; font-size: 16pt; }
 dialog button:first-child { float: right; }
 
 fieldset p {
@@ -114,7 +114,7 @@ thead tr th, tbody tr th[scope=row] {
 	font-weight: normal; font-size: 0.75em;
 }
 th, td {
-	font-size: 0.9em;
+	font-size: 0.75em;
 	padding: 0 0.1em;
 }
 tbody th, tbody td {

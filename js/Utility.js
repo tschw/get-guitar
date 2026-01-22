@@ -75,6 +75,76 @@ export function initializedArray( n, f ) {
 	return result;
 }
 
+export async function loadContent( container, html, styleSheet = null ) {
+
+	const doc = document, request = new XMLHttpRequest();
+
+	let cssUrlPattern = null;
+
+	if ( styleSheet ) {
+		const linkElement = doc.createElement( 'link' );
+		linkElement.rel = 'stylesheet';
+		linkElement.type = 'text/css';
+		linkElement.href = styleSheet;
+		doc.querySelector( 'head' ).appendChild( linkElement );
+
+		const loc = doc.location;
+		let pathname = styleSheet;
+		if ( ! pathname.startsWith( '/' ) ) {
+
+			const d = loc.pathname;
+			pathname = d.slice( 0, d.lastIndexOf( '/' ) + 1 ) + pathname;
+		}
+		cssUrlPattern = new URLPattern(
+				Object.assign( Object.assign(
+					{ }, loc ), { pathname, search: '', hash: '' } ) );
+	}
+
+	return new Promise( resolve => {
+
+		const fail = event => resolve( false );
+
+		request.addEventListener( 'load', event => {
+
+			function checkCssLoaded() {
+
+				const csss = doc.styleSheets;
+
+				for ( let i = 0, n = csss.length; i < n; ++ i )
+					if ( cssUrlPattern.test( csss[ i ].href ) )
+						return updateDom();
+
+				waitCssLoaded();
+			}
+			let xboDelay = 25, xboSteps = 5;
+			function waitCssLoaded() {
+
+				if ( -- xboSteps > 0 ) {
+
+					window.setTimeout( event => { checkCssLoaded(); }, xboDelay );
+					xboDelay *= 2;
+
+				} else updateDom();
+			}
+			function updateDom() {
+
+				container.innerHTML = request.responseText;
+				resolve( true );
+			}
+
+			if ( request.status == 200 ) {
+				if ( styleSheet ) checkCssLoaded(); else updateDom();
+			} else fail( event );
+
+		} );
+		request.addEventListener( 'error', fail );
+		request.addEventListener( 'abort', fail );
+
+		request.open( 'GET', html );
+		request.send();
+	} );
+}
+
 export function checkStyle( s ) {
 
 	/*

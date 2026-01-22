@@ -37,7 +37,7 @@ const ButtonsRowDistance = ButtonsWidth + ButtonsRowSpacing;
 
 class App {
 
-	constructor() {
+	constructor( settingsObject, webMidi ) {
 
 		this.element = document.getElementsByTagName( 'canvas' )[ 0 ];
 		this.c2d = this.element.getContext( '2d' );
@@ -47,8 +47,6 @@ class App {
 		this.diffCandidates = new BitMaskDelta();
 		this.diffStimuli = new BitMaskDelta();
 
-		const webMidi = new WebMidi();
-		const settingsObject = new Settings( webMidi );
 		const settings = settingsObject.state;
 		this.settings = settings;
 		const highlighting = new Highlighting();
@@ -94,8 +92,8 @@ class App {
 		this.buttons = [
 
 			createButton(
-					xLastButton, yFretsButtons,
-					symbol.Settings, () => settingsObject.openModalDialog() ),
+					xLastButton, yFretsButtons, symbol.Settings,
+					async () => settingsObject.openModalDialog() ),
 
 			this.buttonSharp = createButton(
 					xLastButton - ButtonsRowDistance, yFretsButtons,
@@ -632,4 +630,14 @@ function setButtonState( button, visible, enabled ) {
 	}
 }
 
-const app = new App();
+let app = null;
+
+window.addEventListener( 'load', async event => {
+
+	const webMidi = new WebMidi();
+
+	const settings = new Settings( webMidi );
+	await settings.initializeState();
+
+	app = new App( settings, webMidi );
+} );

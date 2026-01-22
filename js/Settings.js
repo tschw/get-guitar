@@ -1,3 +1,4 @@
+import { loadContent } from './Utility.js'
 import { animation } from './Animation.js'
 import { FormElem, Tunings, NoteOctaveCombo,
 		MidiPort, MidiInputResponse } from './SettingsHtmlUi.js'
@@ -7,6 +8,9 @@ const PersistTimeout = 500;
 
 export class Settings {
 
+	state = { tunings: [ ], local: { }, midi: { } };
+
+	#webMidi;
 	#uiHandlers = [ ];
 	#imexToggles = [ ];
 	#persistTimer = 0;
@@ -17,25 +21,24 @@ export class Settings {
 
 	constructor( webMidi ) {
 
-		this.webMidi = webMidi;
-		this.midiElems = [ ];
-
-		let state = JSON.parse( storage?.getItem( StorageKey ) || 'null' );
-		if ( ! state ) {
-
-			state = { tunings: [ ], local: { }, midi: { } };
-			this.state = state;
-			this.#initializeUi();
-			this.#getState();
-
-		} else this.state = state;
-
-		webMidi.addSystemStateListener( event => this.#onMidiStateChange() );
+		this.#webMidi = webMidi;
 	}
 
-	openModalDialog() {
+	async initializeState() {
 
-		this.#initializeUi();
+		const state = JSON.parse( storage?.getItem( StorageKey ) || 'null' );
+		if ( state )
+			this.state = state;
+		else {
+			await this.#initializeUi();
+			this.#getState();
+		}
+		this.#webMidi.addSystemStateListener( () => this.#onMidiStateChange() );
+	}
+
+	async openModalDialog() {
+
+		await this.#initializeUi();
 		this.#updateUi();
 		this.#dialog.showModal();
 		this.persist();
@@ -69,7 +72,7 @@ export class Settings {
 
 	#onMidiStateChange( event ) {
 
-		const subsystem = this.webMidi;
+		const subsystem = this.#webMidi;
 
 		if ( event == null && subsystem.access ) {
 
@@ -83,18 +86,25 @@ export class Settings {
 
 	#updateMidiDiax() {
 
-		const diax = this.webMidi.diagnostics,
-				diaxElem = document.forms.local.elements[ 'midiDiax' ];
+		const diaxElem = document.forms.local.elements[ 'midiDiax' ];
+		if ( diaxElem ) {
 
-		diaxElem.style.display = diax ? 'block' : 'none';
-		diaxElem.value = diax || '';
+			const diax = this.#webMidi.diagnostics;
+			diaxElem.style.display = diax ? 'block' : 'none';
+			diaxElem.value = diax || '';
+		}
 	}
 
-	#initializeUi() {
+	async #initializeUi() {
 
 		if ( this.#uiHandlers.length > 0 ) return;
 
-		const store = ( event => this.persist() ), midi = this.webMidi;
+		if ( ! await loadContent( document.forms.local,
+				'html/settings.html', 'style/settings.css' ) )
+
+			alert( "failed loading additional HTML" );
+
+		const store = ( event => this.persist() ), midi = this.#webMidi;
 
 		{
 			const data = this.state, dom = document.forms.tunings.elements;

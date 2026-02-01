@@ -1,8 +1,8 @@
-dialog {
+dialog.settings {
 	background-color: inherit;
 	position: absolute;
-	left: 4%; width: 88%;
-	top: 6.5%; height: 78%;
+	left: 4vw; width: 88vw;
+	top: 2vh; height: 80vh;
 	opacity: 86%;
 	padding: 2%;
 	margin: 0;
@@ -14,7 +14,7 @@ dialog {
 }
 
 dialog h3 { margin: 0; font-size: 16pt; }
-dialog button:first-child { float: right; }
+dialog button[type=close]:first-child { float: right; }
 
 fieldset p {
 	margin: 0.25em 0 0.5em 0;
@@ -46,7 +46,7 @@ label {
 	color: lightgray;
 }
 
-a:hover, a.button:hover, button:hover, label:hover {
+a:hover, a.button:hover:not(:disabled), button:hover:not(:disabled), label:hover {
 	color: inherit!important;
 	border-color: inherit;
 	cursor: pointer;
@@ -57,7 +57,7 @@ form#settings {
 	margin: 1% 0 0 0;
 	clear: right;
 	text-align: left;
-	overflow-y: scroll;
+	overflow-y: auto;
 	overflow-x: auto;
 	position: relative;
 	height: 94%;
@@ -97,8 +97,8 @@ textarea:hover:not(:disabled), textarea:focus:not(:disabled) {
 	background-color: #e7e7e7;
 }
 
-input { height: 1.5em; } select { height: 1.8em; }
-input[type=number] { width: 3em; }
+input { height: 1.5em; } select:not([size]) { height: 1.8em; }
+input[type=number] { width: 3em; text-align: right; }
 input[type=checkbox] { vertical-align: middle; }
 input[type=file] {
 	position: absolute!important;
@@ -110,7 +110,7 @@ thead tr:first-child th {
 	padding: 0 0.2em;
 	border-bottom: 1px solid white;
 }
-thead tr th, tbody tr th[scope=row] {
+thead tr th, tbody tr th {
 	font-weight: normal; font-size: 0.75em;
 }
 th, td {

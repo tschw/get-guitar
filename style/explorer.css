@@ -1,0 +1,137 @@
+dialog.explorer {
+	background-color: inherit;
+	position: absolute;
+	left: 6vw; width: 84vw;
+	top: 2vh; height: 80vh;
+	opacity: 86%;
+	padding: 2%;
+	margin: 0;
+	border: 0;
+	color: white;
+	font-size: 16px;
+	overflow: hidden;
+	text-align: center;
+}
+
+form#explorer {
+	display: block;
+	margin: 1% 0 0 0;
+	clear: right;
+	text-align: left;
+	overflow-y: auto;
+	overflow-x: auto;
+	position: relative;
+	height: 95%;
+}
+
+.explorer table {
+	margin-top: 5px;
+	user-select: none;
+}
+
+.explorer th[scope=col] {
+	text-align: center;
+}
+
+.explorer search.criterion {
+	clear: both;
+}
+
+.explorer search.criterion input[type=checkbox] {
+	width: auto;
+	height: 100%;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	outline: none;
+	vertical-align: middle;
+	padding: 0 5px 0 5px;
+	font-weight: normal;
+	color: gray;
+	border-radius: 8px;
+}
+.explorer search.criterion input[type=checkbox]:checked {
+	font-weight: bold;
+	color: black!important;
+}
+.explorer search.criterion input[type=checkbox]:disabled {
+	background-color: #eee;
+}
+.explorer search.criterion input[type=checkbox]:hover:not(:disabled) {
+	cursor: pointer;
+	background-color: gray;
+}
+.explorer search.criterion input[type=checkbox]:before {
+	content: attr(label);
+	display: inline-block;
+	text-align: center;
+	width: 100%;
+}
+
+.explorer search.criterion input[type=number], search.criterion input[type=number]:hover {
+	width: 3em;
+	height: 100%;
+	border: none;
+	outline: none;
+	background: none;
+	vertical-align: middle;
+	padding-right: 0.5em;
+	font-weight: bold;
+	color: white;
+}
+.explorer search.criterion input[type=number]:disabled {
+	color: #aaa;
+	font-weight: normal;
+}
+
+.explorer output {
+	display: inline-block;
+	min-width: 3em;
+	padding-right: 1em;
+	text-align: right;
+}
+
+.explorer .value {
+	background-color: rgba( 255, 255, 255, 0.2 );
+}
+.explorer .search {
+	background-color: rgba( 255, 255, 255, 0.1 );
+}
+
+.explorer select {
+
+	background-color: inherit;
+	text-align: right;
+	color: white;
+	min-width: 3em;
+}
+.explorer select:hover:not(:disabled) {
+
+	background-color: rgba( 0, 0, 0, 0.3 );
+}
+
+.explorer canvas {
+	user-select: none;
+}
+.explorer canvas.editor {
+	margin-top: 4px;
+}
+.explorer canvas.visual {
+	width: 4em;
+	height: 6em;
+}
+
+.explorer button[name=invert] {
+
+	display: inline-block;
+	font-size: 1em;
+}
+.explorer button[name=invert]:disabled {
+
+	color: gray!important;
+}
+.explorer button[name=invert]:hover:not(:disabled) {
+
+	border-color: white;
+}
+

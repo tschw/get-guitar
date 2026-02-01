@@ -12,8 +12,8 @@
 	</head>
 	<body>
 		<canvas width="1000" height="495"></canvas>
-		<dialog>
-			<button form="settings">✖</button>
+		<dialog class="settings">
+			<button type="close" form="settings">✖</button>
 			<h3>The Boiler Room Backstage</h3>
 			<form name="local" id="settings" method="dialog">
 				<!-- loaded later -->
@@ -21,6 +21,13 @@
 			<form id="imex"></form>
 			<form id="tunings"></form>
 			<form id="midi"></form>
+		</dialog>
+		<dialog class="explorer">
+			<button type="close" form="explorer">✖</button>
+			<h3>Prime Structure and Placement</h3>
+			<form name="explorer" id="explorer" method="dialog"></form>
+				<!-- loaded later -->
+			</form>
 		</dialog>
 		<script src="js/App.js" type="module"></script>
 	</body>

@@ -1,0 +1,114 @@
+<fieldset>
+	<canvas class="editor"></canvas>
+	<table>
+		<colgroup>
+			<col class="value" span="2"/>
+			<col class="search" span="2" />
+			<col class="value" span="2"/>
+		</colgroup>
+		<thead>
+			<tr>
+				<th scope="col" colspan="5">Harmonic Structure</th>
+				<th scope="col">Usage</th>
+			</tr><tr>
+				<th scope="col">Trait</th>
+				<th scope="col">Value</th>
+				<th scope="col">Search</th>
+				<th scope="col">Selection</th>
+				<th scope="col">Visual</th>
+				<th scope="col">Position</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<th scope="row">Cardinality</th>
+				<td><output name="cardinality">-</output></td>
+				<td>
+					<search class="criterion center"><!-- template -->
+						<input type="checkbox" label="=" />
+						<input type="number" disabled="true" value="" />
+						<input type="checkbox" label=">" />
+						<input type="number" disabled="true" value="" />
+						<input type="checkbox" label="<" />
+						<input type="number" disabled="true" value="" />
+					</search>
+				</td>
+				<td rowspan="5" class="center">
+	<select name="structure" size="6">
+	</select>
+				</td>
+				<td rowspan="5" class="center">
+					<canvas class="visual"></canvas>
+				</td>
+				<td class"center">
+					<output name="position" title="chromatic transposition of the structure">-</output>
+				</td>
+			</tr><tr>
+				<th scope="row">Index</th>
+				<td><output name="index">-</output></td><td></td>
+				<td class="center">
+					<label><input type="checkbox" name="pinpos"></input> &#x1f4cc;</label>
+				</td>
+			</tr><tr>
+				<th scope="row">No. of Positions</th>
+				<td><output name="positions">-</output></td><td></td>
+				<th scope="col">Polarity</th>
+			</tr><tr>
+				<th scope="row">No. of Modes</th>
+				<td><output name="modes">-</output></td><td></td>
+				<td class="center"><button type="button" name="invert" title="1's complement">0&#x21c4;1</button></td>
+			</tr><tr>
+				<th scope="row">T/p. to Complement</th>
+				<td><output name="tpComplement">-</output></td><td></td>
+				<td class="center">
+					<label><input type="checkbox" name="pinpat"></input> &#x1f4cc;</label>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<table>
+		<colgroup>
+			<col class="value" span="2" />
+			<col class="search" />
+			<col class="value" />
+			<col class="search" />
+		</colgroup>
+		<thead>
+			<tr>
+				<th scope="col" colspan="3">.. of Steps</th>
+				<th scope="col" colspan="2">.. of Fifths</th>
+			</tr>
+			<tr>
+				<th scope="col">Trait</th>
+				<th scope="col">Value</th>
+				<th scope="col">Search</th>
+				<th scope="col">Value</th>
+				<th scope="col">Search</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<th scope="row">Min. adjacency</th>
+				<td><output name="minAdjacencySteps">-</output></td><td></td>
+				<td><output name="minAdjacencyFifths">-</output></td><td></td>
+			</tr><tr>
+				<th scope="row">Max. adjacency</th>
+				<td><output name="maxAdjacencySteps">-</output></td><td></td>
+				<td><output name="maxAdjacencyFifths">-</output></td><td></td>
+			</tr><tr>
+				<th scope="row">Min. gap size</th>
+				<td><output name="minGapSizeSteps">-</output></td><td></td>
+				<td><output name="minGapSizeFifths">-</output></td><td></td>
+			</tr><tr>
+				<th scope="row">Max. gap size</th>
+				<td><output name="maxGapSizeSteps">-</output></td><td></td>
+				<td><output name="maxGapSizeFifths">-</output></td><td></td>
+			</tr><tr>
+				<th scope="row">No. of Gaps</th>
+				<td><output name="gapsSteps">-</output></td><td></td>
+				<td><output name="gapsFifths">-</output></td><td></td>
+			</tr>
+		</tbody>
+	</table>
+</fieldset>
+

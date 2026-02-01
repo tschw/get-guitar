@@ -15,3 +15,5 @@ export const Microphone = "\u{1f399}";
 
 export const Sharp = "\u266f";
 export const Flat = "\u266d";
+
+export const Atom = "\u269b";

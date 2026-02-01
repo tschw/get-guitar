@@ -6,13 +6,14 @@ import { PianoKeyboard } from './PianoKeyboard.js'
 import { CircleOfFifths } from './CircleOfFifths.js'
 import { ScaleLegend } from './ScaleLegend.js'
 import { Button } from './Button.js'
-import { formatBinary } from './Utility.js'
+import { formatBinary, loadStyles, loadContent } from './Utility.js'
 import { transpose, noteNameToNumber } from './Music.js'
 import * as symbol from './UnicodeSymbols.js'
 import { animation } from './Animation.js'
 import * as audioAnalyzer from './audio-analyzer/api.js'
 import { BitMaskDelta } from './BitMaskDelta.js'
 import { TonalityInfoByIndex, TonalityInfoByPrefix } from './TonalityInfo.js'
+import { HarmonyExplorer } from './HarmonyExplorer.js'
 
 const NumberOfFrets = 16;
 const NumberOfPianoWhiteKeys = 8;
@@ -73,6 +74,8 @@ class App {
 		this.cof = cof;
 
 		const yFretsButtons = UpperEdgeButtonsSpacing;
+		const yFretsBottomButtons =
+				fretsHeight - ButtonsHeight - LowerEdgeButtonsSpacing;
 		const yKeysButtons = keysTop + UpperEdgeOfKeysButtonsSpacing;
 		const yButtonsBottom = height - ButtonsHeight - LowerEdgeButtonsSpacing;
 
@@ -102,6 +105,10 @@ class App {
 			this.buttonFlat = createButton(
 					xLastButton - ButtonsRowDistance * 2, yFretsButtons,
 					symbol.Flat, () => this.transpose( -1 ) ),
+
+			this.buttonExplorer = createButton(
+					xLastButton, yFretsBottomButtons,
+					symbol.Atom, async () => this.openExplorer() ),
 
 			this.buttonMic = createButton(
 					xLastButton,
@@ -213,6 +220,34 @@ class App {
 		this.legend.paint( c2d );
 		for ( const button of this.buttons ) button.paint( c2d );
 		this.highlighting.attenuate();
+	}
+
+	async openExplorer() {
+
+		const explorer = await this.#getExplorer();
+		explorer.element.parentElement.showModal();
+		explorer.reflow();
+		explorer.setState( this.highlighting.selection );
+	}
+
+	async #getExplorer() {
+
+		let explorer = this.explorer;
+		if ( ! explorer ) {
+
+			const vframe = document.forms.explorer;
+			if ( ! await loadStyles(
+					'style/settings.css', 'style/explorer.css' ) )
+				throw new Error( "failed downloading style sheets" );
+
+			if ( ! await loadContent( vframe, 'html/explorer.html' ) )
+				throw new Error( "failed downloading extra html" );
+
+			vframe.parentElement.showModal();
+			this.explorer = explorer = new HarmonyExplorer(
+					vframe, bits => this.#applySelection( bits ) );
+		}
+		return explorer;
 	}
 
 	#getPointerCoordinates( event ) {
@@ -386,6 +421,7 @@ class App {
 
 		setButtonState( this.buttonApplyCoF, true, selecting );
 		setButtonState( this.buttonCancelCoF, true, selecting );
+		this.buttonExplorer.enabled = ! selecting;
 
 		cof.selectedTonality = animation.ifStateChange(
 				cof.selectedTonality, selecting ? tonality : 0 );
@@ -489,6 +525,7 @@ class App {
 
 			case 'starting':
 				this.buttonMic.highlit = true;
+				this.buttonExplorer.enabled = false;
 				animation.requestRefresh();
 				break;
 
@@ -496,6 +533,7 @@ class App {
 				const cof = this.cof;
 				if (cof.selectedTonality == 0)
 					cof.matchTonality = this.highlighting.selection;
+				this.buttonExplorer.enabled = true;
 				this.diffCandidates.prev = 0;
 				this.diffStimuli.prev = 0;
 				break;
@@ -522,16 +560,19 @@ class App {
 
 		setButtonState( this.buttonApplyCoF, true, false );
 		setButtonState( this.buttonCancelCoF, true, false );
+		this.buttonExplorer.enabled = true;
 
 		animation.requestRefresh();
 	}
 
 	#applySelection( selection ) {
 
-		const highlighting = this.highlighting;
-		highlighting.selection = selection;
+		this.highlighting.selection = selection;
 		this.cof.matchTonality = selection;
 		this.#updateUrl( selection );
+		const explorer = this.explorer;
+		if ( explorer && explorer.element.parentElement.open )
+			explorer.setState( selection );
 		animation.requestRefresh();
 	}
 

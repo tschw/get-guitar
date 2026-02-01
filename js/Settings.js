@@ -1,4 +1,4 @@
-import { loadContent } from './Utility.js'
+import { loadStyles, loadContent } from './Utility.js'
 import { animation } from './Animation.js'
 import { FormElem, Tunings, NoteOctaveCombo,
 		MidiPort, MidiInputResponse } from './SettingsHtmlUi.js'
@@ -99,10 +99,11 @@ export class Settings {
 
 		if ( this.#uiHandlers.length > 0 ) return;
 
-		if ( ! await loadContent( document.forms.local,
-				'html/settings.html', 'style/settings.css' ) )
+		if ( ! await loadStyles( 'style/settings.css' ) )
+			throw new Error( "failed downloading style sheets" );
 
-			alert( "failed loading additional HTML" );
+		if ( ! await loadContent( document.forms.local, 'html/settings.html' ) )
+			throw new Error( "failed downloading extra html" );
 
 		const store = ( event => this.persist() ), midi = this.#webMidi;
 

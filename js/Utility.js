@@ -75,30 +75,77 @@ export function initializedArray( n, f ) {
 	return result;
 }
 
-export async function loadContent( container, html, styleSheet = null ) {
+const patternSpec = { },
+		PatternOverrides = { search: '', hash: '' };
 
-	const doc = document, request = new XMLHttpRequest();
+export async function loadStyles( args ) {
 
-	let cssUrlPattern = null;
+	const doc = document, urls = [ ];
 
-	if ( styleSheet ) {
-		const linkElement = doc.createElement( 'link' );
-		linkElement.rel = 'stylesheet';
-		linkElement.type = 'text/css';
-		linkElement.href = styleSheet;
-		doc.querySelector( 'head' ).appendChild( linkElement );
+	const loc = doc.location;
+	Object.assign( Object.assign( patternSpec, loc ), PatternOverrides );
 
-		const loc = doc.location;
+	const urlPath = loc.pathname;
+
+	for ( const styleSheet of arguments ) {
+
 		let pathname = styleSheet;
-		if ( ! pathname.startsWith( '/' ) ) {
+		if ( ! pathname.startsWith( '/' ) ) pathname =
+				urlPath.slice( 0, urlPath.lastIndexOf( '/' ) + 1 ) + pathname;
 
-			const d = loc.pathname;
-			pathname = d.slice( 0, d.lastIndexOf( '/' ) + 1 ) + pathname;
+		patternSpec.pathname = pathname;
+		const pattern = new URLPattern( patternSpec );
+
+		if ( ! styleSheetPresent( pattern ) ) {
+
+			const linkElement = doc.createElement( 'link' );
+			linkElement.rel = 'stylesheet';
+			linkElement.type = 'text/css';
+			linkElement.href = styleSheet;
+			doc.querySelector( 'head' ).appendChild( linkElement );
+
+			urls.push( pattern );
 		}
-		cssUrlPattern = new URLPattern(
-				Object.assign( Object.assign(
-					{ }, loc ), { pathname, search: '', hash: '' } ) );
 	}
+
+	function styleSheetPresent( pattern ) {
+
+		for ( const loadedCss of doc.styleSheets )
+			if ( pattern.test( loadedCss.href ) )
+				return true;
+		return false;
+	}
+
+	return new Promise( resolve => {
+
+		function checkCssLoaded() {
+
+			for ( const pattern of urls ) {
+
+				if ( ! styleSheetPresent( pattern ) )
+					return waitCssLoaded();
+			}
+			resolve( true );
+		}
+
+		let xboDelay = 25, xboSteps = 6;
+		function waitCssLoaded() {
+
+			if ( -- xboSteps > 0 ) {
+
+				window.setTimeout( event => checkCssLoaded(), xboDelay );
+				xboDelay *= 2;
+
+			} else resolve( false );
+		}
+
+		checkCssLoaded();
+	} );
+}
+
+export async function loadContent( container, html ) {
+
+	const request = new XMLHttpRequest();
 
 	return new Promise( resolve => {
 
@@ -106,37 +153,14 @@ export async function loadContent( container, html, styleSheet = null ) {
 
 		request.addEventListener( 'load', event => {
 
-			function checkCssLoaded() {
-
-				const csss = doc.styleSheets;
-
-				for ( let i = 0, n = csss.length; i < n; ++ i )
-					if ( cssUrlPattern.test( csss[ i ].href ) )
-						return updateDom();
-
-				waitCssLoaded();
-			}
-			let xboDelay = 25, xboSteps = 5;
-			function waitCssLoaded() {
-
-				if ( -- xboSteps > 0 ) {
-
-					window.setTimeout( event => { checkCssLoaded(); }, xboDelay );
-					xboDelay *= 2;
-
-				} else updateDom();
-			}
-			function updateDom() {
+			if ( request.status == 200 ) {
 
 				container.innerHTML = request.responseText;
 				resolve( true );
-			}
 
-			if ( request.status == 200 ) {
-				if ( styleSheet ) checkCssLoaded(); else updateDom();
 			} else fail( event );
-
 		} );
+
 		request.addEventListener( 'error', fail );
 		request.addEventListener( 'abort', fail );
 

@@ -1,27 +1,27 @@
 dialog.explorer {
 	background-color: inherit;
 	position: absolute;
-	left: 6vw; width: 84vw;
-	top: 2vh; height: 80vh;
+	left: 2vw; width: 90vw;
+	height: 100%;
 	opacity: 86%;
-	padding: 2%;
+	padding: 1% 2% 2% 2%;
 	margin: 0;
 	border: 0;
 	color: white;
-	font-size: 16px;
+	font-size: 14px;
 	overflow: hidden;
 	text-align: center;
 }
 
 form#explorer {
 	display: block;
-	margin: 1% 0 0 0;
-	clear: right;
+	margin: 8px 0 0 0;
+	clear: both;
 	text-align: left;
 	overflow-y: auto;
 	overflow-x: auto;
 	position: relative;
-	height: 95%;
+	zoom: 86%;
 }
 
 .explorer table {
@@ -40,8 +40,6 @@ form#explorer {
 .explorer search.criterion input[type=checkbox] {
 	width: auto;
 	height: 100%;
-	-webkit-appearance: none;
-	-moz-appearance: none;
 	appearance: none;
 	outline: none;
 	vertical-align: middle;
@@ -69,13 +67,12 @@ form#explorer {
 }
 
 .explorer search.criterion input[type=number], search.criterion input[type=number]:hover {
-	width: 3em;
+	width: 2.5em;
 	height: 100%;
 	border: none;
 	outline: none;
 	background: none;
 	vertical-align: middle;
-	padding-right: 0.5em;
 	font-weight: bold;
 	color: white;
 }

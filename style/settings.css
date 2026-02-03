@@ -2,9 +2,9 @@ dialog.settings {
 	background-color: inherit;
 	position: absolute;
 	left: 4vw; width: 88vw;
-	top: 2vh; height: 80vh;
+	top: 2vh; height: 90vh;
 	opacity: 86%;
-	padding: 2%;
+	padding: 1% 2% 2% 2%;
 	margin: 0;
 	border: 0;
 	color: white;
@@ -13,8 +13,8 @@ dialog.settings {
 	text-align: center;
 }
 
-dialog h3 { margin: 0; font-size: 16pt; }
-dialog button[type=close]:first-child { float: right; }
+dialog h3 { margin: 0; font-size: 14pt; zoom: 75% }
+dialog button[type=close]:first-child { float: right; zoom: 56.25%; }
 
 fieldset p {
 	margin: 0.25em 0 0.5em 0;
@@ -54,13 +54,14 @@ a:hover, a.button:hover:not(:disabled), button:hover:not(:disabled), label:hover
 
 form#settings {
 	display: block;
-	margin: 1% 0 0 0;
+	margin: 0;
 	clear: right;
 	text-align: left;
 	overflow-y: auto;
 	overflow-x: auto;
 	position: relative;
 	height: 94%;
+	zoom: 75%;
 }
 
 .block { display: block; }
@@ -111,11 +112,10 @@ thead tr:first-child th {
 	border-bottom: 1px solid white;
 }
 thead tr th, tbody tr th {
-	font-weight: normal; font-size: 0.75em;
+	font-weight: normal;
 }
 th, td {
-	font-size: 0.75em;
-	padding: 0 0.1em;
+	padding: 0 0.1em 0 0;
 }
 tbody th, tbody td {
 	border-top: 1px solid white;

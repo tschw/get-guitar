@@ -6,7 +6,7 @@ import { PianoKeyboard } from './PianoKeyboard.js'
 import { CircleOfFifths } from './CircleOfFifths.js'
 import { ScaleLegend } from './ScaleLegend.js'
 import { Button } from './Button.js'
-import { formatBinary, loadStyles, loadContent } from './Utility.js'
+import { formatBinary, loadStyles, loadContent, findCssRule } from './Utility.js'
 import { transpose, noteNameToNumber } from './Music.js'
 import * as symbol from './UnicodeSymbols.js'
 import { animation } from './Animation.js'
@@ -225,6 +225,7 @@ class App {
 	async openExplorer() {
 
 		const explorer = await this.#getExplorer();
+		this.explorerZoomRule.style.zoom = window.innerWidth / 945;
 		explorer.element.parentElement.showModal();
 		explorer.reflow();
 		explorer.setState( this.highlighting.selection );
@@ -243,9 +244,11 @@ class App {
 			if ( ! await loadContent( vframe, 'html/explorer.html' ) )
 				throw new Error( "failed downloading extra html" );
 
-			vframe.parentElement.showModal();
 			this.explorer = explorer = new HarmonyExplorer(
 					vframe, bits => this.#applySelection( bits ) );
+
+			this.explorerZoomRule = findCssRule(
+					'style/explorer.css', 'form#explorer' );
 		}
 		return explorer;
 	}

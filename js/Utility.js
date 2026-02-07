@@ -169,6 +169,15 @@ export async function loadContent( container, html ) {
 	} );
 }
 
+export function findCssRule( hrefSuffix, selector ) {
+
+	for ( const styles of document.styleSheets )
+		if ( styles.href?.endsWith( hrefSuffix ) )
+			for ( const rule of styles.cssRules )
+				if ( rule.selectorText == selector )
+					return rule;
+}
+
 export function checkStyle( s ) {
 
 	/*

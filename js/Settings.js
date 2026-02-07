@@ -1,4 +1,4 @@
-import { loadStyles, loadContent } from './Utility.js'
+import { loadStyles, loadContent, findCssRule } from './Utility.js'
 import { animation } from './Animation.js'
 import { FormElem, Tunings, NoteOctaveCombo,
 		MidiPort, MidiInputResponse } from './SettingsHtmlUi.js'
@@ -18,6 +18,7 @@ export class Settings {
 	#imexButtonLastFailed = null;
 
 	#dialog = document.querySelector( 'dialog' );
+	#zoomRule = null;
 
 	constructor( webMidi ) {
 
@@ -40,6 +41,7 @@ export class Settings {
 
 		await this.#initializeUi();
 		this.#updateUi();
+		this.#zoomRule.style.zoom = window.innerWidth / 1000;
 		this.#dialog.showModal();
 		this.persist();
 	}
@@ -101,6 +103,8 @@ export class Settings {
 
 		if ( ! await loadStyles( 'style/settings.css' ) )
 			throw new Error( "failed downloading style sheets" );
+
+		this.#zoomRule = findCssRule( 'style/settings.css', 'form#settings' );
 
 		if ( ! await loadContent( document.forms.local, 'html/settings.html' ) )
 			throw new Error( "failed downloading extra html" );

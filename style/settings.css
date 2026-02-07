@@ -13,8 +13,8 @@ dialog.settings {
 	text-align: center;
 }
 
-dialog h3 { margin: 0; font-size: 14pt; zoom: 75% }
-dialog button[type=close]:first-child { float: right; zoom: 56.25%; }
+dialog h3 { margin: 0; font-size: 14pt; zoom: 90% }
+dialog button[type=close]:first-child { float: right; zoom: 67.5%; }
 
 fieldset p {
 	margin: 0.25em 0 0.5em 0;

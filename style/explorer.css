@@ -1,8 +1,8 @@
 dialog.explorer {
 	background-color: inherit;
 	position: absolute;
-	left: 2vw; width: 90vw;
-	height: 100%;
+	left: 4vw; width: 88vw;
+	top: 2vh; height: 96vh;
 	opacity: 86%;
 	padding: 1% 2% 2% 2%;
 	margin: 0;
@@ -16,11 +16,12 @@ dialog.explorer {
 form#explorer {
 	display: block;
 	margin: 8px 0 0 0;
-	clear: both;
+	clear: right;
 	text-align: left;
 	overflow-y: auto;
 	overflow-x: auto;
 	position: relative;
+	height: 100%;
 	zoom: 8.4;
 }
 

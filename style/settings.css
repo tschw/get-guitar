@@ -2,7 +2,7 @@ dialog.settings {
 	background-color: inherit;
 	position: absolute;
 	left: 4vw; width: 88vw;
-	top: 2vh; height: 90vh;
+	top: 2vh; height: 96vh;
 	opacity: 86%;
 	padding: 1% 2% 2% 2%;
 	margin: 0;
@@ -60,7 +60,7 @@ form#settings {
 	overflow-y: auto;
 	overflow-x: auto;
 	position: relative;
-	height: 94%;
+	height: 100%;
 	zoom: 75%;
 }
 

@@ -244,6 +244,8 @@ class App {
 			if ( ! await loadContent( vframe, 'html/explorer.html' ) )
 				throw new Error( "failed downloading extra html" );
 
+			vframe.parentElement.showModal(); // for size calculations
+
 			this.explorer = explorer = new HarmonyExplorer(
 					vframe, bits => this.#applySelection( bits ) );
 

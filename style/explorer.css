@@ -1,10 +1,10 @@
 dialog.explorer {
 	background-color: inherit;
-	position: absolute;
+	position: fixed;
 	left: 4vw; width: 88vw;
-	top: 2vh; height: 96vh;
+	top: 3vh; height: 91vh;
 	opacity: 86%;
-	padding: 1% 2% 2% 2%;
+	padding: 1vh 2vw 2vh 2vw;
 	margin: 0;
 	border: 0;
 	color: white;
@@ -15,14 +15,13 @@ dialog.explorer {
 
 form#explorer {
 	display: block;
-	margin: 8px 0 0 0;
+	margin: 1vh 0 0 0;
 	clear: right;
 	text-align: left;
 	overflow-y: auto;
 	overflow-x: auto;
-	position: relative;
-	height: 100%;
-	zoom: 8.4;
+	height: 94%;
+	zoom: 84%;
 }
 
 .explorer table {

@@ -1,16 +1,27 @@
 dialog.settings {
 	background-color: inherit;
-	position: absolute;
+	position: fixed;
 	left: 4vw; width: 88vw;
-	top: 2vh; height: 96vh;
+	top: 3vh; height: 91vh;
 	opacity: 86%;
-	padding: 1% 2% 2% 2%;
+	padding: 1vh 2vw 2vh 2vw;
 	margin: 0;
 	border: 0;
 	color: white;
 	font-size: 14pt;
 	overflow: hidden;
 	text-align: center;
+}
+
+form#settings {
+	display: block;
+	margin: 0;
+	clear: right;
+	text-align: left;
+	overflow-y: auto;
+	overflow-x: auto;
+	height: 95%;
+	zoom: 75%;
 }
 
 dialog h3 { margin: 0; font-size: 14pt; zoom: 90% }
@@ -50,18 +61,6 @@ a:hover, a.button:hover:not(:disabled), button:hover:not(:disabled), label:hover
 	color: inherit!important;
 	border-color: inherit;
 	cursor: pointer;
-}
-
-form#settings {
-	display: block;
-	margin: 0;
-	clear: right;
-	text-align: left;
-	overflow-y: auto;
-	overflow-x: auto;
-	position: relative;
-	height: 100%;
-	zoom: 75%;
 }
 
 .block { display: block; }

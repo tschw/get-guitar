@@ -150,11 +150,12 @@ class App {
 
 		let initialSelection = 0;
 
-		const loc = window.location.toString(),
+		const loc = window.location;
+		const url = loc.href.toString(),
 				FindSParam = /(([?&]s=)([^&\/]*))(?:&|\/?$)/,
 				ParseSParam =
 					/(([?&]s=)((\d{1,2};\d{1,2}@\d{1,2})[^&\/]*))(?:&|\/?$)/;
-		const sParam = ParseSParam.exec( loc ) || FindSParam.exec( loc );
+		const sParam = ParseSParam.exec( url ) || FindSParam.exec( url );
 		if ( sParam != null ) {
 			if ( sParam.length == 5 )
 
@@ -167,8 +168,8 @@ class App {
 			if ( paramValue != detailed ) {
 
 				const completeParam = sParam[ 1 ], valuePrefix = sParam[ 2 ];
-				window.location = loc.replace(
-						completeParam, valuePrefix + detailed );
+				loc.replace( url.replace(
+						completeParam, valuePrefix + detailed ) );
 			}
 		}
 
@@ -179,10 +180,10 @@ class App {
 		if ( audioAnalyzer.getSystemState() == 'unavailable' ) {
 
 			this.buttonMic.enabled = false;
-			const redirect = location.toString().replace(
+			const redirect = url.replace(
 					'//tschw.github.io/perfect-harmony',
 					'//perfect-harmony.netlify.app');
-			if ( redirect != location ) window.location = redirect;
+			if ( redirect != url ) loc.replace( redirect );
 		}
 
 		for ( const button of [ this.buttonApplyCoF, this.buttonCancelCoF ] ) {

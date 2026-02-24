@@ -1,10 +1,10 @@
 dialog.settings {
 	background-color: inherit;
 	position: fixed;
-	left: 4vw; width: 88vw;
-	top: 3vh; height: 91vh;
+	left: 4dvw; width: 88dvw;
+	top: 3dvh; height: 91dvh;
 	opacity: 86%;
-	padding: 1vh 2vw 2vh 2vw;
+	padding: 1dvh 2dvw 2dvh 2dvw;
 	margin: 0;
 	border: 0;
 	color: white;

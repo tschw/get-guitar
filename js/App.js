@@ -629,6 +629,7 @@ class App {
 				allowTranspose = this.cof.selectedTonality ||
 						audioAnalyzer.getSystemState() != 'running';
 
+		this.buttonExplorer.visible = localSettings.featureExplorer;
 		this.buttonMic.visible = localSettings.featureAudioAnalysis;
 
 		const sharpFlatButtons = localSettings.featureChromaticTranspose;

@@ -157,7 +157,8 @@ export class Settings {
 
 					new FormElem( dom, data, store, 'featureChromaticTranspose' ),
 					new FormElem( dom, data, store, 'featureTransposeByFifth' ),
-					new FormElem( dom, data, store, 'featureAudioAnalysis' ) );
+					new FormElem( dom, data, store, 'featureAudioAnalysis' ),
+					new FormElem( dom, data, store, 'featureExplorer' ) );
 		}
 
 		const imex = document.forms.imex.elements;

@@ -59,7 +59,8 @@ export class FormElem extends SettingsHtmlUi {
 	loadFromModel() {
 
 		const name = this.modelName;
-		const value = this.dataContext[ name ], lm = this.domContext[ name ];
+		const lm = this.domContext[ name ];
+		let value = this.dataContext[ name ];
 
 		if ( value === undefined ) switch ( lm.type ) {
 			case 'number':		value = + lm.defaultValue;			break;
